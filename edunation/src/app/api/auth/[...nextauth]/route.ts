@@ -1,7 +1,9 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
@@ -16,6 +18,33 @@ export const authOptions: NextAuthOptions = {
             clientId: process.env.GITHUB_CLIENT_ID ?? '',
             clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
         }),
+        CredentialsProvider({
+            name: 'Email',
+            credentials: {
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' },
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) return null;
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                });
+
+                if (!user || !user.password) return null;
+
+                const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+                if (!passwordMatch) return null;
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    image: user.image,
+                    role: user.role,
+                };
+            },
+        }),
     ],
 
     // Custom pages
@@ -25,37 +54,61 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async session({ session, user }) {
-            // When using database sessions, `user` is the DB record
+        async jwt({ token, user }) {
+            // On initial sign-in, store user id
+            if (user) {
+                token.id = user.id;
+                token.email = user.email;
+            }
+            // Auto-grant admin to the owner email set in .env.local
+            const adminEmail = process.env.ADMIN_EMAIL;
+            if (adminEmail && token.email === adminEmail) {
+                token.role = 'admin';
+            } else if (token.id || token.sub) {
+                // Fetch latest role from DB for all other users
+                const userId = (token.id ?? token.sub) as string;
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { role: true },
+                });
+                token.role = dbUser?.role ?? 'student';
+            }
+            return token;
+        },
+
+        async session({ session, token, user }) {
             if (session.user) {
-                (session.user as { id?: string; role?: string }).id = user.id;
-                (session.user as { id?: string; role?: string }).role = (user as { role?: string }).role ?? 'student';
+                if (token) {
+                    (session.user as { id?: string; role?: string }).id = token.sub;
+                    (session.user as { id?: string; role?: string }).role = token.role as string;
+                } else if (user) {
+                    (session.user as { id?: string; role?: string }).id = user.id;
+                    (session.user as { id?: string; role?: string }).role = (user as { role?: string }).role ?? 'student';
+                }
             }
             return session;
         },
 
-        async signIn({ user }) {
-            // Auto-create a free subscription for new users
-            if (user?.id) {
-                const existing = await prisma.subscription.findUnique({
-                    where: { userId: user.id },
-                });
-                if (!existing) {
-                    await prisma.subscription.create({
-                        data: {
-                            userId: user.id,
-                            plan: 'free',
-                            status: 'active',
-                        },
-                    });
-                }
-            }
+        async signIn() {
             return true;
         },
     },
 
+    // Fires AFTER the user is fully committed to the DB (OAuth only)
+    events: {
+        async createUser({ user }) {
+            // Only create subscription for OAuth users (credentials users get it via register API)
+            const existing = await prisma.subscription.findUnique({ where: { userId: user.id } });
+            if (!existing) {
+                await prisma.subscription.create({
+                    data: { userId: user.id, plan: 'free', status: 'active' },
+                });
+            }
+        },
+    },
+
     session: {
-        strategy: 'database',  // use DB-backed sessions (not JWT) with PrismaAdapter
+        strategy: 'jwt',   // switch to JWT so CredentialsProvider works with PrismaAdapter
     },
 
     secret: process.env.NEXTAUTH_SECRET,

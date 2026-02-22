@@ -1,7 +1,8 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import CourseCard from '@/components/CourseCard';
-import { courses, plans } from '@/lib/data';
+import CourseCard, { CourseDB } from '@/components/CourseCard';
+import { plans } from '@/lib/data';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
@@ -12,8 +13,17 @@ function formatUZS(price: number, currLabel: string) {
 
 export default function HomePage() {
   const { t } = useLanguage();
-  const featuredCourses = courses.slice(0, 3);
-  const freeCourses = courses.filter(c => c.isFree);
+  const [featuredCourses, setFeaturedCourses] = useState<CourseDB[]>([]);
+  const [freeCourses, setFreeCourses] = useState<CourseDB[]>([]);
+
+  useEffect(() => {
+    fetch('/api/courses')
+      .then(r => r.json())
+      .then((data: CourseDB[]) => {
+        setFeaturedCourses(data.slice(0, 3));
+        setFreeCourses(data.filter(c => c.isFree).slice(0, 3));
+      });
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -227,7 +237,7 @@ export default function HomePage() {
 
           <div className="grid-4">
             {[
-              { id: 1, name: 'Ryan Mitchell', role: 'Frontend Developer at Google', avatar: 'RM', rating: 5, text: t.language === 'uz' ? "EduNation mening kareramni to'liq o'zgartirdi. React kursi juda chuqur bo'lib, 3 oyda Google'da orzuimdagi ishga kirdim!" : t.language === 'ru' ? 'EduNation полностью изменил мою карьеру. Курс React был невероятно глубоким, и через 3 месяца я получил работу мечты в Google!' : 'EduNation completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google!', course: 'React 18 Mastery' },
+              { id: 1, name: 'Ryan Mitchell', role: 'Frontend Developer at Google', avatar: 'RM', rating: 5, text: t.language === 'uz' ? "EduNationUz mening kareramni to'liq o'zgartirdi. React kursi juda chuqur bo'lib, 3 oyda Google'da orzuimdagi ishga kirdim!" : t.language === 'ru' ? 'EduNationUz полностью изменил мою карьеру. Курс React был невероятно глубоким, и через 3 месяца я получил работу мечты в Google!' : 'EduNationUz completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google!', course: 'React 18 Mastery' },
               { id: 2, name: 'Fatima Al-Hassan', role: 'UX Designer at Apple', avatar: 'FA', rating: 5, text: t.language === 'uz' ? "UI/UX dizayn kursi ajoyib. Sarah's ta'lim uslubi juda aniq va qiziqarli. Noldan to'liq portfolio qurishgacha yetdim." : t.language === 'ru' ? 'Курс UI/UX дизайна феноменален. Стиль преподавания Сары такой ясный и увлекательный. Я прошла путь от нуля до полного портфолио.' : "The UI/UX design course is phenomenal. Sarah's teaching style is so clear and engaging. I went from zero to building a full portfolio.", course: 'UI/UX Design Masterclass' },
               { id: 3, name: 'Carlos Mendez', role: 'Data Scientist at Netflix', avatar: 'CM', rating: 5, text: t.language === 'uz' ? "Python AI bootcamp hech shubhasiz eng yaxshi ML kursi. Dr. Webb murakkab tushunchalarni juda aniq tushuntiradi. Maoshim ikki barobarga o'sdi!" : t.language === 'ru' ? 'Буткемп Python AI — бесспорно лучший курс по ML. Доктор Вебб объясняет сложные концепции с такой ясностью. Моя зарплата удвоилась!' : 'The Python AI bootcamp is hands-down the best ML course available. My salary doubled after completing it.', course: 'Python & AI Bootcamp' },
               { id: 4, name: 'Yuki Tanaka', role: 'Full-Stack Engineer at Stripe', avatar: 'YT', rating: 5, text: t.language === 'uz' ? "Pro rejaga obuna bo'ldim va bu ajoyib narx! Netflix obunasidan ham arzonroq narxda barcha kurslarga kirish. 3 ta to'liq loyiha qurib, ishga oldim!" : t.language === 'ru' ? 'Подписался на план Pro — это невероятная ценность. Доступ ко всем курсам дешевле подписки на Netflix. Построил 3 проекта и устроился!' : 'Subscribed to the Pro plan and it\'s insane value. Access to all courses for less than a Netflix subscription. Built 3 projects and got hired!', course: 'Next.js Full-Stack' },

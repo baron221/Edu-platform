@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -13,18 +13,48 @@ export default function SignupPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState<'student' | 'instructor'>('student');
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState('');
 
     // Redirect if already signed in
-    if (status === 'authenticated') {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/');
+        }
+    }, [status, router]);
 
-    const handleEmailSignup = (e: React.FormEvent) => {
+    if (status === 'authenticated') return null;
+
+    const handleEmailSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('Email/password signup requires a database. Please use Google or GitHub to sign up instantly!');
+        setError('');
+        setLoading('email');
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, role }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error ?? 'Registration failed.');
+                setLoading(null);
+                return;
+            }
+            // Auto sign-in after registration
+            const result = await signIn('credentials', { email, password, redirect: false });
+            if (result?.ok) {
+                // Hard reload to guarantee fresh session with correct DB role
+                window.location.href = '/';
+            } else {
+                setError('Login failed after registration. Please log in manually.');
+                setLoading(null);
+            }
+        } catch {
+            setError('Something went wrong. Please try again.');
+            setLoading(null);
+        }
     };
 
     const handleOAuth = async (provider: 'google' | 'github') => {
@@ -47,7 +77,7 @@ export default function SignupPage() {
             <div className={styles.card}>
                 <Link href="/" className={styles.logo}>
                     <span>🎓</span>
-                    <span>Edu<span className="gradient-text">Nation</span></span>
+                    <span>EduNation<span className="gradient-text">Uz</span></span>
                 </Link>
 
                 <h1 className={styles.title}>{t.auth.signupTitle}</h1>
@@ -107,6 +137,31 @@ export default function SignupPage() {
                 <div className={styles.divider}><span>{t.auth.orSignupWith} email</span></div>
 
                 <form className={styles.form} onSubmit={handleEmailSignup}>
+                    {/* Role Selector */}
+                    <div className={styles.field}>
+                        <label className={styles.label}>I am signing up as</label>
+                        <div className={styles.roleToggle}>
+                            <button
+                                type="button"
+                                className={`${styles.roleBtn} ${role === 'student' ? styles.roleBtnActive : ''}`}
+                                onClick={() => setRole('student')}
+                            >
+                                <span className={styles.roleIcon}>🎓</span>
+                                <span className={styles.roleLabel}>Student</span>
+                                <span className={styles.roleDesc}>I want to learn</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.roleBtn} ${role === 'instructor' ? styles.roleBtnActive : ''}`}
+                                onClick={() => setRole('instructor')}
+                            >
+                                <span className={styles.roleIcon}>👩‍🏫</span>
+                                <span className={styles.roleLabel}>Teacher</span>
+                                <span className={styles.roleDesc}>I want to teach</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.nameLabel}</label>
                         <input type="text" className="input" placeholder={t.auth.namePlaceholder}

@@ -1,28 +1,58 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import CourseCard from '@/components/CourseCard';
-import { courses, categories } from '@/lib/data';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
+const CATEGORIES = [
+    { name: 'All', icon: '🌟' },
+    { name: 'Web Development', icon: '💻' },
+    { name: 'Data Science', icon: '🤖' },
+    { name: 'Design', icon: '🎨' },
+    { name: 'Marketing', icon: '📢' },
+    { name: 'Mobile Development', icon: '📱' },
+    { name: 'Business', icon: '💼' },
+];
+
+export interface CourseDB {
+    id: string;
+    title: string;
+    instructor: string;
+    category: string;
+    level: string;
+    price: number;
+    isFree: boolean;
+    isNew: boolean;
+    description: string | null;
+    slug: string;
+    _count: { lessons: number; enrollments: number };
+}
+
 export default function CoursesPage() {
     const { t } = useLanguage();
+    const [courses, setCourses] = useState<CourseDB[]>([]);
+    const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('All');
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<'all' | 'free' | 'premium'>('all');
 
-    const filtered = courses.filter(c => {
-        const matchCat = activeCategory === 'All' || c.category === activeCategory;
-        const matchSearch =
-            c.title.toLowerCase().includes(search.toLowerCase()) ||
-            c.instructor.toLowerCase().includes(search.toLowerCase()) ||
-            c.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()));
-        const matchFilter =
-            filter === 'all' ? true :
-                filter === 'free' ? c.isFree :
-                    !c.isFree;
-        return matchCat && matchSearch && matchFilter;
-    });
+    const fetchCourses = useCallback(() => {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (activeCategory !== 'All') params.set('category', activeCategory);
+        if (search) params.set('search', search);
+        if (filter === 'free') params.set('free', 'true');
+        if (filter === 'premium') params.set('free', 'false');
+
+        fetch(`/api/courses?${params}`)
+            .then(r => r.json())
+            .then(data => { setCourses(data); setLoading(false); });
+    }, [activeCategory, search, filter]);
+
+    useEffect(() => {
+        const timer = setTimeout(fetchCourses, search ? 300 : 0);
+        return () => clearTimeout(timer);
+    }, [fetchCourses, search]);
 
     return (
         <div className={styles.page}>
@@ -54,14 +84,13 @@ export default function CoursesPage() {
                 <div className="container">
                     <div className={styles.filtersInner}>
                         <div className={styles.categories}>
-                            {categories.map(cat => (
+                            {CATEGORIES.map(cat => (
                                 <button
                                     key={cat.name}
                                     className={`${styles.catBtn} ${activeCategory === cat.name ? styles.catActive : ''}`}
                                     onClick={() => setActiveCategory(cat.name)}
                                 >
                                     <span>{cat.icon}</span> {cat.name}
-                                    <span className={styles.catCount}>{cat.count}</span>
                                 </button>
                             ))}
                         </div>
@@ -88,17 +117,17 @@ export default function CoursesPage() {
                 <div className="container">
                     <div className={styles.resultsHeader}>
                         <p className={styles.resultCount}>
-                            {t.courses.showing} <strong>{filtered.length}</strong>{' '}
-                            {filtered.length === 1 ? t.courses.course : t.courses.courses}
-                            {activeCategory !== 'All' ? ` ${t.courses.in} ${activeCategory}` : ''}
+                            {loading ? 'Loading...' : <>{t.courses.showing} <strong>{courses.length}</strong>{' '}
+                                {courses.length === 1 ? t.courses.course : t.courses.courses}
+                                {activeCategory !== 'All' ? ` ${t.courses.in} ${activeCategory}` : ''}</>}
                         </p>
                     </div>
 
-                    {filtered.length > 0 ? (
+                    {!loading && courses.length > 0 ? (
                         <div className="grid-3">
-                            {filtered.map(c => <CourseCard key={c.id} course={c} />)}
+                            {courses.map(c => <CourseCard key={c.id} course={c} />)}
                         </div>
-                    ) : (
+                    ) : !loading ? (
                         <div className={styles.empty}>
                             <div className={styles.emptyIcon}>🔍</div>
                             <h3>{t.courses.noCoursesTitle}</h3>
@@ -109,6 +138,10 @@ export default function CoursesPage() {
                             >
                                 {t.courses.clearFilters}
                             </button>
+                        </div>
+                    ) : (
+                        <div className={styles.loadingGrid}>
+                            {[...Array(6)].map((_, i) => <div key={i} className={styles.skeleton} />)}
                         </div>
                     )}
                 </div>

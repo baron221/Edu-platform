@@ -51,7 +51,7 @@ export default function Navbar() {
                 <Link href="/" className={styles.logo}>
                     <span className={styles.logoIcon}>🎓</span>
                     <span className={styles.logoText}>
-                        Edu<span className="gradient-text">Nation</span>
+                        EduNation<span className="gradient-text">Uz</span>
                     </span>
                 </Link>
 
@@ -72,7 +72,6 @@ export default function Navbar() {
                             aria-label="Select language"
                         >
                             <span className={styles.langFlag}>{currentLang.flag}</span>
-                            <span className={styles.langCode}>{currentLang.code.toUpperCase()}</span>
                             <span className={`${styles.langArrow} ${langOpen ? styles.langArrowOpen : ''}`}>▾</span>
                         </button>
 

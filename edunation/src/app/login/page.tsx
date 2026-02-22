@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -16,14 +16,29 @@ export default function LoginPage() {
     const [error, setError] = useState('');
 
     // Redirect if already signed in
-    if (status === 'authenticated') {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/');
+        }
+    }, [status, router]);
+
+    if (status === 'authenticated') return null;
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('Email/password login requires a database setup. Please use Google or GitHub sign-in.');
+        setError('');
+        setLoading('email');
+        const result = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+        });
+        setLoading(null);
+        if (result?.error) {
+            setError('Invalid email or password. Please try again.');
+        } else {
+            router.push('/');
+        }
     };
 
     const handleOAuth = async (provider: 'google' | 'github') => {
@@ -46,7 +61,7 @@ export default function LoginPage() {
             <div className={styles.card}>
                 <Link href="/" className={styles.logo}>
                     <span>🎓</span>
-                    <span>Edu<span className="gradient-text">Nation</span></span>
+                    <span>EduNation<span className="gradient-text">Uz</span></span>
                 </Link>
 
                 <h1 className={styles.title}>{t.auth.loginTitle}</h1>

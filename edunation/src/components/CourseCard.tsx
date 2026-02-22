@@ -1,25 +1,46 @@
 'use client';
 import Link from 'next/link';
-import { Course } from '@/lib/data';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './CourseCard.module.css';
 
-interface Props {
-    course: Course;
+export interface CourseDB {
+    id: string;
+    title: string;
+    instructor: string;
+    category: string;
+    level: string;
+    price: number;
+    isFree: boolean;
+    isNew: boolean;
+    description: string | null;
+    slug: string;
+    _count?: { lessons: number; enrollments: number };
 }
 
-function StarRating({ rating }: { rating: number }) {
-    return (
-        <span className={styles.stars}>
-            {'★'.repeat(Math.floor(rating))}{'☆'.repeat(5 - Math.floor(rating))}
-            <span className={styles.ratingNum}>{rating}</span>
-        </span>
-    );
+interface Props {
+    course: CourseDB;
 }
+
+const CATEGORY_GRADIENTS: Record<string, string> = {
+    'Web Development': 'linear-gradient(135deg, #1e1b4b, #312e81)',
+    'Design': 'linear-gradient(135deg, #1a0533, #4a044e)',
+    'Data Science': 'linear-gradient(135deg, #0c1445, #1e3a5f)',
+    'Mobile Development': 'linear-gradient(135deg, #0d2137, #0c4a6e)',
+    'Business': 'linear-gradient(135deg, #1c1009, #78350f)',
+    'Marketing': 'linear-gradient(135deg, #1a2e05, #365314)',
+};
+
+const CATEGORY_ICONS: Record<string, string> = {
+    'Web Development': '💻',
+    'Design': '🎨',
+    'Data Science': '🤖',
+    'Mobile Development': '📱',
+    'Business': '💼',
+    'Marketing': '📢',
+};
 
 function formatPrice(price: number, currLabel: string): string {
     if (price === 0) return '';
-    // Display in thousands for readability e.g. 1 130 000 → "1 130 000"
     return `${price.toLocaleString('ru-RU')} ${currLabel}`;
 }
 
@@ -31,25 +52,17 @@ export default function CourseCard({ course }: Props) {
             course.level === 'Intermediate' ? t.shared.intermediate :
                 t.shared.advanced;
 
+    const gradient = CATEGORY_GRADIENTS[course.category] ?? 'linear-gradient(135deg, #1e1b4b, #312e81)';
+    const icon = CATEGORY_ICONS[course.category] ?? '📚';
+    const lessonCount = course._count?.lessons ?? 0;
+    const enrollmentCount = course._count?.enrollments ?? 0;
+
     return (
-        <Link href={`/courses/${course.id}`} className={styles.card}>
+        <Link href={`/courses/${course.slug}`} className={styles.card}>
             {/* Thumbnail */}
             <div className={styles.thumbnail}>
-                <div className={styles.thumbBg} style={{
-                    background: course.category === 'Web Development'
-                        ? 'linear-gradient(135deg, #1e1b4b, #312e81)'
-                        : course.category === 'Design'
-                            ? 'linear-gradient(135deg, #1a0533, #4a044e)'
-                            : course.category === 'Data Science'
-                                ? 'linear-gradient(135deg, #0c1445, #1e3a5f)'
-                                : 'linear-gradient(135deg, #1a2e05, #365314)'
-                }}>
-                    <span className={styles.thumbIcon}>
-                        {course.category === 'Web Development' ? '💻'
-                            : course.category === 'Design' ? '🎨'
-                                : course.category === 'Data Science' ? '🤖'
-                                    : '📢'}
-                    </span>
+                <div className={styles.thumbBg} style={{ background: gradient }}>
+                    <span className={styles.thumbIcon}>{icon}</span>
                 </div>
 
                 {/* Badges */}
@@ -71,28 +84,19 @@ export default function CourseCard({ course }: Props) {
                 <h3 className={styles.title}>{course.title}</h3>
                 <p className={styles.instructor}>{t.shared.by} {course.instructor}</p>
 
-                <div className={styles.meta}>
-                    <StarRating rating={course.rating} />
-                    <span className={styles.reviews}>({course.reviews.toLocaleString()})</span>
-                </div>
-
                 <div className={styles.info}>
-                    <span>📹 {course.lessons} {t.courseDetail?.lessons || 'lessons'}</span>
-                    <span>⏱ {course.duration}</span>
+                    <span>📹 {lessonCount} {t.courseDetail?.lessons || 'lessons'}</span>
+                    <span>🎓 {enrollmentCount.toLocaleString()} students</span>
                 </div>
 
                 <div className={styles.footer}>
                     <div className={styles.price}>
                         {course.isFree
                             ? <span className={styles.freeLabel}>{t.shared.free}</span>
-                            : <>
-                                <span className={styles.priceAmt}>
-                                    {formatPrice(course.price, t.shared.currency)}
-                                </span>
-                            </>
+                            : <span className={styles.priceAmt}>{formatPrice(course.price, t.shared.currency)}</span>
                         }
                     </div>
-                    <span className={styles.students}>{(course.students / 1000).toFixed(0)}K {t.courseDetail?.students || 'students'}</span>
+                    <span className={`badge badge-${course.level.toLowerCase()}`}>{levelLabel}</span>
                 </div>
             </div>
         </Link>

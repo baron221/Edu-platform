@@ -8,6 +8,8 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+  // Enable foreign key enforcement in SQLite (required for cascade deletes)
+  relationMode = "prisma"
 }
 
 // =====================================================================
@@ -61,7 +63,8 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String    @default("student") // student | instructor | admin
+  password      String?                          // hashed with bcryptjs (null for OAuth users)
+  role          String    @default("student")    // student | instructor | admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -130,6 +133,14 @@ model Lesson {
   isFree      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Video configuration
+  videoQuality  String?   @default("auto")   // auto | 1080p | 720p | 480p | 360p
+
+  // Live stream / Google Meet
+  meetLink      String?                       // Google Meet URL
+  liveAt        DateTime?                     // Scheduled live session time
+  isLiveEnabled Boolean   @default(false)     // Toggle live stream
 
   course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress Progress[]
