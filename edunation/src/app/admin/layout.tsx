@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className={styles.brand}>
                     <span className={styles.brandIcon}>🎓</span>
                     <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
-                    <span className={styles.adminBadge}>ADMIN</span>
+                    <span className={styles.adminBadge}>{(session?.user as any)?.role === 'admin' ? 'ADMIN' : 'INSTRUCTOR'}</span>
                 </div>
 
                 <nav className={styles.nav}>
@@ -47,11 +47,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className={styles.sidebarFooter}>
                     <div className={styles.userInfo}>
                         <div className={styles.userAvatar}>
-                            {session?.user?.name?.charAt(0).toUpperCase() ?? 'A'}
+                            {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
                         </div>
                         <div>
-                            <div className={styles.userName}>{session?.user?.name ?? 'Admin'}</div>
-                            <div className={styles.userRole}>Administrator</div>
+                            <div className={styles.userName}>{session?.user?.name ?? 'Instructor'}</div>
+                            <div className={styles.userRole}>{(session?.user as any)?.role === 'admin' ? 'Administrator' : 'Instructor'}</div>
                         </div>
                     </div>
                     <button

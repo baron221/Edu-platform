@@ -9,7 +9,7 @@ export async function GET() {
         const role = (session?.user as any)?.role;
         const instructorId = (session?.user as any)?.id;
 
-        const whereClause = role === 'admin' ? {} : { instructor: instructorId };
+        const whereClause = role === 'admin' ? {} : { instructorId: instructorId };
 
         const courses = await prisma.course.findMany({
             where: whereClause,
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         const instructorId = (session?.user as any)?.id;
+        const instructorName = (session?.user as any)?.name || 'Unknown Instructor';
 
         if (!instructorId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
                 slug: `${body.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${Date.now()}`,
                 title: body.title,
                 description: body.description,
-                instructor: instructorId,
+                instructor: instructorName,
+                instructorId: instructorId,
                 category: body.category,
                 level: body.level ?? 'Beginner',
                 price: body.price ?? 0,

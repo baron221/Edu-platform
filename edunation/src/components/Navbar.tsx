@@ -124,6 +124,9 @@ export default function Navbar() {
                                         <div className={styles.userDropdownEmail}>{session.user?.email}</div>
                                     </div>
                                     <div className={styles.userDropdownDivider} />
+                                    <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                        🎓 My Learning
+                                    </Link>
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         📚 {t.nav.courses}
                                     </Link>
@@ -179,13 +182,23 @@ export default function Navbar() {
 
                 <div className={styles.mobileCta}>
                     {session ? (
-                        <button
-                            className="btn btn-secondary"
-                            style={{ flex: 1, justifyContent: 'center' }}
-                            onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
-                        >
-                            🚪 Sign Out
-                        </button>
+                        <>
+                            <Link
+                                href="/dashboard"
+                                className="btn btn-primary"
+                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                🎓 My Learning
+                            </Link>
+                            <button
+                                className="btn btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
+                            >
+                                🚪 Sign Out
+                            </button>
+                        </>
                     ) : (
                         <>
                             <Link href="/login" className="btn btn-secondary" onClick={() => setMenuOpen(false)}>{t.nav.login}</Link>

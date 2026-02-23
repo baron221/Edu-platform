@@ -106,6 +106,7 @@ model Course {
   title       String
   description String?
   instructor  String
+  instructorId String?
   category    String
   level       String   @default("Beginner") // Beginner | Intermediate | Advanced
   price       Int      @default(0)          // price in UZS (0 = free)

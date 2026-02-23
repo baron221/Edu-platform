@@ -1,0 +1,54 @@
+.page {
+    min-height: 100vh;
+    padding-top: 80px;
+    background: #0B0E14;
+    color: white;
+}
+
+.header {
+    padding: 60px 0 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: #11141D;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.content {
+    padding: 50px 0;
+}
+
+.empty {
+    text-align: center;
+    padding: 80px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.empty h3 {
+    font-size: 1.5rem;
+    margin: 0 0 10px;
+}
+
+.empty p {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
