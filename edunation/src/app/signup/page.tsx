@@ -8,7 +8,7 @@ import styles from '../auth.module.css';
 
 export default function SignupPage() {
     const { t } = useLanguage();
-    const { status } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -20,9 +20,14 @@ export default function SignupPage() {
     // Redirect if already signed in
     useEffect(() => {
         if (status === 'authenticated') {
-            router.push('/');
+            const userRole = (session?.user as any)?.role;
+            if (userRole === 'admin' || userRole === 'instructor') {
+                router.push('/admin/courses');
+            } else {
+                router.push('/');
+            }
         }
-    }, [status, router]);
+    }, [status, session, router]);
 
     if (status === 'authenticated') return null;
 
@@ -46,7 +51,7 @@ export default function SignupPage() {
             const result = await signIn('credentials', { email, password, redirect: false });
             if (result?.ok) {
                 // Hard reload to guarantee fresh session with correct DB role
-                window.location.href = '/';
+                window.location.href = role === 'instructor' ? '/admin/courses' : '/';
             } else {
                 setError('Login failed after registration. Please log in manually.');
                 setLoading(null);

@@ -18,7 +18,7 @@ async function verifyAccess(courseId: string) {
 
     if (!course) return { error: 'Not found', status: 404 };
 
-    if (role !== 'admin' && course.instructor !== userId) {
+    if (role !== 'admin' && course.instructorId !== userId) {
         return { error: 'Forbidden: You do not own this course', status: 403 };
     }
 

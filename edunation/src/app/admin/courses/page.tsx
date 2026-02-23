@@ -18,7 +18,11 @@ export default function AdminCoursesPage() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
-    const [newTitle, setNewTitle] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+        title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: ''
+    });
+    const [thumbFile, setThumbFile] = useState<File | null>(null);
     const router = useRouter();
 
     const load = () =>
@@ -29,13 +33,29 @@ export default function AdminCoursesPage() {
 
     useEffect(() => { load(); }, []);
 
-    const handleCreate = async () => {
-        if (!newTitle.trim()) return;
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
         setCreating(true);
+
+        let thumbnailUrl = null;
+        if (thumbFile) {
+            const formDataMedia = new FormData();
+            formDataMedia.append('file', thumbFile);
+            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formDataMedia });
+            if (uploadRes.ok) {
+                const { url } = await uploadRes.json();
+                thumbnailUrl = url;
+            }
+        }
+
         const res = await fetch('/api/admin/courses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: newTitle, instructor: 'Admin', category: 'Web Development', level: 'Beginner', isFree: true, price: 0 }),
+            body: JSON.stringify({
+                ...formData,
+                price: Number(formData.price) || 0,
+                thumbnail: thumbnailUrl
+            }),
         });
         const course = await res.json();
         setCreating(false);
@@ -43,7 +63,9 @@ export default function AdminCoursesPage() {
             alert(course.error ?? 'Failed to create course. Please try again.');
             return;
         }
-        setNewTitle('');
+        setShowModal(false);
+        setFormData({ title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: '' });
+        setThumbFile(null);
         router.push(`/admin/courses/${course.id}`);
     };
 
@@ -69,18 +91,9 @@ export default function AdminCoursesPage() {
                     <h1 className={styles.title}>Courses</h1>
                     <p className={styles.subtitle}>{courses.length} total courses</p>
                 </div>
-                <div className={styles.createRow}>
-                    <input
-                        className={styles.createInput}
-                        value={newTitle}
-                        onChange={e => setNewTitle(e.target.value)}
-                        placeholder="New course title..."
-                        onKeyDown={e => e.key === 'Enter' && handleCreate()}
-                    />
-                    <button className={styles.createBtn} onClick={handleCreate} disabled={creating}>
-                        {creating ? '...' : 'START'}
-                    </button>
-                </div>
+                <button className={`btn btn-primary`} onClick={() => setShowModal(true)}>
+                    + New Course
+                </button>
             </div>
 
             {loading ? <div className={styles.loading}>Loading courses...</div> : (
@@ -113,6 +126,61 @@ export default function AdminCoursesPage() {
                             </span>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {showModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>Create New Course</h2>
+                            <button className={styles.closeBtn} onClick={() => setShowModal(false)}>✕</button>
+                        </div>
+                        <form onSubmit={handleCreate} className={styles.modalForm}>
+                            <div className={styles.field}>
+                                <label>Course Title</label>
+                                <input required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Advanced TypeScript" className="input" />
+                            </div>
+                            <div className={styles.field}>
+                                <label>Description</label>
+                                <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="What is this course about?" className="input" />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div className={styles.field}>
+                                    <label>Category</label>
+                                    <input required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input" />
+                                </div>
+                                <div className={styles.field}>
+                                    <label>Level</label>
+                                    <select value={formData.level} onChange={e => setFormData({ ...formData, level: e.target.value })} className="input">
+                                        <option>Beginner</option>
+                                        <option>Intermediate</option>
+                                        <option>Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className={styles.field}>
+                                <label className={styles.checkboxLabel}>
+                                    <input type="checkbox" checked={formData.isFree} onChange={e => setFormData({ ...formData, isFree: e.target.checked })} />
+                                    This course is free
+                                </label>
+                            </div>
+                            {!formData.isFree && (
+                                <div className={styles.field}>
+                                    <label>Price (UZS)</label>
+                                    <input type="number" required={!formData.isFree} value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} placeholder="e.g. 500000" className="input" />
+                                </div>
+                            )}
+                            <div className={styles.field}>
+                                <label>Course Thumbnail Graphic</label>
+                                <input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files?.[0] || null)} className="input" style={{ padding: '0.5rem' }} />
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" disabled={creating}>{creating ? 'Creating...' : 'Create Course'}</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

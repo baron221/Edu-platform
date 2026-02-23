@@ -18,9 +18,14 @@ export default function LoginPage() {
     // Redirect if already signed in
     useEffect(() => {
         if (status === 'authenticated') {
-            router.push('/');
+            const role = (session?.user as any)?.role;
+            if (role === 'admin' || role === 'instructor') {
+                router.push('/admin/courses');
+            } else {
+                router.push('/');
+            }
         }
-    }, [status, router]);
+    }, [status, session, router]);
 
     if (status === 'authenticated') return null;
 
@@ -37,7 +42,8 @@ export default function LoginPage() {
         if (result?.error) {
             setError('Invalid email or password. Please try again.');
         } else {
-            router.push('/');
+            // Role redirect will be handled by the useEffect above
+            // as 'status' will turn to 'authenticated' and trigger the router
         }
     };
 

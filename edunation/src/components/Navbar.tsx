@@ -127,6 +127,11 @@ export default function Navbar() {
                                     <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         🎓 My Learning
                                     </Link>
+                                    {((session.user as any)?.role === 'admin' || (session.user as any)?.role === 'instructor') && (
+                                        <Link href="/admin/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                            🛠️ Instructor Dashboard
+                                        </Link>
+                                    )}
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         📚 {t.nav.courses}
                                     </Link>

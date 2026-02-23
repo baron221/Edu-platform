@@ -12,11 +12,11 @@ async function verifyAccess(courseId: string) {
 
     const course = await prisma.course.findUnique({
         where: { id: courseId },
-        select: { instructor: true },
+        select: { instructorId: true },
     });
 
     if (!course) return { error: 'Not found', status: 404 };
-    if (role !== 'admin' && course.instructor !== userId) {
+    if (role !== 'admin' && course.instructorId !== userId) {
         return { error: 'Forbidden', status: 403 };
     }
     return { ok: true };
