@@ -140,14 +140,13 @@ export default function CourseDetailPage() {
     return (
         <div className={styles.page}>
             {/* Hero */}
-            <div className={styles.hero}>
-                <div className={styles.heroBg} style={{
-                    background: course.category === 'Web Development'
-                        ? 'linear-gradient(135deg, #0f0a2e 0%, #1e1b4b 100%)'
-                        : course.category === 'Design'
-                            ? 'linear-gradient(135deg, #180228 0%, #2d1345 100%)'
-                            : 'linear-gradient(135deg, #071428 0%, #0f2445 100%)'
-                }} />
+            <div className={styles.hero} style={{
+                background: course.category === 'Web Development'
+                    ? 'linear-gradient(135deg, #0f0a2e 0%, #1e1b4b 100%)'
+                    : course.category === 'Design'
+                        ? 'linear-gradient(135deg, #180228 0%, #2d1345 100%)'
+                        : 'linear-gradient(135deg, #071428 0%, #0f2445 100%)'
+            }}>
                 <div className="container">
                     <div className={styles.heroContent}>
                         <Link href="/courses" className={styles.back}>{t.courseDetail.back}</Link>
@@ -195,13 +194,21 @@ export default function CourseDetailPage() {
                         <div className={styles.videoSection}>
                             <div className={styles.videoWrapper}>
                                 {activeLesson && canWatch(activeLesson) ? (
-                                    <iframe
-                                        className={styles.videoIframe}
-                                        src={activeLesson.videoUrl}
-                                        title={activeLesson.title}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
+                                    activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
+                                        <iframe
+                                            className={styles.videoIframe}
+                                            src={activeLesson.videoUrl}
+                                            title={activeLesson.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <div className={styles.locked}>
+                                            <div className={styles.lockedIcon}>⏳</div>
+                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
+                                            <p className={styles.lockedDesc}>The video for this lesson is currently being processed or has not been uploaded yet.</p>
+                                        </div>
+                                    )
                                 ) : activeLesson ? (
                                     <div className={styles.locked}>
                                         <div className={styles.lockedIcon}>🔒</div>

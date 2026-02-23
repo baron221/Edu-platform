@@ -58,34 +58,46 @@ export default function LessonEditorPage() {
         setSaved(true);
     };
 
-    // Simulate video upload (in production, send to cloud storage)
     const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploading(true);
         setUploadProgress(0);
 
-        // Simulate upload progress
+        // Note: Real progressive upload tracking requires XMLHttpRequest or Axios,
+        // but for fetch we can show a continuous fast indeterminate progress.
         const interval = setInterval(() => {
             setUploadProgress(p => {
-                if (p >= 95) { clearInterval(interval); return p; }
-                return p + Math.random() * 15;
+                if (p >= 90) return p;
+                return p + Math.random() * 10;
             });
-        }, 200);
+        }, 300);
 
-        // In a real app, upload to S3/R2 here. For local dev we use a public URL placeholder.
-        const formData = new FormData();
-        formData.append('file', file);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
 
-        // Mock: just store filename as URL for demo
-        await new Promise(r => setTimeout(r, 1500));
-        clearInterval(interval);
-        setUploadProgress(100);
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-        const fakeUrl = `/videos/${file.name}`;
-        handleChange('videoUrl', fakeUrl);
-        handleChange('duration', '00:00'); // Would be parsed from file metadata
-        setUploading(false);
+            clearInterval(interval);
+            setUploadProgress(100);
+
+            if (res.ok) {
+                const data = await res.json();
+                handleChange('videoUrl', data.url);
+                handleChange('duration', '00:00'); // Note: actual duration extraction requires a hidden video element
+            } else {
+                alert('File upload failed. Please try again.');
+            }
+        } catch (err) {
+            clearInterval(interval);
+            alert('An error occurred during upload.');
+        } finally {
+            setUploading(false);
+        }
     };
 
     if (!lesson) return <div className={styles.loading}>Loading lesson...</div>;

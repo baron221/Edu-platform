@@ -36,6 +36,9 @@ export default function CourseEditorPage() {
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [showLessonModal, setShowLessonModal] = useState(false);
+    const [newLessonData, setNewLessonData] = useState({ title: '', description: '', isFree: false });
+    const [creatingLesson, setCreatingLesson] = useState(false);
 
     useEffect(() => {
         fetch(`/api/admin/courses/${id}`)
@@ -81,13 +84,66 @@ export default function CourseEditorPage() {
         setSaved(true);
     };
 
-    const addLesson = async () => {
+    const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+
+    const handleCreateLesson = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreatingLesson(true);
+
+        let videoUrl = '';
+        if (videoFile) {
+            const formData = new FormData();
+            formData.append('file', videoFile);
+
+            try {
+                // We'll simulate progress like the other page, but do real fetch
+                const interval = setInterval(() => {
+                    setUploadProgress(p => {
+                        if (p >= 90) { clearInterval(interval); return p; }
+                        return p + 10;
+                    });
+                }, 300);
+
+                const uploadRes = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                clearInterval(interval);
+                setUploadProgress(100);
+
+                if (uploadRes.ok) {
+                    const data = await uploadRes.json();
+                    videoUrl = data.url;
+                } else {
+                    alert('Video upload failed');
+                    setCreatingLesson(false);
+                    return;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Video upload error');
+                setCreatingLesson(false);
+                return;
+            }
+        }
+
         await fetch(`/api/admin/courses/${id}/lessons`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: 'New Lesson', isFree: false }),
+            body: JSON.stringify({ ...newLessonData, videoUrl }),
         });
-        fetch(`/api/admin/courses/${id}`).then(r => r.json()).then(setCourse);
+
+        const r = await fetch(`/api/admin/courses/${id}`);
+        const data = await r.json();
+        setCourse(data);
+
+        setShowLessonModal(false);
+        setNewLessonData({ title: '', description: '', isFree: false });
+        setVideoFile(null);
+        setUploadProgress(0);
+        setCreatingLesson(false);
     };
 
     const deleteLesson = async (lessonId: string) => {
@@ -176,7 +232,7 @@ export default function CourseEditorPage() {
                 <div className={styles.card}>
                     <div className={styles.cardHeader}>
                         <h2 className={styles.cardTitle}>Lessons ({course.lessons.length})</h2>
-                        <button className={styles.addLessonBtn} onClick={addLesson}>+ Add Lesson</button>
+                        <button className={styles.addLessonBtn} onClick={() => setShowLessonModal(true)}>+ Add Lesson</button>
                     </div>
                     <div className={styles.lessonList}>
                         {course.lessons.map((lesson, i) => (
@@ -202,6 +258,57 @@ export default function CourseEditorPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Lesson Creation Modal */}
+            {showLessonModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowLessonModal(false)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>Create New Lesson</h2>
+                            <button className={styles.closeBtn} onClick={() => setShowLessonModal(false)}>✕</button>
+                        </div>
+                        <form onSubmit={handleCreateLesson} className={styles.modalForm}>
+                            <div className={styles.field}>
+                                <label>Lesson Title</label>
+                                <input required value={newLessonData.title} onChange={e => setNewLessonData({ ...newLessonData, title: e.target.value })} placeholder="e.g. Introduction to React" className="input" />
+                            </div>
+                            <div className={styles.field}>
+                                <label>Short Description (Optional)</label>
+                                <textarea rows={3} value={newLessonData.description} onChange={e => setNewLessonData({ ...newLessonData, description: e.target.value })} placeholder="What will students learn?" className="input" />
+                            </div>
+                            <div className={styles.field}>
+                                <label>Video File (Optional)</label>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={e => setVideoFile(e.target.files?.[0] || null)}
+                                    className="input"
+                                />
+                                {uploadProgress > 0 && uploadProgress < 100 && (
+                                    <div className={styles.progressContainer} style={{ marginTop: '8px' }}>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
+                                        </div>
+                                        <div className={styles.progressText}>{Math.round(uploadProgress)}% Uploaded</div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className={styles.field}>
+                                <label className={styles.checkboxLabel}>
+                                    <input type="checkbox" checked={newLessonData.isFree} onChange={e => setNewLessonData({ ...newLessonData, isFree: e.target.checked })} />
+                                    Offer as a Free Preview
+                                </label>
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowLessonModal(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" disabled={creatingLesson}>
+                                    {creatingLesson ? 'Creating...' : 'Create Lesson'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
