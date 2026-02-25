@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
 
     const result = streamText({
-        model: google('gemini-2.5-flash'),
+        model: google('gemini-1.5-flash'),
         system: `You are a helpful, expert teaching assistant for the e-learning platform EduNationUz.
     Your goal is to help students understand course material, explain concepts clearly, and guide them to the right answers without simply doing the work for them.
     Keep your answers concise, encouraging, and formatted in clean markdown. 
