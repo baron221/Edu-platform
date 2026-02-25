@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { useChat, Message } from '@ai-sdk/react';
+import { useChat, UIMessage } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import styles from './AIAssistant.module.css';
 
@@ -9,12 +10,14 @@ export default function AIAssistant() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Vercel AI SDK handles the streaming state automatically
-    const { messages, append, isLoading } = useChat({
-        api: '/api/chat',
-        initialMessages: [
-            { id: '1', role: 'assistant', content: 'Hi there! I am your EduNation AI assistant. What can I help you learn today?' }
-        ]
+    const { messages, sendMessage, status } = useChat({
+        transport: new DefaultChatTransport({ api: '/api/chat' }),
+        messages: [
+            { id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hi there! I am your EduNation AI assistant. What can I help you learn today?' }] }
+        ] as UIMessage[]
     });
+
+    const isLoading = status === 'submitted' || status === 'streaming';
 
     const [inputValue, setInputValue] = useState('');
 
@@ -22,10 +25,7 @@ export default function AIAssistant() {
         e.preventDefault();
         if (!inputValue.trim() || isLoading) return;
 
-        append({
-            role: 'user',
-            content: inputValue
-        });
+        sendMessage({ text: inputValue });
         setInputValue('');
     };
 
@@ -48,12 +48,12 @@ export default function AIAssistant() {
                     </div>
 
                     <div className={styles.messages}>
-                        {messages.map((m: Message) => (
+                        {messages.map((m: UIMessage) => (
                             <div key={m.id} className={`${styles.message} ${m.role === 'user' ? styles.userMessage : styles.aiMessage}`}>
                                 {m.role === 'assistant' ? (
-                                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                                    <ReactMarkdown>{m.parts.map(p => p.type === 'text' ? p.text : '').join('')}</ReactMarkdown>
                                 ) : (
-                                    m.content
+                                    m.parts.map(p => p.type === 'text' ? p.text : '').join('')
                                 )}
                             </div>
                         ))}
