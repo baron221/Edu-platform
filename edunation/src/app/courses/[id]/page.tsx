@@ -345,7 +345,10 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Floating AI Tutor */}
-            <AIAssistant />
+            <AIAssistant
+                context={`The student is currently viewing the course titled "${course.title}" (${course.category}). ${activeLesson ? `They are currently on the lesson: "${activeLesson.title}".` : ''}`}
+                lessonId={activeLesson?.id}
+            />
         </div>
     );
 }

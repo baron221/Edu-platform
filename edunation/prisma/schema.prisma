@@ -73,10 +73,11 @@ model User {
   sessions Session[]
 
   // App relations
-  subscription Subscription?
-  enrollments  Enrollment[]
-  progress     Progress[]
-  reviews      Review[]
+  subscription  Subscription?
+  enrollments   Enrollment[]
+  progress      Progress[]
+  reviews       Review[]
+  chatSessions  ChatSession[]
 }
 
 // =====================================================================
@@ -143,6 +144,9 @@ model Lesson {
   liveAt        DateTime?                     // Scheduled live session time
   isLiveEnabled Boolean   @default(false)     // Toggle live stream
 
+  // AI Knowledge Base
+  content       String?                       // Text content/transcript used for AI RAG
+
   course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress Progress[]
 }
@@ -200,4 +204,29 @@ model Review {
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+}
+
+// =====================================================================
+// AI CHAT HISTORY
+// =====================================================================
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String?  // nullable if we want to allow anonymous chat sessions or match via localstorage
+  title     String?  // auto-generated title or "Chat with AI"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id            String   @id @default(cuid())
+  chatSessionId String
+  role          String   // "user" | "assistant" | "system"
+  content       String   // text content (JSON stringified if using parts array)
+  createdAt     DateTime @default(now())
+
+  session ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 }
