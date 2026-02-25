@@ -141,7 +141,7 @@ export default function SignupPage() {
 
                 <div className={styles.divider}><span>{t.auth.orSignupWith} email</span></div>
 
-                <form className={styles.form} onSubmit={handleEmailSignup}>
+                <form className={styles.form} onSubmit={handleEmailSignup} autoComplete="off">
                     {/* Role Selector */}
                     <div className={styles.field}>
                         <label className={styles.label}>I am signing up as</label>
@@ -170,17 +170,17 @@ export default function SignupPage() {
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.nameLabel}</label>
                         <input type="text" className="input" placeholder={t.auth.namePlaceholder}
-                            value={name} onChange={e => setName(e.target.value)} required />
+                            value={name} onChange={e => setName(e.target.value)} autoComplete="off" required />
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.emailLabel}</label>
                         <input type="email" className="input" placeholder={t.auth.emailPlaceholder}
-                            value={email} onChange={e => setEmail(e.target.value)} required />
+                            value={email} onChange={e => setEmail(e.target.value)} autoComplete="off" required />
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.passwordLabel}</label>
                         <input type="password" className="input" placeholder={t.auth.passwordPlaceholder}
-                            value={password} onChange={e => setPassword(e.target.value)} minLength={8} required />
+                            value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
                     </div>
                     <button type="submit" className="btn btn-secondary"
                         style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>

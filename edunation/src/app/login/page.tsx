@@ -121,7 +121,7 @@ export default function LoginPage() {
 
                 <div className={styles.divider}><span>or sign in with email</span></div>
 
-                <form className={styles.form} onSubmit={handleEmailLogin}>
+                <form className={styles.form} onSubmit={handleEmailLogin} autoComplete="off">
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.emailLabel}</label>
                         <input
@@ -130,6 +130,7 @@ export default function LoginPage() {
                             placeholder={t.auth.emailPlaceholder}
                             value={email}
                             onChange={e => setEmail(e.target.value)}
+                            autoComplete="off"
                             required
                         />
                     </div>
@@ -145,6 +146,7 @@ export default function LoginPage() {
                             placeholder={t.auth.passwordPlaceholder}
                             value={password}
                             onChange={e => setPassword(e.target.value)}
+                            autoComplete="new-password"
                             required
                         />
                     </div>

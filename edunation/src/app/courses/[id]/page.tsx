@@ -23,6 +23,7 @@ export default function CourseDetailPage() {
     const [activeLesson, setActiveLesson] = useState<any>(null);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isEnrolled, setIsEnrolled] = useState(false);
+    const [getsUniversityFreeAccess, setGetsUniversityFreeAccess] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [progress, setProgress] = useState<any[]>([]);
     const [error, setError] = useState(false);
@@ -40,6 +41,7 @@ export default function CourseDetailPage() {
                 setCourse(data);
                 setIsSubscribed(data.isSubscribed);
                 setIsEnrolled(data.isEnrolled);
+                setGetsUniversityFreeAccess(data.getsUniversityFreeAccess);
                 setProgress(data.progress || []);
                 if (data.lessons && data.lessons.length > 0) {
                     setActiveLesson(data.lessons[0]);
@@ -122,7 +124,7 @@ export default function CourseDetailPage() {
         );
     }
 
-    const canWatch = (lesson: typeof activeLesson) => lesson.isFree || isSubscribed || isEnrolled;
+    const canWatch = (lesson: typeof activeLesson) => lesson.isFree || isSubscribed || isEnrolled || getsUniversityFreeAccess;
     const isLessonCompleted = (lessonId: string) => progress.some(p => p.lessonId === lessonId && p.completed);
 
     // Calculate progress percentage
@@ -257,7 +259,17 @@ export default function CourseDetailPage() {
 
                     {/* Sidebar */}
                     <div className={styles.sidebar}>
-                        {!course.isFree && !isSubscribed && !isEnrolled && (
+                        {getsUniversityFreeAccess && !isEnrolled && (
+                            <div className={styles.enrollCard} style={{ border: '2px solid #10b981' }}>
+                                <div className={styles.enrollFree}>University Free Access</div>
+                                <p className={styles.enrollDesc}>As a student of National Pedagogical University, you have free access to this course.</p>
+                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', background: '#10b981', borderColor: '#10b981' }} onClick={handleEnroll} disabled={enrolling}>
+                                    {enrolling ? 'Enrolling...' : 'Claim Free Access'}
+                                </button>
+                            </div>
+                        )}
+
+                        {!course.isFree && !isSubscribed && !isEnrolled && !getsUniversityFreeAccess && (
                             <div className={styles.enrollCard}>
                                 <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
                                 <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>

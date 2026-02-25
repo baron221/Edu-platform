@@ -30,8 +30,10 @@ export async function GET(
         let isEnrolled = false;
         let isSubscribed = false;
         let progress: any[] = [];
+        let getsUniversityFreeAccess = false;
 
         const userId = (session?.user as any)?.id;
+        const userEmail = (session?.user as any)?.email || '';
 
         if (userId) {
             const enrollment = await prisma.enrollment.findUnique({
@@ -55,13 +57,17 @@ export async function GET(
                     courseId: course.id
                 }
             });
+            const isUniversityStudent = /^\d{6}@npuu\.uz$/i.test(userEmail);
+            const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
+            getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
         }
 
         return NextResponse.json({
             ...course,
             isEnrolled,
             isSubscribed,
-            progress
+            progress,
+            getsUniversityFreeAccess
         });
     } catch (error) {
         console.error('Error fetching course:', error);

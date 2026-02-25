@@ -12,6 +12,8 @@ export async function POST(request: Request) {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
+        const userEmail = (session?.user as any)?.email || '';
+
         const body = await request.json();
         const { courseId } = body;
 
@@ -41,8 +43,13 @@ export async function POST(request: Request) {
             return new NextResponse('Course not found', { status: 404 });
         }
 
+        // University Free Access Check
+        const isUniversityStudent = /^\d{6}@npuu\.uz$/i.test(userEmail);
+        const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
+        const getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
+
         // Only allow enrollment if the course is free (for this endpoint)
-        if (!course.isFree) {
+        if (!course.isFree && !getsUniversityFreeAccess) {
             // For paid courses, we'd normally verify payment here. 
             // Since there's no payment gateway yet, we just block free enrollment.
             // UNLESS the user has an active Pro subscription.
