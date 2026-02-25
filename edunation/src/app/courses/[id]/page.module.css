@@ -3,23 +3,26 @@
     min-height: 100vh;
 }
 
-/* Hero */
 .hero {
     position: relative;
     padding: 60px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border);
     overflow: hidden;
+    background: #0f172a;
+    /* Solid dark fallback */
 }
 
 .heroBg {
     position: absolute;
     inset: 0;
-    opacity: 0.8;
+    z-index: 0;
+    pointer-events: none;
+    /* Removed opacity: 0.8 to prevent muddy blending with light page background */
 }
 
 .hero .container {
     position: relative;
-    z-index: 1;
+    z-index: 10;
 }
 
 .heroContent {
@@ -44,14 +47,14 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #a855f7;
+    color: #c084fc;
     margin-bottom: 12px;
 }
 
 .heroTitle {
     font-size: clamp(28px, 4vw, 48px);
     font-weight: 900;
-    color: #f1f5f9;
+    color: #ffffff;
     margin-bottom: 16px;
     letter-spacing: -0.02em;
     line-height: 1.1;
@@ -59,7 +62,7 @@
 
 .heroDesc {
     font-size: 16px;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.8);
     line-height: 1.7;
     margin-bottom: 24px;
     max-width: 640px;
@@ -78,13 +81,13 @@
     align-items: center;
     gap: 6px;
     font-size: 14px;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .metaDivider {
     width: 1px;
     height: 16px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .stars {
@@ -99,7 +102,7 @@
 }
 
 .ratingCount {
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 13px;
 }
 
@@ -113,18 +116,19 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: var(--grad-primary);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     font-weight: 700;
-    color: white;
+    color: #ffffff;
 }
 
 .instructorLabel {
     font-size: 11px;
-    color: #64748b;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -132,7 +136,7 @@
 .instructorName {
     font-size: 15px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: #ffffff;
 }
 
 /* Layout */
@@ -143,8 +147,7 @@
     padding: 48px 0 80px;
 }
 
-/* Video */
-.main {}
+
 
 .videoSection {
     margin-bottom: 32px;
@@ -156,7 +159,7 @@
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
 }
 
 .videoIframe {
@@ -185,7 +188,7 @@
 .lockedTitle {
     font-size: 22px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 .lockedDesc {
@@ -197,7 +200,7 @@
 .videoTitle {
     font-size: 22px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 10px;
 }
 
@@ -230,13 +233,12 @@
     font-weight: 500;
 }
 
-/* Sidebar */
-.sidebar {}
+
 
 .enrollCard {
     padding: 28px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 20px;
     margin-bottom: 24px;
 }
@@ -245,7 +247,7 @@
     font-family: 'Outfit', sans-serif;
     font-size: 40px;
     font-weight: 900;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
@@ -274,15 +276,15 @@
 /* Lessons */
 .lessonsList {
     padding: 24px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 20px;
 }
 
 .lessonsTitle {
     font-size: 16px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -317,7 +319,7 @@
 }
 
 .lessonItem:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-card);
 }
 
 .lessonActive {
@@ -333,7 +335,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -351,7 +353,7 @@
 .lessonTitle {
     font-size: 13px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

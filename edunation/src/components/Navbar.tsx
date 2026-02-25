@@ -51,7 +51,7 @@ export default function Navbar() {
                 <Link href="/" className={styles.logo}>
                     <span className={styles.logoIcon}>🎓</span>
                     <span className={styles.logoText}>
-                        Edu<span className="gradient-text">Nation</span>
+                        EduNation<span className="gradient-text">Uz</span>
                     </span>
                 </Link>
 
@@ -72,7 +72,6 @@ export default function Navbar() {
                             aria-label="Select language"
                         >
                             <span className={styles.langFlag}>{currentLang.flag}</span>
-                            <span className={styles.langCode}>{currentLang.code.toUpperCase()}</span>
                             <span className={`${styles.langArrow} ${langOpen ? styles.langArrowOpen : ''}`}>▾</span>
                         </button>
 
@@ -125,6 +124,14 @@ export default function Navbar() {
                                         <div className={styles.userDropdownEmail}>{session.user?.email}</div>
                                     </div>
                                     <div className={styles.userDropdownDivider} />
+                                    <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                        🎓 My Learning
+                                    </Link>
+                                    {((session.user as any)?.role === 'admin' || (session.user as any)?.role === 'instructor') && (
+                                        <Link href="/admin/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                            🛠️ Instructor Dashboard
+                                        </Link>
+                                    )}
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         📚 {t.nav.courses}
                                     </Link>
@@ -180,13 +187,23 @@ export default function Navbar() {
 
                 <div className={styles.mobileCta}>
                     {session ? (
-                        <button
-                            className="btn btn-secondary"
-                            style={{ flex: 1, justifyContent: 'center' }}
-                            onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
-                        >
-                            🚪 Sign Out
-                        </button>
+                        <>
+                            <Link
+                                href="/dashboard"
+                                className="btn btn-primary"
+                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                🎓 My Learning
+                            </Link>
+                            <button
+                                className="btn btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
+                            >
+                                🚪 Sign Out
+                            </button>
+                        </>
                     ) : (
                         <>
                             <Link href="/login" className="btn btn-secondary" onClick={() => setMenuOpen(false)}>{t.nav.login}</Link>

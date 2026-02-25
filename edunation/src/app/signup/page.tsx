@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -8,23 +8,58 @@ import styles from '../auth.module.css';
 
 export default function SignupPage() {
     const { t } = useLanguage();
-    const { status } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState<'student' | 'instructor'>('student');
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState('');
 
     // Redirect if already signed in
-    if (status === 'authenticated') {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const userRole = (session?.user as any)?.role;
+            if (userRole === 'admin' || userRole === 'instructor') {
+                router.push('/admin/courses');
+            } else {
+                router.push('/');
+            }
+        }
+    }, [status, session, router]);
 
-    const handleEmailSignup = (e: React.FormEvent) => {
+    if (status === 'authenticated') return null;
+
+    const handleEmailSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('Email/password signup requires a database. Please use Google or GitHub to sign up instantly!');
+        setError('');
+        setLoading('email');
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, role }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error ?? 'Registration failed.');
+                setLoading(null);
+                return;
+            }
+            // Auto sign-in after registration
+            const result = await signIn('credentials', { email, password, redirect: false });
+            if (result?.ok) {
+                // Hard reload to guarantee fresh session with correct DB role
+                window.location.href = role === 'instructor' ? '/admin/courses' : '/';
+            } else {
+                setError('Login failed after registration. Please log in manually.');
+                setLoading(null);
+            }
+        } catch {
+            setError('Something went wrong. Please try again.');
+            setLoading(null);
+        }
     };
 
     const handleOAuth = async (provider: 'google' | 'github') => {
@@ -47,7 +82,7 @@ export default function SignupPage() {
             <div className={styles.card}>
                 <Link href="/" className={styles.logo}>
                     <span>🎓</span>
-                    <span>Edu<span className="gradient-text">Nation</span></span>
+                    <span>EduNation<span className="gradient-text">Uz</span></span>
                 </Link>
 
                 <h1 className={styles.title}>{t.auth.signupTitle}</h1>
@@ -106,21 +141,46 @@ export default function SignupPage() {
 
                 <div className={styles.divider}><span>{t.auth.orSignupWith} email</span></div>
 
-                <form className={styles.form} onSubmit={handleEmailSignup}>
+                <form className={styles.form} onSubmit={handleEmailSignup} autoComplete="off">
+                    {/* Role Selector */}
+                    <div className={styles.field}>
+                        <label className={styles.label}>I am signing up as</label>
+                        <div className={styles.roleToggle}>
+                            <button
+                                type="button"
+                                className={`${styles.roleBtn} ${role === 'student' ? styles.roleBtnActive : ''}`}
+                                onClick={() => setRole('student')}
+                            >
+                                <span className={styles.roleIcon}>🎓</span>
+                                <span className={styles.roleLabel}>Student</span>
+                                <span className={styles.roleDesc}>I want to learn</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.roleBtn} ${role === 'instructor' ? styles.roleBtnActive : ''}`}
+                                onClick={() => setRole('instructor')}
+                            >
+                                <span className={styles.roleIcon}>👩‍🏫</span>
+                                <span className={styles.roleLabel}>Teacher</span>
+                                <span className={styles.roleDesc}>I want to teach</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.nameLabel}</label>
                         <input type="text" className="input" placeholder={t.auth.namePlaceholder}
-                            value={name} onChange={e => setName(e.target.value)} required />
+                            value={name} onChange={e => setName(e.target.value)} autoComplete="off" required />
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.emailLabel}</label>
                         <input type="email" className="input" placeholder={t.auth.emailPlaceholder}
-                            value={email} onChange={e => setEmail(e.target.value)} required />
+                            value={email} onChange={e => setEmail(e.target.value)} autoComplete="off" required />
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.passwordLabel}</label>
                         <input type="password" className="input" placeholder={t.auth.passwordPlaceholder}
-                            value={password} onChange={e => setPassword(e.target.value)} minLength={8} required />
+                            value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
                     </div>
                     <button type="submit" className="btn btn-secondary"
                         style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>

@@ -16,7 +16,7 @@ export default function Footer() {
                     <div className={styles.brand}>
                         <Link href="/" className={styles.logo}>
                             <span>🎓</span>
-                            <span>Edu<span className="gradient-text">Nation</span></span>
+                            <span>EduNation<span className="gradient-text">Uz</span></span>
                         </Link>
                         <p className={styles.tagline}>{t.footer.tagline}</p>
                         <div className={styles.social}>

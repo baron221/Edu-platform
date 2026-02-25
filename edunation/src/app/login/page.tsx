@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -16,14 +16,35 @@ export default function LoginPage() {
     const [error, setError] = useState('');
 
     // Redirect if already signed in
-    if (status === 'authenticated') {
-        router.push('/');
-        return null;
-    }
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const role = (session?.user as any)?.role;
+            if (role === 'admin' || role === 'instructor') {
+                router.push('/admin/courses');
+            } else {
+                router.push('/');
+            }
+        }
+    }, [status, session, router]);
+
+    if (status === 'authenticated') return null;
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('Email/password login requires a database setup. Please use Google or GitHub sign-in.');
+        setError('');
+        setLoading('email');
+        const result = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+        });
+        setLoading(null);
+        if (result?.error) {
+            setError('Invalid email or password. Please try again.');
+        } else {
+            // Role redirect will be handled by the useEffect above
+            // as 'status' will turn to 'authenticated' and trigger the router
+        }
     };
 
     const handleOAuth = async (provider: 'google' | 'github') => {
@@ -46,7 +67,7 @@ export default function LoginPage() {
             <div className={styles.card}>
                 <Link href="/" className={styles.logo}>
                     <span>🎓</span>
-                    <span>Edu<span className="gradient-text">Nation</span></span>
+                    <span>EduNation<span className="gradient-text">Uz</span></span>
                 </Link>
 
                 <h1 className={styles.title}>{t.auth.loginTitle}</h1>
@@ -100,7 +121,7 @@ export default function LoginPage() {
 
                 <div className={styles.divider}><span>or sign in with email</span></div>
 
-                <form className={styles.form} onSubmit={handleEmailLogin}>
+                <form className={styles.form} onSubmit={handleEmailLogin} autoComplete="off">
                     <div className={styles.field}>
                         <label className={styles.label}>{t.auth.emailLabel}</label>
                         <input
@@ -109,6 +130,7 @@ export default function LoginPage() {
                             placeholder={t.auth.emailPlaceholder}
                             value={email}
                             onChange={e => setEmail(e.target.value)}
+                            autoComplete="off"
                             required
                         />
                     </div>
@@ -124,6 +146,7 @@ export default function LoginPage() {
                             placeholder={t.auth.passwordPlaceholder}
                             value={password}
                             onChange={e => setPassword(e.target.value)}
+                            autoComplete="new-password"
                             required
                         />
                     </div>

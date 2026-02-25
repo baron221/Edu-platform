@@ -282,7 +282,7 @@ export const testimonials = [
         role: 'Frontend Developer at Google',
         avatar: 'RM',
         rating: 5,
-        text: 'EduNation completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google. Worth every penny!',
+        text: 'EduNationUz completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google. Worth every penny!',
         course: 'React 18 Mastery',
     },
     {

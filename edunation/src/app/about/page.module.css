@@ -45,8 +45,8 @@
 
 .missionCard {
     padding: 36px 28px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 24px;
     text-align: center;
     transition: all 0.3s ease;
@@ -65,7 +65,7 @@
 .missionCard h3 {
     font-size: 20px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 12px;
 }
 
@@ -78,8 +78,8 @@
 /* Timeline */
 .timelineSection {
     background: rgba(124, 58, 237, 0.03);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .sectionTitle {
@@ -144,8 +144,8 @@
 /* Team */
 .teamCard {
     padding: 32px 24px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 24px;
     text-align: center;
     transition: all 0.3s ease;
@@ -174,7 +174,7 @@
 .teamName {
     font-size: 17px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 

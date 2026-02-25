@@ -1,0 +1,144 @@
+/* Lesson editor page — import shared styles from course editor */
+/* Reuse the same module as the course editor */
+@import '../page.module.css';
+
+/* Extra lesson-specific overrides */
+.lessonList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lessonItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.lessonItem:hover {
+    border-color: #c4b5fd;
+    background: #faf5ff;
+}
+
+.lessonOrder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.lessonInfo {
+    flex: 1;
+}
+
+.lessonTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.lessonMeta {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.lessonActions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.lessonEditBtn {
+    padding: 4px 12px;
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.lessonEditBtn:hover {
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.lessonDeleteBtn {
+    padding: 4px 10px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: none;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.lessonDeleteBtn:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.noLessons {
+    padding: 28px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    border: 1px dashed #e2e8f0;
+    border-radius: 10px;
+}
+
+.addLessonBtn {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.addLessonBtn:hover {
+    opacity: 0.88;
+}
+
+.select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    background: white;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+}
+
+.select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+}
+
+.toggleRow {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+}
