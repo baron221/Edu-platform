@@ -4,6 +4,7 @@ import { notFound, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
+import AIAssistant from '@/components/AIAssistant';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -342,6 +343,9 @@ export default function CourseDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Floating AI Tutor */}
+            <AIAssistant />
         </div>
     );
 }
