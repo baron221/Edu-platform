@@ -1,328 +1,381 @@
-.page {
-    padding: 36px 40px;
-    max-width: 1000px;
+.loading {
+    padding: 60px 40px;
+    color: #64748b;
+    font-size: 15px;
+    text-align: center;
 }
 
-.loading {
-    padding: 40px;
-    color: #64748b;
-    font-size: 14px;
+.page {
+    padding: 32px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Top Bar */
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .breadcrumb {
-    margin-bottom: 16px;
-}
-
-.backLink {
-    font-size: 13px;
-    color: #7c3aed;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
     gap: 16px;
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #475569;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .title {
     font-family: 'Outfit', sans-serif;
-    font-size: 26px;
-    font-weight: 900;
+    font-size: 22px;
+    font-weight: 700;
     color: #0f172a;
-    letter-spacing: -0.02em;
+    margin: 0;
 }
 
-.headerActions {
+.actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .savedMsg {
-    font-size: 13px;
     color: #10b981;
     font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 6px 14px;
+    border-radius: 8px;
 }
 
 .saveBtn {
-    padding: 10px 22px;
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    background: #0f172a;
     color: white;
     border: none;
+    padding: 10px 24px;
     border-radius: 10px;
+    font-weight: 600;
     font-size: 14px;
-    font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.saveBtn:disabled {
-    opacity: 0.6;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
 .saveBtn:hover:not(:disabled) {
-    opacity: 0.88;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
 }
 
-.grid {
+.saveBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Layout Grid */
+.mainContainer {
+    display: grid;
+    grid-template-columns: 7fr 4fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .mainContainer {
+        grid-template-columns: 1fr;
+    }
+}
+
+.leftCol,
+.rightCol {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
-/* Card */
+/* Cards */
 .card {
     background: white;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    padding: 28px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .cardHeader {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 16px;
 }
 
 .cardTitle {
     font-family: 'Outfit', sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 20px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.cardHeader .cardTitle {
-    margin-bottom: 0;
-}
-
-/* Fields */
+/* Form Fields */
 .field {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+.field:last-child {
+    margin-bottom: 0;
 }
 
 .label {
     display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
-}
-
-.input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
     font-size: 14px;
-    color: #0f172a;
-    outline: none;
-    background: white;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
-    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
 }
 
-.input:focus {
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
-}
-
-.textarea {
+.input,
+.textarea,
+.select {
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 16px;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #0f172a;
-    outline: none;
-    resize: vertical;
-    background: white;
-    box-sizing: border-box;
+    border-radius: 12px;
     font-family: 'Inter', sans-serif;
-    transition: border-color 0.2s;
-    line-height: 1.6;
+    font-size: 15px;
+    color: #0f172a;
+    transition: all 0.2s;
+    background: #f8fafc;
+    box-sizing: border-box;
 }
 
-.textarea:focus {
+.input:focus,
+.textarea:focus,
+.select:focus {
+    background: white;
     border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
 }
 
 .twoCol {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    margin-bottom: 24px;
 }
 
-.toggleLabel {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #334155;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-/* Upload Zone */
-.uploadZone {
-    border: 2px dashed #e2e8f0;
-    border-radius: 12px;
-    padding: 28px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #f8fafc;
-}
-
-.uploadZone:hover {
-    border-color: #7c3aed;
-    background: rgba(124, 58, 237, 0.04);
-}
-
-.uploadIcon {
-    font-size: 32px;
-    margin-bottom: 8px;
-}
-
-.uploadText {
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 4px;
-}
-
-.uploadHint {
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-.videoPreview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.videoPreviewIcon {
-    font-size: 28px;
-}
-
-.videoPreviewName {
-    font-size: 13px;
-    color: #0f172a;
-    font-weight: 600;
-}
-
-.changeVideo {
-    font-size: 11px;
-    color: #7c3aed;
-}
-
-/* Progress Bar */
-.progressWrap {
+/* Toggles */
+.toggleWrapper {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 10px;
-}
-
-.progressBar {
-    flex: 1;
-    height: 6px;
-    background: #e2e8f0;
-    border-radius: 50px;
-    overflow: hidden;
-}
-
-.progressFill {
-    height: 100%;
-    background: linear-gradient(90deg, #7c3aed, #06b6d4);
-    border-radius: 50px;
-    transition: width 0.2s;
-}
-
-.progressText {
-    font-size: 12px;
-    color: #64748b;
-    min-width: 36px;
-}
-
-/* Quality Grid */
-.qualityGrid {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.qualityBtn {
-    padding: 6px 14px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
     border: 1px solid #e2e8f0;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+}
+
+.toggleWrapper:hover {
+    border-color: #cbd5e1;
+}
+
+.toggleLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.toggleLabel input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #7c3aed;
+    cursor: pointer;
+}
+
+/* Lessons List inside Course Editor */
+.addLessonBtn {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    border: none;
+    padding: 8px 16px;
     border-radius: 8px;
     font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    background: white;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.qualityBtn:hover {
-    border-color: #7c3aed;
-    color: #7c3aed;
+.addLessonBtn:hover {
+    background: rgba(124, 58, 237, 0.15);
 }
 
-.qualityActive {
-    background: rgba(124, 58, 237, 0.1);
-    border-color: #7c3aed;
-    color: #7c3aed;
+.lessonList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* Live Section */
-.liveAlert {
-    padding: 12px 16px;
-    background: rgba(6, 182, 212, 0.08);
-    border: 1px solid rgba(6, 182, 212, 0.2);
-    border-radius: 10px;
-    font-size: 13px;
-    color: #0891b2;
-    margin-bottom: 16px;
-    line-height: 1.5;
+.lessonItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.2s;
 }
 
-.liveDisabled {
-    padding: 20px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 13px;
-    border: 1px dashed #e2e8f0;
-    border-radius: 10px;
+.lessonItem:hover {
+    border-color: #cbd5e1;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
-.meetPreviewBtn {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 8px 16px;
+.lessonOrder {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #475569;
+    flex-shrink: 0;
+}
+
+.lessonInfo {
+    flex: 1;
+}
+
+.lessonTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.lessonMeta {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.badgePremium {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.badgeFree {
     background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    color: #059669;
+}
+
+.lessonActions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.lessonEditBtn {
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
+    transition: all 0.2s;
+}
+
+.lessonEditBtn:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.lessonDeleteBtn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.05);
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
     transition: background 0.2s;
 }
 
-.meetPreviewBtn:hover {
-    background: rgba(16, 185, 129, 0.18);
+.lessonDeleteBtn:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.noLessons {
+    padding: 40px;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #e2e8f0;
 }
 
 /* Modal */
@@ -339,14 +392,25 @@
     justify-content: center;
     z-index: 1000;
     padding: 20px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modalContent {
     background: white;
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
-    max-width: 600px;
-    padding: 30px;
+    max-width: 500px;
+    padding: 32px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
@@ -359,52 +423,113 @@
 
 .modalHeader h2 {
     font-family: 'Outfit', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 700;
     color: #0f172a;
     margin: 0;
 }
 
 .closeBtn {
-    background: none;
+    background: #f1f5f9;
     border: none;
-    font-size: 20px;
+    width: 32px;
+    height: 32px;
     color: #64748b;
     cursor: pointer;
-    padding: 4px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 
 .closeBtn:hover {
-    background: #f1f5f9;
+    background: #e2e8f0;
     color: #0f172a;
 }
 
 .modalForm {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-}
-
-.checkboxLabel {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #334155;
-    cursor: pointer;
+    gap: 20px;
 }
 
 .modalActions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 12px;
+    padding-top: 24px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnPrimary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btnSecondary {
+    background: white;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+/* Progress inside modal */
+.progressContainer {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.progressBar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    border-radius: 10px;
+    transition: width 0.2s;
+}
+
+.progressText {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-align: right;
 }

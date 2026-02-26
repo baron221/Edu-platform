@@ -13,6 +13,8 @@ interface Stats {
 export default function AdminDashboard() {
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
     useEffect(() => {
         fetch('/api/admin/stats')
@@ -27,6 +29,24 @@ export default function AdminDashboard() {
         { label: 'Total Users', value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
         { label: 'Enrollments', value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
     ];
+
+    const fetchAnalytics = async () => {
+        setLoadingAnalytics(true);
+        try {
+            const res = await fetch('/api/admin/analytics');
+            const data = await res.json();
+            if (res.ok && data.data) {
+                setAnalytics(data.data);
+            } else {
+                alert(data.message || data.error || 'Failed to fetch analytics.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred fetching AI analytics");
+        } finally {
+            setLoadingAnalytics(false);
+        }
+    };
 
     return (
         <div className={styles.page}>
@@ -49,6 +69,57 @@ export default function AdminDashboard() {
                         <div className={styles.statLabel}>{card.label}</div>
                     </Link>
                 ))}
+            </div>
+
+            {/* AI Student Sentiment Analytics */}
+            <div className={styles.section} style={{ marginBottom: '40px' }}>
+                <div className={styles.sectionHeaderFlex}>
+                    <h2 className={styles.sectionTitle} style={{ borderBottom: 'none', paddingBottom: 0 }}>🧠 AI Student Insights</h2>
+                    <button
+                        onClick={fetchAnalytics}
+                        className={styles.aiBtnSubtle}
+                        disabled={loadingAnalytics}
+                    >
+                        {loadingAnalytics ? 'Analyzing...' : 'Refresh Insights ✨'}
+                    </button>
+                </div>
+
+                {loadingAnalytics ? (
+                    <div className={styles.analyticsLoading}>
+                        <div className={styles.spinner}></div>
+                        <span>AI is reading recent student chats and analyzing sentiment...</span>
+                    </div>
+                ) : analytics ? (
+                    <div className={styles.analyticsWrapper}>
+                        <div className={styles.analyticsSummary}>
+                            <strong>Summary:</strong> {analytics.summary}
+                        </div>
+                        <div className={styles.analyticsGrid}>
+                            <div className={styles.analyticsCard}>
+                                <h3>Overall Sentiment</h3>
+                                <div className={`${styles.sentimentBadge} ${styles['sentiment' + analytics.overallSentiment]}`}>
+                                    {analytics.overallSentiment}
+                                </div>
+                            </div>
+                            <div className={styles.analyticsCard}>
+                                <h3>Top Student Struggles</h3>
+                                <ul>
+                                    {analytics.topStruggles.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                                </ul>
+                            </div>
+                            <div className={styles.analyticsCard}>
+                                <h3>AI Recommendations</h3>
+                                <ul>
+                                    {analytics.recommendations.map((r: string, i: number) => <li key={i}>{r}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className={styles.analyticsEmpty}>
+                        Click "Refresh Insights" to have the AI analyze recent student questions.
+                    </div>
+                )}
             </div>
 
             {/* Recent Users */}
