@@ -86,7 +86,7 @@ export default function CourseCard({ course }: Props) {
 
                 <div className={styles.info}>
                     <span>📹 {lessonCount} {t.courseDetail?.lessons || 'lessons'}</span>
-                    <span>🎓 {enrollmentCount.toLocaleString()} students</span>
+                    <span>🎓 {enrollmentCount.toLocaleString()} {t.courseDetail?.students || 'students'}</span>
                 </div>
 
                 <div className={styles.footer}>

@@ -138,6 +138,8 @@ model Lesson {
 
   // Video configuration
   videoQuality  String?   @default("auto")   // auto | 1080p | 720p | 480p | 360p
+  muxPlaybackId String?                      // Used to render the Mux Player on the frontend
+  muxAssetId    String?                      // Used to track the asset in the Mux Dashboard
 
   // Live stream / Google Meet
   meetLink      String?                       // Google Meet URL

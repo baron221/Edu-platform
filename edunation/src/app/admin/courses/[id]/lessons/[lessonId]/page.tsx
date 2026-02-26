@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
+import * as Upchunk from '@mux/upchunk';
 
 interface Lesson {
     id: string;
@@ -94,38 +95,46 @@ export default function LessonEditorPage() {
         setUploading(true);
         setUploadProgress(0);
 
-        // Note: Real progressive upload tracking requires XMLHttpRequest or Axios,
-        // but for fetch we can show a continuous fast indeterminate progress.
-        const interval = setInterval(() => {
-            setUploadProgress(p => {
-                if (p >= 90) return p;
-                return p + Math.random() * 10;
-            });
-        }, 300);
-
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const res = await fetch('/api/upload', {
+            // 1. Get a direct upload ticket from our new Mux API
+            const ticketRes = await fetch(`/api/admin/courses/${courseId}/lessons/${lessonId}/mux-upload`, {
                 method: 'POST',
-                body: formData
+            });
+            const ticketData = await ticketRes.json();
+
+            if (!ticketRes.ok) {
+                throw new Error(ticketData.error || 'Failed to get upload ticket');
+            }
+
+            // 2. Use @mux/upchunk to stream the file directly from the browser to Mux
+            // This safely bypasses Vercel's 4.5MB payload limit!
+            const upload = Upchunk.createUpload({
+                endpoint: ticketData.url, // The Mux Google Cloud Storage URL
+                file: file,
+                chunkSize: 5120, // 5MB chunks
             });
 
-            clearInterval(interval);
-            setUploadProgress(100);
+            upload.on('progress', progress => {
+                setUploadProgress(progress.detail);
+            });
 
-            if (res.ok) {
-                const data = await res.json();
-                handleChange('videoUrl', data.url);
-                handleChange('duration', '00:00'); // Note: actual duration extraction requires a hidden video element
-            } else {
-                alert('File upload failed. Please try again.');
-            }
+            upload.on('success', () => {
+                setUploadProgress(100);
+                setTimeout(() => setUploading(false), 1000);
+                // We clear the old videoUrl if it existed and let the Webhook handle the rest
+                handleChange('videoUrl', `mux-upload:${ticketData.uploadId}`);
+                alert('Success! Mux is now encoding your video. It will appear here shortly.');
+            });
+
+            upload.on('error', err => {
+                console.error('Mux Upchunk Error:', err);
+                alert('An error occurred during upload to Mux.');
+                setUploading(false);
+            });
+
         } catch (err) {
-            clearInterval(interval);
-            alert('An error occurred during upload.');
-        } finally {
+            console.error('Upload init error:', err);
+            alert('An error occurred starting the upload.');
             setUploading(false);
         }
     };

@@ -122,6 +122,8 @@ export const translations = {
             getAccessFree: 'Get Full Access Free',
             free: 'Free',
             lesson: 'lesson',
+            yourProgress: 'Your Progress',
+            lessonsCompleted: (completed: number, total: number) => `${completed} of ${total} lessons completed`,
         },
         // Pricing
         pricing: {
@@ -356,6 +358,8 @@ export const translations = {
             getAccessFree: 'Bepul to\'liq kirish',
             free: 'Bepul',
             lesson: 'dars',
+            yourProgress: 'Sizning natijangiz',
+            lessonsCompleted: (completed: number, total: number) => `${total} darsdan ${completed} tasi yakunlandi`,
         },
         pricing: {
             label: '💎 Narxlar',
@@ -584,6 +588,8 @@ export const translations = {
             getAccessFree: 'Получить полный доступ бесплатно',
             free: 'Бесплатно',
             lesson: 'урок',
+            yourProgress: 'Ваш прогресс',
+            lessonsCompleted: (completed: number, total: number) => `Завершено ${completed} из ${total} уроков`,
         },
         pricing: {
             label: '💎 Цены',

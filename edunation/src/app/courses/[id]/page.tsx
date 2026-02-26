@@ -7,6 +7,7 @@ import styles from './page.module.css';
 import AIAssistant from '@/components/AIAssistant';
 import AIQuizPlayer from '@/components/AIQuizPlayer';
 import ReactMarkdown from 'react-markdown';
+import MuxPlayer from '@mux/mux-player-react';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -16,7 +17,7 @@ function formatUZS(price: number, currLabel: string) {
 export default function CourseDetailPage() {
     const params = useParams();
     const id = params.id as string;
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,51 +143,46 @@ export default function CourseDetailPage() {
     const durationStr = '12 hours'; // Placeholder for total duration
     const instructorAvatar = '👨‍🏫'; // Placeholder
 
+    // Parse multi-lingual description (Format assumption: "English text | Uzbek text" or separated by newlines)
+    let localizedDescription = course.description || '';
+    if (localizedDescription) {
+        const parts = localizedDescription.includes('|')
+            ? localizedDescription.split('|')
+            : localizedDescription.split('\n').filter((p: string) => p.trim().length > 0);
+
+        if (parts.length > 1) {
+            // If language is Uzbek ('uz' or 'uz-UZ'), pick the second part, else the first part (English)
+            if (language === 'uz') {
+                localizedDescription = parts[1]?.trim() || parts[0]?.trim();
+            } else if (language === 'ru') {
+                localizedDescription = parts[2]?.trim() || parts[0]?.trim();
+            } else {
+                localizedDescription = parts[0]?.trim();
+            }
+        }
+    }
+
     return (
         <div className={styles.page}>
             {/* Hero */}
-            <div className={styles.hero} style={{
-                background: course.category === 'Web Development'
-                    ? 'linear-gradient(135deg, #0f0a2e 0%, #1e1b4b 100%)'
-                    : course.category === 'Design'
-                        ? 'linear-gradient(135deg, #180228 0%, #2d1345 100%)'
-                        : 'linear-gradient(135deg, #071428 0%, #0f2445 100%)'
-            }}>
+            <div className={styles.hero}>
+                <div className={styles.heroBg}>
+                    <div className={styles.glowOrb1} />
+                    <div className={styles.glowOrb2} />
+                </div>
                 <div className="container">
                     <div className={styles.heroContent}>
                         <Link href="/courses" className={styles.back}>{t.courseDetail.back}</Link>
                         <div className={styles.heroCat}>{course.category}</div>
                         <h1 className={styles.heroTitle}>{course.title}</h1>
-                        <p className={styles.heroDesc}>{course.description}</p>
+                        <p className={styles.heroDesc}>{localizedDescription}</p>
 
-                        <div className={styles.heroMeta}>
-                            <div className={styles.metaItem}>
-                                <span className={styles.stars}>{'★'.repeat(Math.floor(rating))}</span>
-                                <span className={styles.ratingNum}>{rating}</span>
-                                <span className={styles.ratingCount}>({reviewsCount.toLocaleString()} {t.courseDetail.reviews})</span>
-                            </div>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>👥 {students.toLocaleString()} {t.courseDetail.students}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>📹 {totalLessons} {t.courseDetail.lessons}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>⏱ {durationStr}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>
-                                {course.isFree
-                                    ? <span className="badge badge-free">{t.courseDetail.freeCourseLabel}</span>
-                                    : <span className="badge badge-premium">{t.shared.premium}</span>
-                                }
-                            </span>
-                        </div>
-
-                        <div className={styles.instructor}>
+                        <div className={styles.premiumInstructorPill}>
                             <div className={styles.instructorAvatar}>{instructorAvatar}</div>
-                            <div>
-                                <div className={styles.instructorLabel}>{t.courseDetail.instructor}</div>
-                                <div className={styles.instructorName}>{course.instructor}</div>
-                            </div>
+                            <span className={styles.instructorName}>{course.instructor}</span>
                         </div>
+
+
                     </div>
                 </div>
             </div>
@@ -199,7 +195,28 @@ export default function CourseDetailPage() {
                         <div className={styles.videoSection}>
                             <div className={styles.videoWrapper}>
                                 {activeLesson && canWatch(activeLesson) ? (
-                                    activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
+                                    activeLesson.muxPlaybackId ? (
+                                        <MuxPlayer
+                                            playbackId={activeLesson.muxPlaybackId}
+                                            metadata={{
+                                                video_id: activeLesson.id,
+                                                video_title: activeLesson.title,
+                                            }}
+                                            streamType="on-demand"
+                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            onEnded={() => {
+                                                if (!isLessonCompleted(activeLesson.id)) {
+                                                    handleMarkComplete(activeLesson.id);
+                                                }
+                                            }}
+                                        />
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
+                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
+                                            <div className={styles.spinner}></div>
+                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
+                                            <p className={styles.lockedDesc}>This video was just uploaded to Mux and is currently being encoded. Check back in a few minutes!</p>
+                                        </div>
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
                                         <iframe
                                             className={styles.videoIframe}
                                             src={activeLesson.videoUrl}
@@ -208,10 +225,10 @@ export default function CourseDetailPage() {
                                             allowFullScreen
                                         />
                                     ) : (
-                                        <div className={styles.locked}>
+                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.lockedIcon}>⏳</div>
-                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
-                                            <p className={styles.lockedDesc}>The video for this lesson is currently being processed or has not been uploaded yet.</p>
+                                            <h3 className={styles.lockedTitle}>Not Uploaded</h3>
+                                            <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
                                         </div>
                                     )
                                 ) : activeLesson ? (
@@ -277,6 +294,21 @@ export default function CourseDetailPage() {
 
                     {/* Sidebar */}
                     <div className={styles.sidebar}>
+                        {/* Essential Stats Card */}
+                        <div className={styles.statsCard}>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>⏱ Duration</span>
+                                <span className={styles.statValue}>{durationStr}</span>
+                            </div>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>📚 Level</span>
+                                <span className={styles.statValue}>{course.level}</span>
+                            </div>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>📹 Lessons</span>
+                                <span className={styles.statValue}>{totalLessons} lessons</span>
+                            </div>
+                        </div>
                         {getsUniversityFreeAccess && !isEnrolled && (
                             <div className={styles.enrollCard} style={{ border: '2px solid #10b981' }}>
                                 <div className={styles.enrollFree}>University Free Access</div>
@@ -308,19 +340,6 @@ export default function CourseDetailPage() {
                                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
                                     {enrolling ? 'Enrolling...' : t.courseDetail.getAccessFree}
                                 </button>
-                            </div>
-                        )}
-
-                        {isEnrolled && (
-                            <div className={styles.enrollCard}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h4 style={{ margin: 0 }}>Your Progress</h4>
-                                    <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{progressPercentage}%</span>
-                                </div>
-                                <div style={{ background: 'var(--card-bg-hover)', height: '8px', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
-                                    <div style={{ background: 'var(--primary-color)', height: '100%', width: `${progressPercentage}%`, transition: 'width 0.3s' }}></div>
-                                </div>
-                                <p className={styles.enrollDesc} style={{ marginTop: '10px' }}>{completedLessonsCount} of {totalLessons} lessons completed</p>
                             </div>
                         )}
 
@@ -357,6 +376,24 @@ export default function CourseDetailPage() {
                                 ))}
                             </div>
                         </div>
+
+                        {isEnrolled && (
+                            <div className={styles.enrollCard}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{t.courseDetail.yourProgress}</h4>
+                                    <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '16px' }}>{progressPercentage}%</span>
+                                </div>
+                                <div className={styles.premiumProgressTrack}>
+                                    <div
+                                        className={styles.premiumProgressFill}
+                                        style={{ width: `${progressPercentage}%` }}
+                                    />
+                                </div>
+                                <p className={styles.enrollDesc} style={{ margin: '14px 0 0', fontWeight: 500 }}>
+                                    {t.courseDetail.lessonsCompleted(completedLessonsCount, totalLessons)}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
