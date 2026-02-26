@@ -216,6 +216,52 @@
     color: #64748b;
 }
 
+.lessonTextContent {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    line-height: 1.7;
+}
+
+.lessonTextContent h1,
+.lessonTextContent h2,
+.lessonTextContent h3 {
+    font-family: 'Outfit', sans-serif;
+    margin: 24px 0 16px;
+    color: var(--text-primary);
+}
+
+.lessonTextContent p {
+    margin-bottom: 16px;
+    font-size: 15px;
+}
+
+.lessonTextContent ul,
+.lessonTextContent ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+.lessonTextContent li {
+    margin-bottom: 8px;
+}
+
+.quizWrapper {
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 2px dashed var(--border);
+}
+
+.quizSectionTitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
 /* Tags */
 .tags {
     display: flex;

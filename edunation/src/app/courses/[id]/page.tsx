@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 import AIAssistant from '@/components/AIAssistant';
+import AIQuizPlayer from '@/components/AIQuizPlayer';
+import ReactMarkdown from 'react-markdown';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -247,6 +249,21 @@ export default function CourseDetailPage() {
                                             </button>
                                         )}
                                     </div>
+
+                                    {/* Render the AI-generated Lesson Text Content */}
+                                    {activeLesson.content && (
+                                        <div className={styles.lessonTextContent}>
+                                            <ReactMarkdown>{activeLesson.content}</ReactMarkdown>
+                                        </div>
+                                    )}
+
+                                    {/* AI Quiz Player Feature */}
+                                    {isEnrolled && canWatch(activeLesson) && (
+                                        <div className={styles.quizWrapper}>
+                                            <h3 className={styles.quizSectionTitle}>🤖 AI Practice Space</h3>
+                                            <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
