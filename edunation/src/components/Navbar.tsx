@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/lib/translations';
 import styles from './Navbar.module.css';
@@ -16,6 +17,7 @@ const LANGUAGES: { code: Language; label: string; flag: string }[] = [
 export default function Navbar() {
     const { t, language, setLanguage } = useLanguage();
     const { data: session } = useSession();
+    const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [langOpen, setLangOpen] = useState(false);
@@ -44,8 +46,11 @@ export default function Navbar() {
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
+    const isDarkPage = pathname === '/leaderboard';
+    const hasScrolledBackground = scrolled || isDarkPage;
+
     return (
-        <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ''}`}>
+        <nav className={`${styles.nav} ${hasScrolledBackground ? styles.scrolled : ''}`}>
             <div className={`container ${styles.navInner}`}>
                 {/* Logo */}
                 <Link href="/" className={styles.logo}>

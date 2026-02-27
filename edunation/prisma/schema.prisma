@@ -81,7 +81,9 @@ model User {
   certificates Certificate[]
 
   // Gamification
-  points Int @default(0)
+  points           Int       @default(0)
+  currentStreak    Int       @default(0)
+  lastActivityDate DateTime?
 }
 
 // =====================================================================

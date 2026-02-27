@@ -7,7 +7,9 @@ interface Stats {
     totalCourses: number;
     totalUsers: number;
     totalEnrollments: number;
+    totalRevenue: number;
     recentUsers: { id: string; name: string | null; email: string | null; role: string; createdAt: string }[];
+    courseDropoffs: { title: string; enrollments: number; completions: number; totalLessons: number; avgProgress: number }[];
 }
 
 export default function AdminDashboard() {
@@ -25,6 +27,7 @@ export default function AdminDashboard() {
     if (loading) return <div className={styles.loading}>Loading dashboard...</div>;
 
     const statCards = [
+        { label: 'Total Revenue', value: `${(stats?.totalRevenue ?? 0).toLocaleString('ru-RU')} UZS`, icon: '💰', color: '#fbbf24', href: '/admin/courses' },
         { label: 'Total Courses', value: stats?.totalCourses ?? 0, icon: '📚', color: '#7c3aed', href: '/admin/courses' },
         { label: 'Total Users', value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
         { label: 'Enrollments', value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
@@ -120,6 +123,44 @@ export default function AdminDashboard() {
                         Click "Refresh Insights" to have the AI analyze recent student questions.
                     </div>
                 )}
+            </div>
+
+            {/* Course Engagement & Drop-offs */}
+            <div className={styles.section} style={{ marginBottom: '40px' }}>
+                <h2 className={styles.sectionTitle}>📉 Course Engagement & Drop-offs</h2>
+                <div className={styles.dropoffContainer}>
+                    {stats?.courseDropoffs && stats.courseDropoffs.length > 0 ? (
+                        stats.courseDropoffs.map((course, i) => (
+                            <div key={i} className={styles.dropoffCard}>
+                                <div className={styles.dropoffHeader}>
+                                    <h3 className={styles.dropoffTitle}>{course.title}</h3>
+                                    <span className={styles.dropoffStats}>{course.enrollments} Enrollments</span>
+                                </div>
+                                <div className={styles.dropoffMetrics}>
+                                    <div className={styles.metric}>
+                                        <span className={styles.metricLabel}>Avg. Progress</span>
+                                        <span className={styles.metricValue}>{Math.round(course.avgProgress)}%</span>
+                                    </div>
+                                    <div className={styles.metric}>
+                                        <span className={styles.metricLabel}>Completions</span>
+                                        <span className={styles.metricValue}>{course.completions}</span>
+                                    </div>
+                                    <div className={styles.metric}>
+                                        <span className={styles.metricLabel}>Drop-off Rate</span>
+                                        <span className={styles.metricValue} style={{ color: '#ef4444' }}>
+                                            {course.enrollments > 0 ? Math.round(((course.enrollments - course.completions) / course.enrollments) * 100) : 0}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className={styles.progressBar}>
+                                    <div className={styles.progressFill} style={{ width: `${Math.round(course.avgProgress)}%` }}></div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className={styles.emptyState}>Not enough data to analyze drop-offs yet.</div>
+                    )}
+                </div>
             </div>
 
             {/* Recent Users */}

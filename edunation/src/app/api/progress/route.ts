@@ -54,10 +54,43 @@ export async function POST(request: Request) {
 
         // Award points if the lesson was just completed for the first time
         if (completed && !wasAlreadyCompleted) {
+            // First, get the user's current streak info
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { currentStreak: true, lastActivityDate: true }
+            });
+
+            const now = new Date();
+            let newStreak = 1;
+
+            if (user?.lastActivityDate) {
+                const lastActivity = new Date(user.lastActivityDate);
+
+                // Set both to midnight to compare just the date parts easily
+                const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const lastMidnight = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+
+                const msInDay = 24 * 60 * 60 * 1000;
+                const diffDays = Math.round((todayMidnight.getTime() - lastMidnight.getTime()) / msInDay);
+
+                if (diffDays === 0) {
+                    // Already studied today, keep current streak
+                    newStreak = user.currentStreak || 1;
+                } else if (diffDays === 1) {
+                    // Studied yesterday, increment streak
+                    newStreak = (user.currentStreak || 0) + 1;
+                } else {
+                    // Missed a day or more, reset to 1
+                    newStreak = 1;
+                }
+            }
+
             await prisma.user.update({
                 where: { id: userId },
                 data: {
-                    points: { increment: 50 } // Award 50 points per lesson
+                    points: { increment: 50 }, // Award 50 points per lesson
+                    currentStreak: newStreak,
+                    lastActivityDate: now
                 }
             });
         }

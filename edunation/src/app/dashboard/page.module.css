@@ -54,3 +54,91 @@
     color: #64748b;
     margin: 0;
 }
+
+/* Dashboard Additions */
+.headerFlex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.streakBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #b45309;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    box-shadow: 0 4px 6px -1px rgba(251, 191, 36, 0.2);
+    border: 2px solid #fcd34d;
+}
+
+.sectionTitle {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 24px;
+}
+
+.sectionSubtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: -16px 0 24px;
+}
+
+.continueSection {
+    margin-bottom: 50px;
+}
+
+.continueCard {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.continueInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.continueCourseName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.continueLessonTitle {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.recommendationsSection {
+    margin-top: 60px;
+    padding-top: 50px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .continueCard {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+}
