@@ -19,6 +19,18 @@ export async function POST(request: Request) {
             return new NextResponse('Missing required fields', { status: 400 });
         }
 
+        // Check if the lesson was already completed before we update it
+        const existingProgress = await prisma.progress.findUnique({
+            where: {
+                userId_lessonId: {
+                    userId,
+                    lessonId
+                }
+            }
+        });
+
+        const wasAlreadyCompleted = existingProgress?.completed === true;
+
         // Upsert progress
         const progress = await prisma.progress.upsert({
             where: {
@@ -40,7 +52,17 @@ export async function POST(request: Request) {
             }
         });
 
-        // If marked as completed, check if all lessons in the course are completed
+        // Award points if the lesson was just completed for the first time
+        if (completed && !wasAlreadyCompleted) {
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    points: { increment: 50 } // Award 50 points per lesson
+                }
+            });
+        }
+
+        // Check if all lessons in the course are completed
         // to mark the enrollment as completed
         if (completed) {
             const courseLessons = await prisma.lesson.count({

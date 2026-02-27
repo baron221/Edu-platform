@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider     = "sqlite"
+  url          = env("DATABASE_URL")
   // Enable foreign key enforcement in SQLite (required for cascade deletes)
   relationMode = "prisma"
 }
@@ -63,8 +63,8 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?                          // hashed with bcryptjs (null for OAuth users)
-  role          String    @default("student")    // student | instructor | admin
+  password      String? // hashed with bcryptjs (null for OAuth users)
+  role          String    @default("student") // student | instructor | admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -73,11 +73,15 @@ model User {
   sessions Session[]
 
   // App relations
-  subscription  Subscription?
-  enrollments   Enrollment[]
-  progress      Progress[]
-  reviews       Review[]
-  chatSessions  ChatSession[]
+  subscription Subscription?
+  enrollments  Enrollment[]
+  progress     Progress[]
+  reviews      Review[]
+  chatSessions ChatSession[]
+  certificates Certificate[]
+
+  // Gamification
+  points Int @default(0)
 }
 
 // =====================================================================
@@ -87,8 +91,8 @@ model User {
 model Subscription {
   id        String    @id @default(cuid())
   userId    String    @unique
-  plan      String    @default("free")    // free | pro | enterprise
-  status    String    @default("active")  // active | cancelled | expired
+  plan      String    @default("free") // free | pro | enterprise
+  status    String    @default("active") // active | cancelled | expired
   startDate DateTime  @default(now())
   endDate   DateTime?
   createdAt DateTime  @default(now())
@@ -102,26 +106,27 @@ model Subscription {
 // =====================================================================
 
 model Course {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String?
-  instructor  String
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String?
+  instructor   String
   instructorId String?
-  category    String
-  level       String   @default("Beginner") // Beginner | Intermediate | Advanced
-  price       Int      @default(0)          // price in UZS (0 = free)
-  isFree      Boolean  @default(false)
-  isNew       Boolean  @default(false)
-  thumbnail   String?
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category     String
+  level        String   @default("Beginner") // Beginner | Intermediate | Advanced
+  price        Int      @default(0) // price in UZS (0 = free)
+  isFree       Boolean  @default(false)
+  isNew        Boolean  @default(false)
+  thumbnail    String?
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   lessons     Lesson[]
   enrollments Enrollment[]
   progress    Progress[]
   reviews     Review[]
+  Certificate Certificate[]
 }
 
 model Lesson {
@@ -137,20 +142,71 @@ model Lesson {
   updatedAt   DateTime @updatedAt
 
   // Video configuration
-  videoQuality  String?   @default("auto")   // auto | 1080p | 720p | 480p | 360p
-  muxPlaybackId String?                      // Used to render the Mux Player on the frontend
-  muxAssetId    String?                      // Used to track the asset in the Mux Dashboard
+  videoQuality  String? @default("auto") // auto | 1080p | 720p | 480p | 360p
+  muxPlaybackId String? // Used to render the Mux Player on the frontend
+  muxAssetId    String? // Used to track the asset in the Mux Dashboard
 
   // Live stream / Google Meet
-  meetLink      String?                       // Google Meet URL
-  liveAt        DateTime?                     // Scheduled live session time
-  isLiveEnabled Boolean   @default(false)     // Toggle live stream
+  meetLink      String? // Google Meet URL
+  liveAt        DateTime? // Scheduled live session time
+  isLiveEnabled Boolean   @default(false) // Toggle live stream
 
   // AI Knowledge Base
-  content       String?                       // Text content/transcript used for AI RAG
+  content String? // Text content/transcript used for AI RAG
 
   course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress Progress[]
+
+  // New relations for AI Course Enhancements
+  quizzes   Quiz[]
+  resources Resource[]
+}
+
+// =====================================================================
+// AI COURSE QUIZZES & RESOURCES
+// =====================================================================
+
+model Quiz {
+  id        String   @id @default(cuid())
+  lessonId  String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson    Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions Question[]
+}
+
+model Question {
+  id          String  @id @default(cuid())
+  quizId      String
+  text        String
+  explanation String? // Explanation for the correct answer
+  order       Int     @default(0)
+
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options Option[]
+}
+
+model Option {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  lessonId    String
+  title       String
+  description String?
+  url         String? // Can be a link to a file, or external resource
+  type        String   @default("link") // "pdf" | "link" | "assignment"
+  createdAt   DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
 // =====================================================================
@@ -198,9 +254,26 @@ model Review {
   id        String   @id @default(cuid())
   userId    String
   courseId  String
-  rating    Int      // 1–5
+  rating    Int // 1–5
   comment   String?
   createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+// =====================================================================
+// CERTIFICATES
+// =====================================================================
+
+model Certificate {
+  id       String   @id @default(cuid())
+  userId   String
+  courseId String
+  issuedAt DateTime @default(now())
+  pdfUrl   String? // Optional URL to stored raw PDF
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -214,8 +287,8 @@ model Review {
 
 model ChatSession {
   id        String   @id @default(cuid())
-  userId    String?  // nullable if we want to allow anonymous chat sessions or match via localstorage
-  title     String?  // auto-generated title or "Chat with AI"
+  userId    String? // nullable if we want to allow anonymous chat sessions or match via localstorage
+  title     String? // auto-generated title or "Chat with AI"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -226,8 +299,8 @@ model ChatSession {
 model ChatMessage {
   id            String   @id @default(cuid())
   chatSessionId String
-  role          String   // "user" | "assistant" | "system"
-  content       String   // text content (JSON stringified if using parts array)
+  role          String // "user" | "assistant" | "system"
+  content       String // text content (JSON stringified if using parts array)
   createdAt     DateTime @default(now())
 
   session ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)

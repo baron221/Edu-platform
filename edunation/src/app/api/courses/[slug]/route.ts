@@ -15,7 +15,20 @@ export async function GET(
             where: { slug },
             include: {
                 lessons: {
-                    orderBy: { order: 'asc' }
+                    orderBy: { order: 'asc' },
+                    include: {
+                        quizzes: {
+                            include: {
+                                questions: {
+                                    include: {
+                                        options: true
+                                    },
+                                    orderBy: { order: 'asc' }
+                                }
+                            }
+                        },
+                        resources: true
+                    }
                 },
                 _count: {
                     select: { enrollments: true, reviews: true }

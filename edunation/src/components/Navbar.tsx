@@ -114,6 +114,12 @@ export default function Navbar() {
                                 <span className={styles.userName}>
                                     {session.user?.name?.split(' ')[0] ?? 'User'}
                                 </span>
+                                {typeof (session.user as any)?.points === 'number' && (
+                                    <span className={styles.userPoints}>
+                                        <span style={{ color: '#fbbf24', marginRight: '4px' }}>★</span>
+                                        {(session.user as any).points}
+                                    </span>
+                                )}
                                 <span className={`${styles.langArrow} ${userOpen ? styles.langArrowOpen : ''}`}>▾</span>
                             </button>
 
@@ -122,10 +128,18 @@ export default function Navbar() {
                                     <div className={styles.userDropdownHeader}>
                                         <div className={styles.userDropdownName}>{session.user?.name}</div>
                                         <div className={styles.userDropdownEmail}>{session.user?.email}</div>
+                                        {typeof (session.user as any)?.points === 'number' && (
+                                            <div className={styles.userDropdownPoints}>
+                                                Your Points: <strong>{(session.user as any).points}</strong>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className={styles.userDropdownDivider} />
                                     <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         🎓 My Learning
+                                    </Link>
+                                    <Link href="/leaderboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                        🏆 Leaderboard
                                     </Link>
                                     {((session.user as any)?.role === 'admin' || (session.user as any)?.role === 'instructor') && (
                                         <Link href="/admin/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>

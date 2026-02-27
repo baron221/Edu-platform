@@ -8,6 +8,10 @@ import AIAssistant from '@/components/AIAssistant';
 import AIQuizPlayer from '@/components/AIQuizPlayer';
 import ReactMarkdown from 'react-markdown';
 import MuxPlayer from '@mux/mux-player-react';
+import QuizViewer from '@/components/QuizViewer';
+import ResourceList from '@/components/ResourceList';
+import CertificateModal from '@/components/CertificateModal';
+import { useSession } from 'next-auth/react';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -33,6 +37,8 @@ export default function CourseDetailPage() {
     const [error, setError] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
     const [updatingProgress, setUpdatingProgress] = useState(false);
+    const [showCert, setShowCert] = useState(false);
+    const { data: session } = useSession();
 
     useEffect(() => {
         setLoading(true);
@@ -274,10 +280,24 @@ export default function CourseDetailPage() {
                                         </div>
                                     )}
 
-                                    {/* AI Quiz Player Feature */}
-                                    {isEnrolled && canWatch(activeLesson) && (
-                                        <div className={styles.quizWrapper}>
-                                            <h3 className={styles.quizSectionTitle}>🤖 AI Practice Space</h3>
+                                    {/* AI-Generated Extra Resources */}
+                                    {isEnrolled && canWatch(activeLesson) && activeLesson.resources && activeLesson.resources.length > 0 && (
+                                        <div style={{ marginTop: '24px' }}>
+                                            <ResourceList resources={activeLesson.resources} />
+                                        </div>
+                                    )}
+
+                                    {/* Pre-Generated Lesson Quiz */}
+                                    {isEnrolled && canWatch(activeLesson) && activeLesson.quizzes && activeLesson.quizzes.length > 0 && (
+                                        <div style={{ marginTop: '24px' }}>
+                                            <QuizViewer quiz={activeLesson.quizzes[0]} />
+                                        </div>
+                                    )}
+
+                                    {/* Dynamic On-Demand AI Practice Space */}
+                                    {isEnrolled && canWatch(activeLesson) && (!activeLesson.quizzes || activeLesson.quizzes.length === 0) && (
+                                        <div className={styles.quizWrapper} style={{ marginTop: '24px' }}>
+                                            <h3 className={styles.quizSectionTitle}>🤖 Dynamic AI Practice Space</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
                                         </div>
                                     )}
@@ -392,6 +412,23 @@ export default function CourseDetailPage() {
                                 <p className={styles.enrollDesc} style={{ margin: '14px 0 0', fontWeight: 500 }}>
                                     {t.courseDetail.lessonsCompleted(completedLessonsCount, totalLessons)}
                                 </p>
+                                {progressPercentage === 100 && (
+                                    <button
+                                        className="btn btn-primary"
+                                        style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', border: 'none', color: '#1e293b', fontWeight: 'bold' }}
+                                        onClick={async () => {
+                                            // Call API to ensure certificate is recorded
+                                            await fetch('/api/certificates', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ courseId: course.id })
+                                            });
+                                            setShowCert(true);
+                                        }}
+                                    >
+                                        🏆 View Certificate
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -403,6 +440,16 @@ export default function CourseDetailPage() {
                 context={`The student is currently viewing the course titled "${course.title}" (${course.category}). ${activeLesson ? `They are currently on the lesson: "${activeLesson.title}".` : ''}`}
                 lessonId={activeLesson?.id}
             />
+
+            {showCert && (
+                <CertificateModal
+                    courseName={course.title}
+                    studentName={session?.user?.name || 'Dedicated Learner'}
+                    instructorName={course.instructor}
+                    date={new Date().toISOString()}
+                    onClose={() => setShowCert(false)}
+                />
+            )}
         </div>
     );
 }

@@ -16,7 +16,29 @@ const courseSchema = z.object({
         z.object({
             title: z.string(),
             description: z.string().describe("A 1-2 sentence description of this specific lesson."),
-            order: z.number().describe("The sequential order of this lesson.")
+            order: z.number().describe("The sequential order of this lesson."),
+            quiz: z.object({
+                title: z.string().describe("Title of the end-of-lesson quiz."),
+                questions: z.array(
+                    z.object({
+                        text: z.string().describe("The quiz question text."),
+                        explanation: z.string().describe("Explanation for why the correct answer is correct."),
+                        options: z.array(
+                            z.object({
+                                text: z.string().describe("The option text."),
+                                isCorrect: z.boolean().describe("Whether this is the correct answer. Only one option should be correct.")
+                            })
+                        ).describe("List of 3-4 options for the question.")
+                    })
+                ).describe("A list of 2-3 questions for this quiz.")
+            }).describe("An end-of-lesson quiz to test the user's knowledge."),
+            resources: z.array(
+                z.object({
+                    title: z.string().describe("Name of the resource or assignment."),
+                    description: z.string().describe("A short explanation of what this resource is for."),
+                    type: z.enum(["link", "assignment", "pdf"]).describe("The type of resource.")
+                })
+            ).describe("A list of 1-3 extra resources or assignments for this lesson.")
         })
     ).describe("A list of 5 to 10 logical lessons that make up this course.")
 });
@@ -83,7 +105,33 @@ export async function POST(req: Request) {
                         title: l.title,
                         description: l.description,
                         order: l.order,
-                        isFree: l.order === 1 // Make the first lesson free by default
+                        isFree: l.order === 1, // Make the first lesson free by default
+                        quizzes: {
+                            create: [{
+                                title: l.quiz.title,
+                                questions: {
+                                    create: l.quiz.questions.map((q, i) => ({
+                                        text: q.text,
+                                        explanation: q.explanation,
+                                        order: i,
+                                        options: {
+                                            create: q.options.map(o => ({
+                                                text: o.text,
+                                                isCorrect: o.isCorrect
+                                            }))
+                                        }
+                                    }))
+                                }
+                            }]
+                        },
+                        resources: {
+                            create: l.resources.map(r => ({
+                                title: r.title,
+                                description: r.description,
+                                type: r.type,
+                                url: '' // Placeholder, as AI doesn't know actual files
+                            }))
+                        }
                     }))
                 }
             }
