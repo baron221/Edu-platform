@@ -32,18 +32,26 @@ export async function POST(req: Request) {
             });
         }
 
-        const purchase = await prisma.purchase.findUnique({
+        let isSubscription = false;
+        let order: any = await prisma.purchase.findUnique({
             where: { id: merchant_trans_id }
         });
 
-        if (!purchase) {
+        if (!order) {
+            order = await prisma.subscriptionPayment.findUnique({
+                where: { id: merchant_trans_id }
+            });
+            if (order) isSubscription = true;
+        }
+
+        if (!order) {
             return NextResponse.json({
                 error: -5,
                 error_note: 'Order not found'
             });
         }
 
-        if (Number(amount) !== purchase.amount) {
+        if (Number(amount) !== order.amount) {
             return NextResponse.json({
                 error: -2,
                 error_note: 'Incorrect parameter amount'
@@ -52,7 +60,7 @@ export async function POST(req: Request) {
 
         // Action 0: Prepare (Check if payment is possible)
         if (action === '0') {
-            if (purchase.status !== 'pending') {
+            if (order.status !== 'pending') {
                 return NextResponse.json({
                     error: -4,
                     error_note: 'Already paid or cancelled'
@@ -62,7 +70,7 @@ export async function POST(req: Request) {
             return NextResponse.json({
                 click_trans_id: click_trans_id,
                 merchant_trans_id: merchant_trans_id,
-                merchant_prepare_id: purchase.id,
+                merchant_prepare_id: order.id,
                 error: 0,
                 error_note: 'Success'
             });
@@ -70,45 +78,84 @@ export async function POST(req: Request) {
 
         // Action 1: Complete (Confirm the payment)
         if (action === '1') {
-            if (purchase.status !== 'pending') {
+            if (order.status !== 'pending') {
                 return NextResponse.json({
                     click_trans_id: click_trans_id,
                     merchant_trans_id: merchant_trans_id,
-                    merchant_confirm_id: purchase.id,
+                    merchant_confirm_id: order.id,
                     error: -4,
                     error_note: 'Already paid'
                 });
             }
 
-            // Mark as completed
-            await prisma.purchase.update({
-                where: { id: purchase.id },
-                data: {
-                    status: 'completed',
-                    transactionId: click_trans_id
-                }
-            });
-
-            // Grant course access
-            await prisma.enrollment.upsert({
-                where: {
-                    userId_courseId: {
-                        userId: purchase.userId,
-                        courseId: purchase.courseId,
+            if (isSubscription) {
+                // Mark subscription payment as completed
+                await prisma.subscriptionPayment.update({
+                    where: { id: order.id },
+                    data: {
+                        status: 'completed',
+                        transactionId: click_trans_id
                     }
-                },
-                update: {},
-                create: {
-                    userId: purchase.userId,
-                    courseId: purchase.courseId,
-                    completed: false,
-                }
-            });
+                });
+
+                // Upgrade the user to instructor
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() + 30);
+
+                const PLANS = {
+                    starter: { maxCourses: 3, canAdvertise: false },
+                    pro: { maxCourses: 20, canAdvertise: true },
+                    studio: { maxCourses: -1, canAdvertise: true },
+                };
+                const cfg = PLANS[order.plan as keyof typeof PLANS] || PLANS.starter;
+
+                await prisma.instructorSubscription.upsert({
+                    where: { userId: order.userId },
+                    update: { plan: order.plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+                    create: { userId: order.userId, plan: order.plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+                });
+                await prisma.user.update({ where: { id: order.userId }, data: { role: 'instructor' } });
+
+                const user = await prisma.user.findUnique({ where: { id: order.userId } });
+                const name = user?.name || 'Instructor';
+                const slug = name.toLowerCase().replace(/\s+/g, '-') + '-' + order.userId.slice(-4);
+
+                await prisma.instructorProfile.upsert({
+                    where: { userId: order.userId },
+                    update: {},
+                    create: { userId: order.userId, slug, tagline: 'Passionate educator on EduNationUz' },
+                });
+            } else {
+                // Mark purchase as completed
+                await prisma.purchase.update({
+                    where: { id: order.id },
+                    data: {
+                        status: 'completed',
+                        transactionId: click_trans_id
+                    }
+                });
+
+                // Grant course access
+                await prisma.enrollment.upsert({
+                    where: {
+                        userId_courseId: {
+                            userId: order.userId,
+                            courseId: order.courseId,
+                        }
+                    },
+                    update: {},
+                    create: {
+                        userId: order.userId,
+                        courseId: order.courseId,
+                        completed: false,
+                    }
+                });
+            }
 
             return NextResponse.json({
                 click_trans_id: click_trans_id,
                 merchant_trans_id: merchant_trans_id,
-                merchant_confirm_id: purchase.id,
+                merchant_confirm_id: order.id,
                 error: 0,
                 error_note: 'Success'
             });

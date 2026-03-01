@@ -32,10 +32,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         const userRole = (session?.user as any)?.role;
                         const items = userRole === 'admin' ? [
                             { href: '/admin', label: 'Dashboard', icon: '📊' },
-                            { href: '/instructor/courses', label: 'Courses', icon: '📚' },
+                            { href: '/admin/courses/all', label: 'All Courses', icon: '🌍' },
+                            { href: '/admin/purchases', label: 'Ledger', icon: '💳' },
                             { href: '/admin/users', label: 'Users', icon: '👥' },
                         ] : [
                             { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
+                            { href: '/instructor/subscribe', label: 'Subscription', icon: '💳' },
                         ];
 
                         return items.map(item => {

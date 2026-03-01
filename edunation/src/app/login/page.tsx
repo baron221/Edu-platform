@@ -20,7 +20,7 @@ export default function LoginPage() {
         if (status === 'authenticated') {
             const role = (session?.user as any)?.role;
             if (role === 'admin') {
-                router.push('/admin/courses');
+                router.push('/admin');
             } else if (role === 'instructor') {
                 router.push('/instructor/courses');
             } else {
