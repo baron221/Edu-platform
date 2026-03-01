@@ -1,0 +1,246 @@
+.page {
+    min-height: 100vh;
+}
+
+/* Hero */
+.hero {
+    position: relative;
+    background: linear-gradient(160deg, #0a0f1e 0%, #150828 50%, #0d1117 100%);
+    padding: 72px 0 0;
+    overflow: hidden;
+}
+
+.heroBg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 40% -10%, rgba(124, 58, 237, .2) 0%, transparent 70%);
+}
+
+.heroSkeleton {
+    height: 400px;
+    background: linear-gradient(90deg, #1e2435 25%, #252d40 50%, #1e2435 75%);
+    background-size: 200%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200%
+    }
+
+    100% {
+        background-position: -200%
+    }
+}
+
+.heroContent {
+    position: relative;
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    padding-bottom: 40px;
+}
+
+/* Avatar */
+.avatarWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(124, 58, 237, .6);
+    box-shadow: 0 0 40px rgba(124, 58, 237, .3);
+}
+
+.avatarFallback {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 800;
+    color: #fff;
+    border: 4px solid rgba(124, 58, 237, .6);
+    box-shadow: 0 0 40px rgba(124, 58, 237, .3);
+}
+
+.verifiedBadge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #7c3aed;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #0a0f1e;
+}
+
+.heroInfo {
+    flex: 1;
+}
+
+.nameLine {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.name {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0;
+}
+
+.planChip {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: .04em;
+}
+
+.tagline {
+    color: #94a3b8;
+    font-size: 1rem;
+    margin: 0 0 16px;
+}
+
+/* Social */
+.socialLinks {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.socialLink {
+    font-size: 13px;
+    font-weight: 600;
+    color: #7c3aed;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid rgba(124, 58, 237, .3);
+    border-radius: 20px;
+    transition: background .2s, color .2s;
+}
+
+.socialLink:hover {
+    background: rgba(124, 58, 237, .15);
+    color: #a78bfa;
+}
+
+/* Stats row */
+.statsRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255, 255, 255, .03);
+    border-top: 1px solid rgba(255, 255, 255, .07);
+    padding: 0;
+    position: relative;
+}
+
+.statBox {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    gap: 4px;
+}
+
+.statNum {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #a78bfa;
+}
+
+.statLabel {
+    font-size: 12px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+}
+
+.statDivider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, .08);
+}
+
+/* Content layout */
+.layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+}
+
+.sidebar {}
+
+.main {}
+
+.bioCard {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.sectionTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0 0 16px;
+}
+
+.bio {
+    color: #94a3b8;
+    line-height: 1.7;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .heroContent {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .nameLine {
+        justify-content: center;
+    }
+
+    .socialLinks {
+        justify-content: center;
+    }
+
+    .statBox {
+        padding: 16px 8px;
+    }
+
+    .statNum {
+        font-size: 1.3rem;
+    }
+}

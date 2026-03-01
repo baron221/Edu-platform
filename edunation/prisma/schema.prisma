@@ -73,18 +73,64 @@ model User {
   sessions Session[]
 
   // App relations
-  subscription Subscription?
-  enrollments  Enrollment[]
-  progress     Progress[]
-  reviews      Review[]
-  chatSessions ChatSession[]
-  certificates Certificate[]
-  purchases    Purchase[]
+  subscription           Subscription?
+  enrollments            Enrollment[]
+  progress               Progress[]
+  reviews                Review[]
+  chatSessions           ChatSession[]
+  certificates           Certificate[]
+  purchases              Purchase[]
+  instructorProfile      InstructorProfile?
+  instructorSubscription InstructorSubscription?
+  communityPosts         CommunityPost[]
+  communityReplies       CommunityReply[]
 
   // Gamification
   points           Int       @default(0)
   currentStreak    Int       @default(0)
   lastActivityDate DateTime?
+}
+
+// =====================================================================
+// INSTRUCTOR PROFILE
+// =====================================================================
+
+model InstructorProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  slug       String   @unique
+  bio        String?
+  tagline    String?
+  avatar     String?
+  website    String?
+  twitter    String?
+  linkedin   String?
+  youtube    String?
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// =====================================================================
+// INSTRUCTOR SUBSCRIPTION
+// =====================================================================
+
+model InstructorSubscription {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  plan         String    @default("starter") // starter | pro | studio
+  status       String    @default("active")  // active | cancelled | expired
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  maxCourses   Int       @default(3)
+  canAdvertise Boolean   @default(false)
+  stripeSubId  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // =====================================================================
@@ -131,6 +177,8 @@ model Course {
   reviews     Review[]
   Certificate Certificate[]
   purchases   Purchase[]
+  community   Community?
+  courseAds   CourseAd[]
 }
 
 model Lesson {
@@ -331,4 +379,62 @@ model ChatMessage {
   createdAt     DateTime @default(now())
 
   session ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+}
+
+// =====================================================================
+// COMMUNITY — per-course discussion forum
+// =====================================================================
+
+model Community {
+  id          String   @id @default(cuid())
+  courseId    String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  course Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  posts  CommunityPost[]
+}
+
+model CommunityPost {
+  id             String   @id @default(cuid())
+  communityId    String
+  authorId       String
+  title          String
+  body           String
+  isPinned       Boolean  @default(false)
+  isAnnouncement Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  community Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replies   CommunityReply[]
+}
+
+model CommunityReply {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// =====================================================================
+// COURSE ADVERTISEMENT
+// =====================================================================
+
+model CourseAd {
+  id        String   @id @default(cuid())
+  courseId  String
+  placement String   @default("homepage") // homepage | category | search
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("active") // active | expired | paused
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }

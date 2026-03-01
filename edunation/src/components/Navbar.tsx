@@ -63,6 +63,7 @@ export default function Navbar() {
                 {/* Desktop Links */}
                 <div className={styles.links}>
                     <Link href="/courses" className={styles.link}>{t.nav.courses}</Link>
+                    <Link href="/instructors" className={styles.link}>Instructors</Link>
                     <Link href="/pricing" className={styles.link}>{t.nav.pricing}</Link>
                     <Link href="/about" className={styles.link}>{t.nav.about}</Link>
                 </div>
@@ -151,6 +152,11 @@ export default function Navbar() {
                                             🛠️ Instructor Dashboard
                                         </Link>
                                     )}
+                                    {(session.user as any)?.role !== 'instructor' && (session.user as any)?.role !== 'admin' && (
+                                        <Link href="/instructor/subscribe" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                            🎓 Become Instructor
+                                        </Link>
+                                    )}
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         📚 {t.nav.courses}
                                     </Link>
@@ -188,6 +194,7 @@ export default function Navbar() {
             {/* Mobile Menu */}
             <div className={`${styles.mobileMenu} ${menuOpen ? styles.mobileOpen : ''}`}>
                 <Link href="/courses" onClick={() => setMenuOpen(false)}>{t.nav.courses}</Link>
+                <Link href="/instructors" onClick={() => setMenuOpen(false)}>Instructors</Link>
                 <Link href="/pricing" onClick={() => setMenuOpen(false)}>{t.nav.pricing}</Link>
                 <Link href="/about" onClick={() => setMenuOpen(false)}>{t.nav.about}</Link>
 
