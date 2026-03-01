@@ -61,11 +61,20 @@ export default function InstructorSubscribePage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ plan: planId }),
             });
-            if (!res.ok) throw new Error((await res.json()).error || 'Failed');
+            if (!res.ok) {
+                const text = await res.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.error || 'Failed');
+                } catch {
+                    throw new Error(text || 'Failed');
+                }
+            }
             const data = await res.json();
             setCurrent(data.subscription);
             setSuccess(`🎉 You're now a ${planId.charAt(0).toUpperCase() + planId.slice(1)} instructor! Reload to see your dashboard.`);
         } catch (e: any) {
+            console.error("Subscription flow error:", e);
             setError(e.message);
         } finally {
             setLoading(false);

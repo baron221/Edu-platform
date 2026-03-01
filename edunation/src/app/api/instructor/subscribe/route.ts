@@ -19,30 +19,35 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    const cfg = PLANS[plan as keyof typeof PLANS];
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30);
+    try {
+        const cfg = PLANS[plan as keyof typeof PLANS];
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
 
-    // Upsert instructor subscription
-    const sub = await prisma.instructorSubscription.upsert({
-        where: { userId },
-        update: { plan, status: 'active', startDate: new Date(), endDate, ...cfg },
-        create: { userId, plan, status: 'active', startDate: new Date(), endDate, ...cfg },
-    });
+        // Upsert instructor subscription
+        const sub = await prisma.instructorSubscription.upsert({
+            where: { userId },
+            update: { plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+            create: { userId, plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+        });
 
-    // Promote user role to instructor
-    await prisma.user.update({ where: { id: userId }, data: { role: 'instructor' } });
+        // Promote user role to instructor
+        await prisma.user.update({ where: { id: userId }, data: { role: 'instructor' } });
 
-    // Create instructor profile if not exists
-    const name = session?.user?.name || 'Instructor';
-    const slug = name.toLowerCase().replace(/\s+/g, '-') + '-' + userId.slice(-4);
-    await prisma.instructorProfile.upsert({
-        where: { userId },
-        update: {},
-        create: { userId, slug, tagline: 'Passionate educator on EduNationUz' },
-    });
+        // Create instructor profile if not exists
+        const name = session?.user?.name || 'Instructor';
+        const slug = name.toLowerCase().replace(/\s+/g, '-') + '-' + userId.slice(-4);
+        await prisma.instructorProfile.upsert({
+            where: { userId },
+            update: {},
+            create: { userId, slug, tagline: 'Passionate educator on EduNationUz' },
+        });
 
-    return NextResponse.json({ success: true, subscription: sub });
+        return NextResponse.json({ success: true, subscription: sub });
+    } catch (error: any) {
+        console.error('Subscription error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
 }
 
 export async function GET(req: Request) {
