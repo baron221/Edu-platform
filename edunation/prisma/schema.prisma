@@ -79,6 +79,7 @@ model User {
   reviews      Review[]
   chatSessions ChatSession[]
   certificates Certificate[]
+  purchases    Purchase[]
 
   // Gamification
   points           Int       @default(0)
@@ -129,6 +130,7 @@ model Course {
   progress    Progress[]
   reviews     Review[]
   Certificate Certificate[]
+  purchases   Purchase[]
 }
 
 model Lesson {
@@ -226,6 +228,29 @@ model Enrollment {
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+}
+
+// =====================================================================
+// PURCHASES — unified ledger for all payment gateways
+// =====================================================================
+
+model Purchase {
+  id            String   @id @default(cuid())
+  userId        String
+  courseId      String
+  provider      String // "payme" | "click" | "stripe"
+  transactionId String   @unique // ID from the payment provider
+  amount        Int
+  currency      String   @default("UZS") // UZS | USD
+  status        String   @default("pending") // pending | completed | failed | refunded
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
 }
 
 // =====================================================================

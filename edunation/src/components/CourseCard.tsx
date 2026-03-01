@@ -1,4 +1,6 @@
 'use client';
+import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './CourseCard.module.css';
@@ -14,6 +16,7 @@ export interface CourseDB {
     isNew: boolean;
     description: string | null;
     slug: string;
+    thumbnail?: string | null;
     _count?: { lessons: number; enrollments: number };
 }
 
@@ -46,6 +49,7 @@ function formatPrice(price: number, currLabel: string): string {
 
 export default function CourseCard({ course }: Props) {
     const { t } = useLanguage();
+    const [imgError, setImgError] = useState(false);
 
     const levelLabel =
         course.level === 'Beginner' ? t.shared.beginner :
@@ -61,9 +65,20 @@ export default function CourseCard({ course }: Props) {
         <Link href={`/courses/${course.slug}`} className={styles.card}>
             {/* Thumbnail */}
             <div className={styles.thumbnail}>
-                <div className={styles.thumbBg} style={{ background: gradient }}>
-                    <span className={styles.thumbIcon}>{icon}</span>
-                </div>
+                {course.thumbnail && !imgError ? (
+                    <Image
+                        src={course.thumbnail}
+                        alt={course.title}
+                        fill
+                        className={styles.thumbImg}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <div className={styles.thumbBg} style={{ background: gradient }}>
+                        <span className={styles.thumbIcon}>{icon}</span>
+                    </div>
+                )}
 
                 {/* Badges */}
                 <div className={styles.badges}>

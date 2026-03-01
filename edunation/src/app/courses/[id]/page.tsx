@@ -38,6 +38,8 @@ export default function CourseDetailPage() {
     const [enrolling, setEnrolling] = useState(false);
     const [updatingProgress, setUpdatingProgress] = useState(false);
     const [showCert, setShowCert] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
 
     useEffect(() => {
@@ -87,12 +89,52 @@ export default function CourseDetailPage() {
         }
     };
 
+    const handlePaymentClick = async (provider: string) => {
+        if (!session?.user) {
+            router.push('/login');
+            return;
+        }
+        setProcessingPayment(true);
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: course.id, provider })
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else if (res.status === 401) {
+                router.push('/login');
+            } else {
+                alert(data.error || 'Payment initialization failed.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Payment error occurred.');
+        } finally {
+            setProcessingPayment(false);
+        }
+    };
+
     const handleMarkComplete = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!activeLesson || !isEnrolled || updatingProgress) return;
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (!activeLesson || !isEnrolled) return;
 
         const isCurrentlyCompleted = isLessonCompleted(activeLesson.id);
         const newCompletedStatus = !isCurrentlyCompleted;
+
+        // --- OPTIMISTIC UPDATE ---
+        const previousProgress = [...progress];
+
+        // Update local state immediately
+        setProgress(prev => {
+            const existing = prev.find(p => p.lessonId === activeLesson.id);
+            if (existing) {
+                return prev.map(p => p.lessonId === activeLesson.id ? { ...existing, completed: newCompletedStatus } : p);
+            }
+            return [...prev, { lessonId: activeLesson.id, completed: newCompletedStatus, updatedAt: new Date().toISOString() }];
+        });
 
         setUpdatingProgress(true);
         try {
@@ -106,18 +148,19 @@ export default function CourseDetailPage() {
                 })
             });
 
-            if (res.ok) {
-                const updatedProgress = await res.json();
-                setProgress(prev => {
-                    const existing = prev.find(p => p.lessonId === activeLesson.id);
-                    if (existing) {
-                        return prev.map(p => p.lessonId === activeLesson.id ? updatedProgress : p);
-                    }
-                    return [...prev, updatedProgress];
-                });
+            if (!res.ok) {
+                throw new Error('Failed to update progress');
             }
+
+            const updatedProgress = await res.json();
+            // Optional: Sync with server data to ensure consistency (e.g. updatedAt timestamps)
+            setProgress(prev => prev.map(p => p.lessonId === activeLesson.id ? updatedProgress : p));
+
         } catch (err) {
             console.error('Error updating progress:', err);
+            // --- ROLLBACK ON ERROR ---
+            setProgress(previousProgress);
+            alert('Failed to update progress. Reverting changes.');
         } finally {
             setUpdatingProgress(false);
         }
@@ -127,8 +170,21 @@ export default function CourseDetailPage() {
     if (loading || !course) {
         return (
             <div className={styles.page}>
-                <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
-                    <h2>Loading...</h2>
+                <div className={`${styles.skeleton} ${styles.skeletonHero}`} />
+                <div className="container">
+                    <div className={styles.layout}>
+                        <div className={styles.main}>
+                            <div className={`${styles.skeleton} ${styles.videoWrapper}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                        </div>
+                        <div className={styles.sidebar}>
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className={`${styles.skeleton} ${styles.skeletonSidebarCard}`} />
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -343,7 +399,7 @@ export default function CourseDetailPage() {
                             <div className={styles.enrollCard}>
                                 <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
                                 <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>
-                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
+                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setShowPaymentModal(true)} disabled={enrolling}>
                                     {enrolling ? 'Enrolling...' : t.courseDetail.enrollNow}
                                 </button>
                                 <Link href="/pricing" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}>
@@ -449,6 +505,50 @@ export default function CourseDetailPage() {
                     date={new Date().toISOString()}
                     onClose={() => setShowCert(false)}
                 />
+            )}
+
+            {showPaymentModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
+                    <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.paymentHeader}>
+                            <h2>Select Payment Method</h2>
+                            <p>Choose how you would like to secure your access to <strong>{course.title}</strong>.</p>
+                        </div>
+
+                        <div className={styles.paymentOptions}>
+                            <button
+                                className={`${styles.payBtn} ${styles.paymeBtn}`}
+                                onClick={() => handlePaymentClick('payme')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>Payme</div>
+                                <span>Pay with Payme</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.clickBtn}`}
+                                onClick={() => handlePaymentClick('click')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>CLICK</div>
+                                <span>Pay with Click</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.stripeBtn}`}
+                                onClick={() => handlePaymentClick('stripe')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>💳</div>
+                                <span>Visa / Mastercard</span>
+                            </button>
+                        </div>
+
+                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
