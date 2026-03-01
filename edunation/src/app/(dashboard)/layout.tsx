@@ -11,7 +11,7 @@ const navItems = [
     { href: '/admin/users', label: 'Users', icon: '👥' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { data: session } = useSession();
 
@@ -28,23 +28,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
 
                 <nav className={styles.nav}>
-                    {navItems.map(item => {
-                        // Hide Users tab for non-admins
+                    {(() => {
                         const userRole = (session?.user as any)?.role;
-                        if (item.href === '/admin/users' && userRole !== 'admin') return null;
+                        const items = userRole === 'admin' ? [
+                            { href: '/admin', label: 'Admin Dashboard', icon: '📊' },
+                            { href: '/admin/courses/all', label: 'Global Courses', icon: '🌍' },
+                            { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
+                            { href: '/admin/users', label: 'Users', icon: '👥' },
+                            { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
+                        ] : [
+                            { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
+                            { href: '/instructor/subscribe', label: 'Subscription', icon: '💳' },
+                        ];
 
-                        const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-                            >
-                                <span className={styles.navIcon}>{item.icon}</span>
-                                {item.label}
-                            </Link>
-                        );
-                    })}
+                        return items.map(item => {
+                            const isActive = pathname === item.href || (item.href !== '/admin' && item.href !== '/instructor/courses' ? pathname.startsWith(item.href) : pathname === item.href || pathname.startsWith(item.href + '/'));
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                                >
+                                    <span className={styles.navIcon}>{item.icon}</span>
+                                    {item.label}
+                                </Link>
+                            );
+                        });
+                    })()}
                 </nav>
 
                 <div className={styles.sidebarFooter}>

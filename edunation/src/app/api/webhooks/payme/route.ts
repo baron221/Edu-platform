@@ -38,56 +38,71 @@ export async function POST(req: Request) {
         // 2. Identify the Purchase (Internal Order)
         const account = params.account;
         const purchaseId = account?.purchase_id || account?.order_id;
+        const subPaymentId = account?.subscription_payment_id;
 
-        if (!purchaseId && method === 'CheckPerformTransaction') {
+        if (!purchaseId && !subPaymentId && method === 'CheckPerformTransaction') {
             return respond(null, { code: -31050, message: 'Account not found' }, id);
         }
 
-        let purchase: any = null;
+        let isSubscription = false;
+        let order: any = null;
+
         if (purchaseId) {
-            purchase = await prisma.purchase.findUnique({
+            order = await prisma.purchase.findUnique({
                 where: { id: purchaseId }
             });
+        } else if (subPaymentId) {
+            order = await prisma.subscriptionPayment.findUnique({
+                where: { id: subPaymentId }
+            });
+            if (order) isSubscription = true;
+        }
 
-            if (!purchase) {
-                return respond(null, { code: -31050, message: 'Order not found' }, id);
-            }
+        if (!order) {
+            return respond(null, { code: -31050, message: 'Order not found' }, id);
         }
 
         // 3. Handle specific JSON-RPC Method
         switch (method) {
             case 'CheckPerformTransaction': {
                 // Check if payment is possible (amount must match in tiyin)
-                const amountInTiyin = purchase.amount * 100;
+                const amountInTiyin = order.amount * 100;
                 if (params.amount !== amountInTiyin) {
                     return respond(null, { code: -31001, message: 'Incorrect amount' }, id);
                 }
-                if (purchase.status !== 'pending') {
+                if (order.status !== 'pending') {
                     return respond(null, { code: -31050, message: 'Order already completed or cancelled' }, id);
                 }
 
                 return respond({
                     allow: true,
-                    detail: { receipt_type: 0, items: [{ title: 'Course Enrollment', price: amountInTiyin, count: 1, package_code: '12345', vat_percent: 0 }] }
+                    detail: { receipt_type: 0, items: [{ title: isSubscription ? 'Instructor Subscription' : 'Course Enrollment', price: amountInTiyin, count: 1, package_code: '12345', vat_percent: 0 }] }
                 }, null, id);
             }
 
             case 'CreateTransaction': {
                 // If the transaction is already "completed", we shouldn't recreate
-                if (purchase.status === 'completed') {
+                if (order.status === 'completed') {
                     return respond(null, { code: -31050, message: 'Order already completed' }, id);
                 }
 
                 // Assuming Payme generates a unique transaction_id for their side (params.id)
                 // Update our transactionId to match theirs for future reference
-                await prisma.purchase.update({
-                    where: { id: purchase.id },
-                    data: { transactionId: params.id }
-                });
+                if (isSubscription) {
+                    await prisma.subscriptionPayment.update({
+                        where: { id: order.id },
+                        data: { transactionId: params.id }
+                    });
+                } else {
+                    await prisma.purchase.update({
+                        where: { id: order.id },
+                        data: { transactionId: params.id }
+                    });
+                }
 
                 return respond({
                     create_time: Date.now(),
-                    transaction: purchase.id,
+                    transaction: order.id,
                     state: 1, // 1 = created
                 }, null, id);
             }
@@ -96,58 +111,106 @@ export async function POST(req: Request) {
                 // The actual money deduction phase!
 
                 // If it was already completed, just return the saved timestamp to be idempotent
-                if (purchase.status === 'completed') {
+                if (order.status === 'completed') {
                     return respond({
-                        transaction: purchase.id,
-                        perform_time: purchase.updatedAt.getTime(),
+                        transaction: order.id,
+                        perform_time: order.updatedAt.getTime(),
                         state: 2, // 2 = completed
                     }, null, id);
                 }
 
-                // 1. Mark Purchase as completed
-                const updatedPurchase = await prisma.purchase.update({
-                    where: { id: purchase.id },
-                    data: { status: 'completed' }
-                });
+                if (isSubscription) {
+                    // Mark SubscriptionPayment as completed
+                    const updatedOrder = await prisma.subscriptionPayment.update({
+                        where: { id: order.id },
+                        data: { status: 'completed' }
+                    });
 
-                // 2. Grant access to the course via Enrollment
-                await prisma.enrollment.upsert({
-                    where: {
-                        userId_courseId: {
-                            userId: purchase.userId,
-                            courseId: purchase.courseId,
+                    // Upgrade the user to instructor
+                    const endDate = new Date();
+                    endDate.setDate(endDate.getDate() + 30);
+
+                    const PLANS = {
+                        starter: { maxCourses: 3, canAdvertise: false },
+                        pro: { maxCourses: 20, canAdvertise: true },
+                        studio: { maxCourses: -1, canAdvertise: true },
+                    };
+                    const cfg = PLANS[order.plan as keyof typeof PLANS] || PLANS.starter;
+
+                    await prisma.instructorSubscription.upsert({
+                        where: { userId: order.userId },
+                        update: { plan: order.plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+                        create: { userId: order.userId, plan: order.plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+                    });
+                    await prisma.user.update({ where: { id: order.userId }, data: { role: 'instructor' } });
+
+                    const user = await prisma.user.findUnique({ where: { id: order.userId } });
+                    const name = user?.name || 'Instructor';
+                    const slug = name.toLowerCase().replace(/\s+/g, '-') + '-' + order.userId.slice(-4);
+
+                    await prisma.instructorProfile.upsert({
+                        where: { userId: order.userId },
+                        update: {},
+                        create: { userId: order.userId, slug, tagline: 'Passionate educator on EduNationUz' },
+                    });
+
+                    return respond({
+                        transaction: order.id,
+                        perform_time: updatedOrder.updatedAt.getTime(),
+                        state: 2, // 2 = completed
+                    }, null, id);
+                } else {
+                    // Mark Purchase as completed
+                    const updatedOrder = await prisma.purchase.update({
+                        where: { id: order.id },
+                        data: { status: 'completed' }
+                    });
+
+                    // Grant access to the course via Enrollment
+                    await prisma.enrollment.upsert({
+                        where: {
+                            userId_courseId: {
+                                userId: order.userId,
+                                courseId: order.courseId,
+                            }
+                        },
+                        update: {},
+                        create: {
+                            userId: order.userId,
+                            courseId: order.courseId,
+                            completed: false,
                         }
-                    },
-                    update: {},
-                    create: {
-                        userId: purchase.userId,
-                        courseId: purchase.courseId,
-                        completed: false,
-                    }
-                });
+                    });
 
-                return respond({
-                    transaction: purchase.id,
-                    perform_time: updatedPurchase.updatedAt.getTime(),
-                    state: 2, // 2 = completed
-                }, null, id);
+                    return respond({
+                        transaction: order.id,
+                        perform_time: updatedOrder.updatedAt.getTime(),
+                        state: 2, // 2 = completed
+                    }, null, id);
+                }
             }
 
             case 'CancelTransaction': {
-                if (purchase.status === 'completed') {
-                    // Usually you cannot cancel a completed transaction directly without refund logic
-                    // Payme uses state -2 for cancelled after complete, -1 for cancelled before complete
+                if (order.status === 'completed') {
                     return respond(null, { code: -31007, message: 'Cannot cancel completed transaction' }, id);
                 }
 
-                const updatedPurchase = await prisma.purchase.update({
-                    where: { id: purchase.id },
-                    data: { status: 'failed' }
-                });
+                let updatedOrder;
+                if (isSubscription) {
+                    updatedOrder = await prisma.subscriptionPayment.update({
+                        where: { id: order.id },
+                        data: { status: 'failed' }
+                    });
+                } else {
+                    updatedOrder = await prisma.purchase.update({
+                        where: { id: order.id },
+                        data: { status: 'failed' }
+                    });
+                }
 
                 return respond({
-                    transaction: purchase.id,
-                    cancel_time: updatedPurchase.updatedAt.getTime(),
+                    transaction: order.id,
+                    cancel_time: updatedOrder.updatedAt.getTime(),
                     state: -1, // -1 = cancelled
                 }, null, id);
             }
@@ -155,14 +218,14 @@ export async function POST(req: Request) {
             case 'CheckTransaction': {
                 // Simple status map
                 let state = 1;
-                if (purchase.status === 'completed') state = 2;
-                if (purchase.status === 'failed') state = -1;
+                if (order.status === 'completed') state = 2;
+                if (order.status === 'failed') state = -1;
 
                 return respond({
-                    create_time: purchase.createdAt.getTime(),
-                    perform_time: purchase.status === 'completed' ? purchase.updatedAt.getTime() : 0,
-                    cancel_time: purchase.status === 'failed' ? purchase.updatedAt.getTime() : 0,
-                    transaction: purchase.id,
+                    create_time: order.createdAt.getTime(),
+                    perform_time: order.status === 'completed' ? order.updatedAt.getTime() : 0,
+                    cancel_time: order.status === 'failed' ? order.updatedAt.getTime() : 0,
+                    transaction: order.id,
                     state,
                     reason: null,
                 }, null, id);

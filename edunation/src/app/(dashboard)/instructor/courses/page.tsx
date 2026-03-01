@@ -16,6 +16,7 @@ interface Course {
 
 export default function AdminCoursesPage() {
     const [courses, setCourses] = useState<Course[]>([]);
+    const [subscription, setSubscription] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -30,12 +31,28 @@ export default function AdminCoursesPage() {
     const router = useRouter();
 
     const load = () =>
-        fetch('/api/admin/courses').then(r => r.json()).then(data => {
-            setCourses(Array.isArray(data) ? data : []);
+        fetch('/api/instructor/courses').then(r => r.json()).then(data => {
+            if (data.courses) {
+                setCourses(data.courses);
+                setSubscription(data.subscription);
+            } else if (Array.isArray(data)) {
+                // Fallback if API hasn't updated yet
+                setCourses(data);
+                setSubscription(null);
+            }
             setLoading(false);
         });
 
     useEffect(() => { load(); }, []);
+
+    const requireSubscription = (e: React.MouseEvent) => {
+        if (!subscription) {
+            e.preventDefault();
+            router.push('/instructor/subscribe');
+            return true;
+        }
+        return false;
+    };
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +69,7 @@ export default function AdminCoursesPage() {
             }
         }
 
-        const res = await fetch('/api/admin/courses', {
+        const res = await fetch('/api/instructor/courses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -70,7 +87,7 @@ export default function AdminCoursesPage() {
         setShowModal(false);
         setFormData({ title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: '' });
         setThumbFile(null);
-        router.push(`/admin/courses/${course.id}`);
+        router.push(`/instructor/courses/${course.id}`);
     };
 
     const handleAiGenerate = async (e: React.FormEvent) => {
@@ -92,8 +109,7 @@ export default function AdminCoursesPage() {
                 setShowAiModal(false);
                 setAiTopic('');
                 setAiInstructions('');
-                // Navigate straight to the new AI generated course edit page
-                router.push(`/admin/courses/${data.course.id}`);
+                router.push(`/instructor/courses/${data.course.id}`);
             }
         } catch (err: any) {
             alert(err.message || 'An error occurred.');
@@ -103,7 +119,7 @@ export default function AdminCoursesPage() {
     };
 
     const togglePublish = async (id: string, current: boolean) => {
-        await fetch(`/api/admin/courses/${id}`, {
+        await fetch(`/api/instructor/courses/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ published: !current }),
@@ -113,22 +129,35 @@ export default function AdminCoursesPage() {
 
     const deleteCourse = async (id: string) => {
         if (!confirm('Delete this course? This cannot be undone.')) return;
-        await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+        await fetch(`/api/instructor/courses/${id}`, { method: 'DELETE' });
         load();
     };
 
     return (
         <div className={styles.page}>
+            {!loading && !subscription && (
+                <div className={styles.subscriptionBanner}>
+                    <div className={styles.bannerIcon}>⚠️</div>
+                    <div className={styles.bannerText}>
+                        <h3>No Active Instructor Plan</h3>
+                        <p>You need an active subscription plan to create and publish courses on the platform.</p>
+                    </div>
+                    <Link href="/instructor/subscribe" className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                        View Plans
+                    </Link>
+                </div>
+            )}
+
             <div className={styles.header}>
                 <div>
                     <h1 className={styles.title}>Courses</h1>
                     <p className={styles.subtitle}>{courses.length} total courses</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className={styles.aiBtn} onClick={() => setShowAiModal(true)}>
+                    <button className={styles.aiBtn} onClick={(e) => { if (!requireSubscription(e)) setShowAiModal(true); }}>
                         ✨ Generate with AI
                     </button>
-                    <button className={`btn btn-primary`} onClick={() => setShowModal(true)}>
+                    <button className={`btn btn-primary`} onClick={(e) => { if (!requireSubscription(e)) setShowModal(true); }}>
                         + New Course
                     </button>
                 </div>
@@ -159,7 +188,7 @@ export default function AdminCoursesPage() {
                                 </button>
                             </span>
                             <span className={styles.actions}>
-                                <Link href={`/admin/courses/${c.id}`} className={styles.editBtn}>Edit</Link>
+                                <Link href={`/instructor/courses/${c.id}`} className={styles.editBtn}>Edit</Link>
                                 <button className={styles.deleteBtn} onClick={() => deleteCourse(c.id)}>Delete</button>
                             </span>
                         </div>

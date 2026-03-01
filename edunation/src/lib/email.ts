@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_to_bypass_build_error');
 const FROM = process.env.EMAIL_FROM || 'EduNationUz <noreply@edunationuz.com>';
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://edunationuz.com';
 

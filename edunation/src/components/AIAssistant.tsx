@@ -4,6 +4,7 @@ import { useChat, UIMessage } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import styles from './AIAssistant.module.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AIAssistantProps {
     context?: string;
@@ -11,6 +12,8 @@ interface AIAssistantProps {
 }
 
 export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
+    const { t } = useLanguage();
+    const tr = t.ai.assistant;
     const [isOpen, setIsOpen] = useState(false);
     const [chatId, setChatId] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -40,7 +43,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
                         setMessages(data.messages);
                     } else {
                         // Set default initial greeting if no history exists
-                        setMessages([{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hi there! I am your EduNation AI assistant. What can I help you learn today?' }] } as UIMessage]);
+                        setMessages([{ id: '1', role: 'assistant', parts: [{ type: 'text', text: tr.greeting }] } as UIMessage]);
                     }
                 } catch (error) {
                     console.error("Failed to fetch chat history:", error);
@@ -50,7 +53,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
                 const newId = crypto.randomUUID();
                 localStorage.setItem('edunation_chatId', newId);
                 setChatId(newId);
-                setMessages([{ id: '1', role: 'assistant', parts: [{ type: 'text', text: 'Hi there! I am your EduNation AI assistant. What can I help you learn today?' }] } as UIMessage]);
+                setMessages([{ id: '1', role: 'assistant', parts: [{ type: 'text', text: tr.greeting }] } as UIMessage]);
             }
         };
 
@@ -122,7 +125,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
             {isOpen && (
                 <div className={styles.chatWindow}>
                     <div className={styles.header}>
-                        <span>🤖 EduNation AI Tutor</span>
+                        <span>{tr.title}</span>
                         <button className={styles.closeBtn} onClick={() => setIsOpen(false)}>
                             ✕
                         </button>
@@ -146,7 +149,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
                         ))}
                         {isLoading && (
                             <div className={`${styles.message} ${styles.aiMessage}`}>
-                                <em>Thinking...</em>
+                                <em>{tr.thinking}</em>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
@@ -190,7 +193,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
                             <textarea
                                 className={styles.input}
                                 value={inputValue}
-                                placeholder="Ask a question..."
+                                placeholder={tr.placeholder}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 disabled={isLoading}
                                 rows={1}
@@ -219,7 +222,7 @@ export default function AIAssistant({ context, lessonId }: AIAssistantProps) {
                 <button
                     className={styles.toggleBtn}
                     onClick={() => setIsOpen(true)}
-                    title="Ask AI Tutor"
+                    title={tr.tooltip}
                 >
                     🤖
                 </button>

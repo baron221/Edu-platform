@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './AIQuizPlayer.module.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Question {
     questionText: string;
@@ -16,6 +17,9 @@ interface AIQuizPlayerProps {
 }
 
 export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
+    const { t } = useLanguage();
+    const tr = t.ai.quiz;
+
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -39,12 +43,15 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
         try {
             const res = await fetch(`/api/courses/${slug}/lessons/${lessonId}/quiz`, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Pass the user's language so Gemini answers in the right language
+                body: JSON.stringify({ language: t.language }),
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Failed to generate quiz');
+                throw new Error(data.error || tr.error);
             }
 
             setQuestions(data.quiz);
@@ -56,19 +63,16 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
     };
 
     const handleOptionSelect = (index: number) => {
-        if (showExplanation) return; // Prevent changing answer after submission
+        if (showExplanation) return;
         setSelectedOption(index);
     };
 
     const handleSubmit = () => {
         if (selectedOption === null) return;
-
-        // Check answer
         const currentQ = questions[currentQuestionIndex];
         if (selectedOption === currentQ.correctAnswerIndex) {
             setScore(s => s + 1);
         }
-
         setShowExplanation(true);
     };
 
@@ -87,8 +91,8 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
             <div className={styles.container}>
                 <div className={styles.introState}>
                     <div className={styles.icon}>🧠</div>
-                    <h3>Test Your Knowledge!</h3>
-                    <p>Have our AI generate a custom 5-question quiz based on this lesson to reinforce what you learned.</p>
+                    <h3>{tr.title}</h3>
+                    <p>{tr.desc}</p>
 
                     {error && <div className={styles.errorBanner}>{error}</div>}
 
@@ -97,7 +101,7 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
                         onClick={startQuiz}
                         disabled={loading}
                     >
-                        {loading ? '✨ Generating Quiz...' : '✨ Generate AI Quiz'}
+                        {loading ? tr.generating : tr.generate}
                     </button>
                 </div>
             </div>
@@ -109,17 +113,17 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
             <div className={styles.container}>
                 <div className={styles.resultState}>
                     <div className={styles.scoreTrophy}>🏆</div>
-                    <h3>Quiz Complete!</h3>
+                    <h3>{tr.complete}</h3>
                     <div className={styles.scoreDisplay}>
-                        You scored <strong>{score}</strong> out of {questions.length}
+                        {tr.score(score, questions.length)}
                     </div>
                     <p className={styles.scoreMessage}>
-                        {score === questions.length ? "Perfect score! You truly mastered this lesson." :
-                            score >= questions.length / 2 ? "Great job! Keep reviewing to get a perfect score next time." :
-                                "Good effort! You might want to review the lesson material and try again."}
+                        {score === questions.length ? tr.perfect :
+                            score >= questions.length / 2 ? tr.good :
+                                tr.retry}
                     </p>
                     <button className={styles.startBtn} onClick={startQuiz}>
-                        🔄 Generate a New Quiz
+                        {tr.newQuiz}
                     </button>
                 </div>
             </div>
@@ -131,8 +135,10 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.badge}>✨ AI Generated Quiz</div>
-                <div className={styles.progressText}>Question {currentQuestionIndex + 1} of {questions.length}</div>
+                <div className={styles.badge}>{tr.badge}</div>
+                <div className={styles.progressText}>
+                    {tr.question} {currentQuestionIndex + 1} {tr.of} {questions.length}
+                </div>
             </div>
 
             <div className={styles.progressBar}>
@@ -177,7 +183,7 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
             {showExplanation && (
                 <div className={selectedOption === currentQ.correctAnswerIndex ? styles.explanationCorrect : styles.explanationWrong}>
                     <h4>
-                        {selectedOption === currentQ.correctAnswerIndex ? '✅ Correct!' : '❌ Incorrect'}
+                        {selectedOption === currentQ.correctAnswerIndex ? tr.correct : tr.incorrect}
                     </h4>
                     <p>{currentQ.explanation}</p>
                 </div>
@@ -190,11 +196,11 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
                         onClick={handleSubmit}
                         disabled={selectedOption === null}
                     >
-                        Submit Answer
+                        {tr.submit}
                     </button>
                 ) : (
                     <button className={styles.nextBtn} onClick={handleNext}>
-                        {currentQuestionIndex < questions.length - 1 ? 'Next Question ➡️' : 'See Results 🏆'}
+                        {currentQuestionIndex < questions.length - 1 ? tr.next : tr.results}
                     </button>
                 )}
             </div>

@@ -46,7 +46,7 @@ export default function Navbar() {
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
-    const isDarkPage = pathname === '/leaderboard';
+    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe';
     const hasScrolledBackground = scrolled || isDarkPage;
 
     return (
@@ -63,6 +63,7 @@ export default function Navbar() {
                 {/* Desktop Links */}
                 <div className={styles.links}>
                     <Link href="/courses" className={styles.link}>{t.nav.courses}</Link>
+                    <Link href="/instructors" className={styles.link}>Instructors</Link>
                     <Link href="/pricing" className={styles.link}>{t.nav.pricing}</Link>
                     <Link href="/about" className={styles.link}>{t.nav.about}</Link>
                 </div>
@@ -146,9 +147,24 @@ export default function Navbar() {
                                     <Link href="/leaderboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         🏆 Leaderboard
                                     </Link>
-                                    {((session.user as any)?.role === 'admin' || (session.user as any)?.role === 'instructor') && (
-                                        <Link href="/admin/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                    {(session.user as any)?.role === 'admin' && (
+                                        <>
+                                            <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                                📊 Admin Dashboard
+                                            </Link>
+                                            <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                                🛠️ Instructor Dashboard
+                                            </Link>
+                                        </>
+                                    )}
+                                    {(session.user as any)?.role === 'instructor' && (
+                                        <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                             🛠️ Instructor Dashboard
+                                        </Link>
+                                    )}
+                                    {(session.user as any)?.role !== 'instructor' && (session.user as any)?.role !== 'admin' && (
+                                        <Link href="/instructor/subscribe" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                            🎓 Become Instructor
                                         </Link>
                                     )}
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
@@ -188,6 +204,7 @@ export default function Navbar() {
             {/* Mobile Menu */}
             <div className={`${styles.mobileMenu} ${menuOpen ? styles.mobileOpen : ''}`}>
                 <Link href="/courses" onClick={() => setMenuOpen(false)}>{t.nav.courses}</Link>
+                <Link href="/instructors" onClick={() => setMenuOpen(false)}>Instructors</Link>
                 <Link href="/pricing" onClick={() => setMenuOpen(false)}>{t.nav.pricing}</Link>
                 <Link href="/about" onClick={() => setMenuOpen(false)}>{t.nav.about}</Link>
 

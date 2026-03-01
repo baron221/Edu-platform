@@ -1,0 +1,298 @@
+.page {
+    min-height: 100vh;
+    background-color: #f8fafc;
+}
+
+/* Hero */
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    padding: 100px 0 0;
+    overflow: hidden;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.heroBg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at bottom left, rgba(219, 39, 119, 0.05) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+.heroContent {
+    position: relative;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    padding-bottom: 48px;
+    z-index: 2;
+}
+
+/* Avatar */
+.avatarWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ffffff;
+    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+    background: white;
+}
+
+.avatarFallback {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 800;
+    color: #fff;
+    border: 4px solid #ffffff;
+    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+}
+
+.verifiedBadge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.heroInfo {
+    flex: 1;
+    padding-top: 10px;
+}
+
+.nameLine {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.name {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.03em;
+}
+
+.planChip {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    letter-spacing: 0.02em;
+}
+
+.tagline {
+    color: #475569;
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin: 0 0 24px;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+/* Social */
+.socialLinks {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.socialLink {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    background: white;
+    text-decoration: none;
+    padding: 8px 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 24px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.socialLink:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.1);
+}
+
+/* Stats row */
+.statsRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    border: 1px solid #e2e8f0;
+    border-bottom: none;
+    padding: 0;
+    position: relative;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.02);
+    z-index: 2;
+}
+
+.statBox {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px;
+    gap: 8px;
+}
+
+.statNum {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+}
+
+.statLabel {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.statDivider {
+    width: 1px;
+    height: 60px;
+    background: #e2e8f0;
+}
+
+/* Content layout */
+.layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 48px;
+    padding: 48px 0 80px;
+}
+
+.bioCard {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 40px;
+}
+
+.sectionTitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 20px;
+    letter-spacing: -0.02em;
+}
+
+.bio {
+    color: #475569;
+    line-height: 1.8;
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 32px 0 60px;
+    }
+
+    .heroContent {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .heroInfo {
+        padding-top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nameLine {
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .tagline {
+        font-size: 1.05rem;
+    }
+
+    .socialLinks {
+        justify-content: center;
+    }
+
+    .statsRow {
+        flex-wrap: wrap;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .statBox {
+        min-width: 45%;
+        padding: 24px 16px;
+    }
+
+    .statDivider {
+        display: none;
+    }
+
+    .statBox:nth-child(1),
+    .statBox:nth-child(3) {
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .statBox:nth-child(1),
+    .statBox:nth-child(2) {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .bioCard {
+        position: relative;
+        top: 0;
+    }
+}

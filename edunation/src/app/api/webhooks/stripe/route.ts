@@ -60,6 +60,46 @@ export async function POST(req: Request) {
             }
 
             console.log(`Successfully enrolled user ${userId} in course ${courseId} via Stripe`);
+        } else if (session.metadata?.subscriptionPaymentId && session.metadata?.plan && session.metadata?.userId) {
+            const subId = session.metadata.subscriptionPaymentId;
+            const plan = session.metadata.plan;
+            const subUserId = session.metadata.userId;
+
+            // 1. Mark subscription payment as completed
+            await prisma.subscriptionPayment.update({
+                where: { id: subId },
+                data: { status: 'completed' }
+            });
+
+            // 2. Upgrade the user to instructor
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + 30);
+
+            const PLANS = {
+                starter: { maxCourses: 3, canAdvertise: false },
+                pro: { maxCourses: 20, canAdvertise: true },
+                studio: { maxCourses: -1, canAdvertise: true },
+            };
+            const cfg = PLANS[plan as keyof typeof PLANS] || PLANS.starter;
+
+            await prisma.instructorSubscription.upsert({
+                where: { userId: subUserId },
+                update: { plan: plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+                create: { userId: subUserId, plan: plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+            });
+            await prisma.user.update({ where: { id: subUserId }, data: { role: 'instructor' } });
+
+            const user = await prisma.user.findUnique({ where: { id: subUserId } });
+            const name = user?.name || 'Instructor';
+            const slug = name.toLowerCase().replace(/\s+/g, '-') + '-' + subUserId.slice(-4);
+
+            await prisma.instructorProfile.upsert({
+                where: { userId: subUserId },
+                update: {},
+                create: { userId: subUserId, slug, tagline: 'Passionate educator on EduNationUz' },
+            });
+
+            console.log(`Successfully upgraded user ${subUserId} to instructor plan ${plan} via Stripe`);
         }
     }
 

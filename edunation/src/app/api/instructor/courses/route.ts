@@ -9,16 +9,27 @@ export async function GET() {
         const role = (session?.user as any)?.role;
         const instructorId = (session?.user as any)?.id;
 
+        if (!instructorId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const whereClause = role === 'admin' ? {} : { instructorId: instructorId };
 
-        const courses = await prisma.course.findMany({
-            where: whereClause,
-            orderBy: { createdAt: 'desc' },
-            include: {
-                _count: { select: { enrollments: true, lessons: true } },
-            },
+        const [courses, subscription] = await Promise.all([
+            prisma.course.findMany({
+                where: whereClause,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    _count: { select: { enrollments: true, lessons: true } },
+                },
+            }),
+            prisma.instructorSubscription.findUnique({
+                where: { userId: instructorId }
+            })
+        ]);
+
+        return NextResponse.json({
+            courses,
+            subscription: subscription || null
         });
-        return NextResponse.json(courses);
     } catch {
         return NextResponse.json({ error: 'Failed to fetch courses' }, { status: 500 });
     }

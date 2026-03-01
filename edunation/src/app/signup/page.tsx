@@ -21,8 +21,10 @@ export default function SignupPage() {
     useEffect(() => {
         if (status === 'authenticated') {
             const userRole = (session?.user as any)?.role;
-            if (userRole === 'admin' || userRole === 'instructor') {
+            if (userRole === 'admin') {
                 router.push('/admin/courses');
+            } else if (userRole === 'instructor') {
+                router.push('/instructor/courses');
             } else {
                 router.push('/');
             }
@@ -51,7 +53,7 @@ export default function SignupPage() {
             const result = await signIn('credentials', { email, password, redirect: false });
             if (result?.ok) {
                 // Hard reload to guarantee fresh session with correct DB role
-                window.location.href = role === 'instructor' ? '/admin/courses' : '/';
+                window.location.href = role === 'instructor' ? '/instructor/courses' : '/';
             } else {
                 setError('Login failed after registration. Please log in manually.');
                 setLoading(null);
