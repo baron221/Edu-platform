@@ -19,8 +19,10 @@ export default function LoginPage() {
     useEffect(() => {
         if (status === 'authenticated') {
             const role = (session?.user as any)?.role;
-            if (role === 'admin' || role === 'instructor') {
+            if (role === 'admin') {
                 router.push('/admin/courses');
+            } else if (role === 'instructor') {
+                router.push('/instructor/courses');
             } else {
                 router.push('/');
             }
