@@ -88,7 +88,7 @@ export default function AIQuizPlayer({ slug, lessonId }: AIQuizPlayerProps) {
                 <div className={styles.introState}>
                     <div className={styles.icon}>🧠</div>
                     <h3>Test Your Knowledge!</h3>
-                    <p>Have our AI generate a custom 5-question quiz based specifically on the text content of this lesson to see how much you learned.</p>
+                    <p>Have our AI generate a custom 5-question quiz based on this lesson to reinforce what you learned.</p>
 
                     {error && <div className={styles.errorBanner}>{error}</div>}
 

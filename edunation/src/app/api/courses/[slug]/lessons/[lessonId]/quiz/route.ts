@@ -30,42 +30,54 @@ export async function POST(
 
         const resolvedParams = await params;
 
-        // 1. Fetch the lesson content to use as the factual baseline
+        // 1. Fetch lesson + course context
         const lesson = await prisma.lesson.findUnique({
             where: { id: resolvedParams.lessonId },
-            select: { title: true, content: true },
+            select: {
+                title: true,
+                content: true,
+                course: { select: { title: true, category: true, instructor: true } }
+            },
         });
 
         if (!lesson) {
             return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
         }
 
-        if (!lesson.content || lesson.content.trim() === '') {
-            return NextResponse.json(
-                { error: 'This lesson has no text content. The instructor needs to add reading material or an AI-generated transcript first before a quiz can be generated.' },
-                { status: 400 }
-            );
-        }
+        const hasContent = lesson.content && lesson.content.trim().length > 50;
+
+        // Build prompt — use rich content if available, fall back to title + course context
+        const prompt = hasContent
+            ? `You are an expert educational AI.
+Generate a 5-question multiple-choice quiz based STRICTLY on the following lesson text.
+Do not include external knowledge that isn't covered in the text.
+
+Course: ${lesson.course?.title || ''} (${lesson.course?.category || ''})
+Lesson Title: ${lesson.title}
+
+Lesson Content:
+${lesson.content}`
+            : `You are an expert educational AI.
+Generate a 5-question multiple-choice quiz that tests understanding of the topic "${lesson.title}" 
+from the course "${lesson.course?.title || 'the course'}" (category: ${lesson.course?.category || 'general'}).
+
+The quiz should cover fundamental concepts, best practices, and key ideas a student would learn 
+in a real video lesson on this topic. Make the questions practical and educational.`;
 
         // 2. Call Gemini to generate the quiz
         const { object: quizResponse } = await generateObject({
             model: google('gemini-2.5-flash'),
             schema: quizSchema,
-            prompt: `
-        You are an expert educational AI. 
-        Generate a 5-question multiple-choice quiz based STRICTLY on the following lesson text. 
-        Do not include external knowledge that isn't covered in the text.
-        
-        Lesson Title: ${lesson.title}
-        
-        Lesson Content:
-        ${lesson.content}
-      `,
+            prompt,
         });
 
-        return NextResponse.json({ quiz: quizResponse.questions }, { status: 200 });
+        return NextResponse.json({
+            quiz: quizResponse.questions,
+            generatedFrom: hasContent ? 'content' : 'topic',
+        }, { status: 200 });
+
     } catch (error) {
         console.error('[AI_QUIZ_ERROR]', error);
-        return NextResponse.json({ error: 'Failed to generate quiz' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to generate quiz. Please try again.' }, { status: 500 });
     }
 }
