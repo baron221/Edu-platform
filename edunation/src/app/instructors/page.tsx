@@ -71,12 +71,15 @@ export default function InstructorsPage() {
                         <div className={styles.grid}>
                             {instructors.map(instructor => {
                                 const profile = instructor.instructorProfile;
-                                const slug = profile?.slug || instructor.id;
+                                const isVirtual = !profile?.slug;
                                 const avatar = profile?.avatar || instructor.image;
-                                const initials = (instructor.name || 'IN').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                                const initials = (instructor.name || 'IN').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+                                const href = profile?.slug
+                                    ? `/instructors/${profile.slug}`
+                                    : `/courses?instructor=${encodeURIComponent(instructor.name || '')}`;
 
                                 return (
-                                    <Link key={instructor.id} href={`/instructors/${slug}`} className={styles.card}>
+                                    <Link key={instructor.id} href={href} className={styles.card}>
                                         {/* Plan badge */}
                                         {instructor.instructorSubscription && (
                                             <div className={`${styles.planBadge} ${styles[instructor.instructorSubscription.plan]}`}>

@@ -16,7 +16,13 @@ export async function GET(
     if (!profile) return new NextResponse('Not found', { status: 404 });
 
     const courses = await prisma.course.findMany({
-        where: { instructorId: profile.userId, published: true },
+        where: {
+            published: true,
+            OR: [
+                { instructorId: profile.userId },
+                { instructor: profile.user.name ?? '', instructorId: null },
+            ],
+        },
         include: {
             _count: { select: { enrollments: true, reviews: true } },
             reviews: { select: { rating: true } },
