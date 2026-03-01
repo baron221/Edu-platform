@@ -46,7 +46,7 @@ export default function Navbar() {
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
-    const isDarkPage = pathname === '/leaderboard';
+    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe';
     const hasScrolledBackground = scrolled || isDarkPage;
 
     return (
