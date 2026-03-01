@@ -11,6 +11,7 @@ import MuxPlayer from '@mux/mux-player-react';
 import QuizViewer from '@/components/QuizViewer';
 import ResourceList from '@/components/ResourceList';
 import CertificateModal from '@/components/CertificateModal';
+import ReviewsSection from '@/components/ReviewsSection';
 import { useSession } from 'next-auth/react';
 
 function formatUZS(price: number, currLabel: string) {
@@ -489,6 +490,11 @@ export default function CourseDetailPage() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="container" style={{ paddingBottom: '60px' }}>
+                <ReviewsSection courseId={course.id} isEnrolled={isEnrolled} />
             </div>
 
             {/* Floating AI Tutor */}

@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { sendCourseCompletionEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         const userId = (session?.user as any)?.id;
+        const userEmail = (session?.user as any)?.email;
+        const userName = session?.user?.name || 'Student';
 
         if (!userId) {
             return new NextResponse('Unauthorized', { status: 401 });
@@ -19,42 +22,25 @@ export async function POST(request: Request) {
             return new NextResponse('Missing required fields', { status: 400 });
         }
 
-        // Check if the lesson was already completed before we update it
         const existingProgress = await prisma.progress.findUnique({
-            where: {
-                userId_lessonId: {
-                    userId,
-                    lessonId
-                }
-            }
+            where: { userId_lessonId: { userId, lessonId } }
         });
-
         const wasAlreadyCompleted = existingProgress?.completed === true;
 
-        // Upsert progress
         const progress = await prisma.progress.upsert({
-            where: {
-                userId_lessonId: {
-                    userId,
-                    lessonId
-                }
-            },
+            where: { userId_lessonId: { userId, lessonId } },
             update: {
                 completed: completed !== undefined ? completed : undefined,
                 watchedSec: watchedSec !== undefined ? watchedSec : undefined
             },
             create: {
-                userId,
-                courseId,
-                lessonId,
+                userId, courseId, lessonId,
                 completed: completed || false,
                 watchedSec: watchedSec || 0
             }
         });
 
-        // Award points if the lesson was just completed for the first time
         if (completed && !wasAlreadyCompleted) {
-            // First, get the user's current streak info
             const user = await prisma.user.findUnique({
                 where: { id: userId },
                 select: { currentStreak: true, lastActivityDate: true }
@@ -65,63 +51,47 @@ export async function POST(request: Request) {
 
             if (user?.lastActivityDate) {
                 const lastActivity = new Date(user.lastActivityDate);
-
-                // Set both to midnight to compare just the date parts easily
                 const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const lastMidnight = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+                const diffDays = Math.round((todayMidnight.getTime() - lastMidnight.getTime()) / 86400000);
 
-                const msInDay = 24 * 60 * 60 * 1000;
-                const diffDays = Math.round((todayMidnight.getTime() - lastMidnight.getTime()) / msInDay);
-
-                if (diffDays === 0) {
-                    // Already studied today, keep current streak
-                    newStreak = user.currentStreak || 1;
-                } else if (diffDays === 1) {
-                    // Studied yesterday, increment streak
-                    newStreak = (user.currentStreak || 0) + 1;
-                } else {
-                    // Missed a day or more, reset to 1
-                    newStreak = 1;
-                }
+                if (diffDays === 0) newStreak = user.currentStreak || 1;
+                else if (diffDays === 1) newStreak = (user.currentStreak || 0) + 1;
+                else newStreak = 1;
             }
 
             await prisma.user.update({
                 where: { id: userId },
-                data: {
-                    points: { increment: 50 }, // Award 50 points per lesson
-                    currentStreak: newStreak,
-                    lastActivityDate: now
-                }
+                data: { points: { increment: 50 }, currentStreak: newStreak, lastActivityDate: now }
             });
         }
 
-        // Check if all lessons in the course are completed
-        // to mark the enrollment as completed
+        // Check if all lessons are done → mark enrollment complete + send email
         if (completed) {
-            const courseLessons = await prisma.lesson.count({
-                where: { courseId }
-            });
-
+            const courseLessons = await prisma.lesson.count({ where: { courseId } });
             const completedLessons = await prisma.progress.count({
-                where: {
-                    userId,
-                    courseId,
-                    completed: true
-                }
+                where: { userId, courseId, completed: true }
             });
 
             if (completedLessons >= courseLessons) {
+                // Mark enrollment as completed
                 await prisma.enrollment.update({
-                    where: {
-                        userId_courseId: {
-                            userId,
-                            courseId
-                        }
-                    },
-                    data: {
-                        completed: true
-                    }
+                    where: { userId_courseId: { userId, courseId } },
+                    data: { completed: true }
                 });
+
+                // Auto-issue certificate if not already done
+                const course = await prisma.course.findUnique({ where: { id: courseId }, select: { title: true } });
+                const cert = await prisma.certificate.upsert({
+                    where: { userId_courseId: { userId, courseId } },
+                    update: {},
+                    create: { userId, courseId }
+                });
+
+                // Send completion email
+                if (userEmail && course) {
+                    await sendCourseCompletionEmail(userEmail, userName, course.title, cert.id);
+                }
             }
         }
 
