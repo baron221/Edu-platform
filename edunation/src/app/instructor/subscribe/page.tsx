@@ -102,7 +102,7 @@ export default function InstructorSubscribePage() {
                     <div className={styles.currentBanner}>
                         ✅ You are currently on the <strong>{current.plan.toUpperCase()}</strong> plan
                         {current.endDate && ` · Renews ${new Date(current.endDate).toLocaleDateString()}`}
-                        <Link href="/instructor/dashboard" className={styles.dashLink}> → Go to Dashboard</Link>
+                        <Link href="/instructor/courses" className={styles.dashLink}> → Go to Dashboard</Link>
                     </div>
                 </div>
             )}
