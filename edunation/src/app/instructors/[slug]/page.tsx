@@ -139,11 +139,13 @@ export default function InstructorProfilePage() {
                         {/* Right: Courses */}
                         <main className={styles.main}>
                             <h2 className={styles.sectionTitle}>
-                                Courses by {name} <span style={{ color: '#7c3aed', fontSize: '1rem' }}>({courses.length})</span>
+                                Courses by {name} <span style={{ color: '#7c3aed', fontSize: '1rem', fontWeight: 600 }}>({courses.length})</span>
                             </h2>
                             {courses.length === 0 ? (
-                                <div style={{ color: '#64748b', textAlign: 'center', padding: '48px 0' }}>
-                                    No published courses yet.
+                                <div style={{ color: '#64748b', textAlign: 'center', padding: '64px 0', background: 'white', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📚</div>
+                                    <h3>No courses yet</h3>
+                                    <p>Check back later for new content.</p>
                                 </div>
                             ) : (
                                 <div className="grid-3">

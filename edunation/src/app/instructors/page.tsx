@@ -63,9 +63,10 @@ export default function InstructorsPage() {
                             ))}
                         </div>
                     ) : instructors.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-                            <div style={{ fontSize: 60, marginBottom: 16 }}>👨‍🏫</div>
-                            <h3>No instructors yet</h3>
+                        <div style={{ textAlign: 'center', padding: '100px 0', background: 'white', border: '1px dashed #cbd5e1', borderRadius: '32px', marginBottom: '80px' }}>
+                            <div style={{ fontSize: 72, marginBottom: 24 }}>👨‍🏫</div>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>No instructors yet</h3>
+                            <p style={{ color: '#64748b' }}>Check back later for new experts.</p>
                         </div>
                     ) : (
                         <div className={styles.grid}>
