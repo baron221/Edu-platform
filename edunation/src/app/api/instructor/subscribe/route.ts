@@ -12,11 +12,11 @@ const PLANS = {
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?.id;
-    if (!userId) return new NextResponse('Unauthorized', { status: 401 });
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { plan } = await req.json();
     if (!PLANS[plan as keyof typeof PLANS]) {
-        return new NextResponse('Invalid plan', { status: 400 });
+        return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
     const cfg = PLANS[plan as keyof typeof PLANS];
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?.id;
-    if (!userId) return new NextResponse('Unauthorized', { status: 401 });
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const sub = await prisma.instructorSubscription.findUnique({ where: { userId } });
     return NextResponse.json({ subscription: sub, plans: PLANS });
