@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import MuxPlayer from '@mux/mux-player-react';
 import styles from './page.module.css';
 
 interface Lesson {
@@ -43,12 +45,13 @@ export default function CourseEditorPage() {
 
     const [showLessonModal, setShowLessonModal] = useState(false);
     const [newLessonData, setNewLessonData] = useState({ title: '', description: '', isFree: false });
+    const { data: session } = useSession({ required: true, onUnauthenticated() { router.push('/login'); } });
     const [creatingLesson, setCreatingLesson] = useState(false);
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
 
     useEffect(() => {
-        fetch(`/api/admin/courses/${id}`)
+        fetch(`/api/instructor/courses/${id}`)
             .then(r => r.json())
             .then(data => {
                 if (data.error) {
@@ -73,7 +76,7 @@ export default function CourseEditorPage() {
     const handleSave = async () => {
         if (!course) return;
         setSaving(true);
-        await fetch(`/api/admin/courses/${id}`, {
+        await fetch(`/api/instructor/courses/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -132,13 +135,13 @@ export default function CourseEditorPage() {
             }
         }
 
-        await fetch(`/api/admin/courses/${id}/lessons`, {
+        const res = await fetch(`/api/instructor/courses/${id}/lessons`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...newLessonData, videoUrl }),
         });
 
-        const r = await fetch(`/api/admin/courses/${id}`);
+        const r = await fetch(`/api/instructor/courses/${id}`);
         const data = await r.json();
         setCourse(data);
 
@@ -151,8 +154,8 @@ export default function CourseEditorPage() {
 
     const deleteLesson = async (lessonId: string) => {
         if (!confirm('Are you certain you want to delete this lesson? This action cannot be undone.')) return;
-        await fetch(`/api/admin/courses/${id}/lessons/${lessonId}`, { method: 'DELETE' });
-        fetch(`/api/admin/courses/${id}`).then(r => r.json()).then(setCourse);
+        await fetch(`/api/instructor/courses/${id}/lessons/${lessonId}`, { method: 'DELETE' });
+        fetch(`/api/instructor/courses/${id}`).then(r => r.json()).then(setCourse);
     };
 
     if (loading) return <div className={styles.loading}>Loading course data...</div>;
@@ -163,8 +166,8 @@ export default function CourseEditorPage() {
         <div className={styles.page}>
             <div className={styles.topBar}>
                 <div className={styles.breadcrumb}>
-                    <Link href="/admin/courses" className={styles.backBtn} title="Back to Courses">
-                        ←
+                    <Link href="/instructor/courses" className={styles.backBtn} title="Back to Courses">
+                        ← Back to Courses
                     </Link>
                     <h1 className={styles.title}>Edit Course</h1>
                 </div>

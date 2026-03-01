@@ -6,16 +6,18 @@ export default withAuth(
         const token = req.nextauth.token;
         const role = token?.role as string;
         const isAuthorized = role === 'admin' || role === 'instructor';
-        const isAdminRoute = req.nextUrl.pathname.startsWith('/admin');
+        const isProtectedDashboard = req.nextUrl.pathname.startsWith('/admin') ||
+            req.nextUrl.pathname.startsWith('/instructor/courses') ||
+            req.nextUrl.pathname.startsWith('/instructor/dashboard');
         const isUsersRoute = req.nextUrl.pathname.startsWith('/admin/users');
 
-        if (isAdminRoute && !isAuthorized) {
+        if (isProtectedDashboard && !isAuthorized) {
             return NextResponse.redirect(new URL('/?error=unauthorized', req.url));
         }
 
         // Only admins can access the users management page
         if (isUsersRoute && role !== 'admin') {
-            return NextResponse.redirect(new URL('/admin?error=unauthorized', req.url));
+            return NextResponse.redirect(new URL('/instructor/courses?error=unauthorized', req.url));
         }
 
         return NextResponse.next();
@@ -28,5 +30,5 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: ['/admin/:path*'],
+    matcher: ['/admin/:path*', '/instructor/courses/:path*', '/instructor/dashboard/:path*'],
 };
