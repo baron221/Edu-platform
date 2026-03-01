@@ -148,9 +148,14 @@ export default function Navbar() {
                                         🏆 Leaderboard
                                     </Link>
                                     {(session.user as any)?.role === 'admin' && (
-                                        <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                            📊 Admin Dashboard
-                                        </Link>
+                                        <>
+                                            <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                                📊 Admin Dashboard
+                                            </Link>
+                                            <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                                🛠️ Instructor Dashboard
+                                            </Link>
+                                        </>
                                     )}
                                     {(session.user as any)?.role === 'instructor' && (
                                         <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
