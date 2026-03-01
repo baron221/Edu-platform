@@ -24,11 +24,13 @@ export async function POST(req: Request) {
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
 
+        const { priceUZS, ...dbCfg } = cfg;
+
         // Upsert instructor subscription
         const sub = await prisma.instructorSubscription.upsert({
             where: { userId },
-            update: { plan, status: 'active', startDate: new Date(), endDate, ...cfg },
-            create: { userId, plan, status: 'active', startDate: new Date(), endDate, ...cfg },
+            update: { plan, status: 'active', startDate: new Date(), endDate, ...dbCfg },
+            create: { userId, plan, status: 'active', startDate: new Date(), endDate, ...dbCfg },
         });
 
         // Promote user role to instructor
