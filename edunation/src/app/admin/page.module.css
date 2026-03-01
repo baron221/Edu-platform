@@ -195,3 +195,227 @@
 .viewAll:hover {
     background: #f8fafc;
 }
+
+/* AI Analytics Section Styles */
+.sectionHeaderFlex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.aiBtnSubtle {
+    padding: 6px 14px;
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.aiBtnSubtle:hover:not(:disabled) {
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.aiBtnSubtle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.analyticsLoading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 30px 40px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(124, 58, 237, 0.2);
+    border-top-color: #7c3aed;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.analyticsEmpty {
+    padding: 30px 40px;
+    color: #64748b;
+    font-size: 14px;
+    background: #f8fafc;
+    text-align: center;
+    border-top: 1px solid #f1f5f9;
+}
+
+.analyticsWrapper {
+    padding: 24px;
+    background: #faf5ff;
+}
+
+.analyticsSummary {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.analyticsGrid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr;
+    gap: 20px;
+}
+
+.analyticsCard {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.analyticsCard h3 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.analyticsCard ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.sentimentBadge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.sentimentPositive {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.sentimentNeutral {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.sentimentConfused {
+    background: #fef08a;
+    color: #ca8a04;
+}
+
+.sentimentFrustrated {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Drop-off Analytics */
+.dropoffContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.dropoffCard {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dropoffHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropoffTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.dropoffStats {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    background: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.dropoffMetrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metricLabel {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.metricValue {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.progressBar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    border-radius: 4px;
+    transition: width 1s ease-in-out;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 14px;
+}

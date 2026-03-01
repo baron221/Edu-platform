@@ -23,6 +23,10 @@ export default function AdminCoursesPage() {
         title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: ''
     });
     const [thumbFile, setThumbFile] = useState<File | null>(null);
+    const [showAiModal, setShowAiModal] = useState(false);
+    const [aiTopic, setAiTopic] = useState('');
+    const [aiInstructions, setAiInstructions] = useState('');
+    const [generating, setGenerating] = useState(false);
     const router = useRouter();
 
     const load = () =>
@@ -69,6 +73,35 @@ export default function AdminCoursesPage() {
         router.push(`/admin/courses/${course.id}`);
     };
 
+    const handleAiGenerate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!aiTopic.trim()) return;
+
+        setGenerating(true);
+        try {
+            const res = await fetch('/api/admin/generate-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic: aiTopic, customInstructions: aiInstructions }),
+            });
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                alert(data.error || 'Failed to generate course.');
+            } else if (data.course?.id) {
+                setShowAiModal(false);
+                setAiTopic('');
+                setAiInstructions('');
+                // Navigate straight to the new AI generated course edit page
+                router.push(`/admin/courses/${data.course.id}`);
+            }
+        } catch (err: any) {
+            alert(err.message || 'An error occurred.');
+        } finally {
+            setGenerating(false);
+        }
+    };
+
     const togglePublish = async (id: string, current: boolean) => {
         await fetch(`/api/admin/courses/${id}`, {
             method: 'PATCH',
@@ -91,9 +124,14 @@ export default function AdminCoursesPage() {
                     <h1 className={styles.title}>Courses</h1>
                     <p className={styles.subtitle}>{courses.length} total courses</p>
                 </div>
-                <button className={`btn btn-primary`} onClick={() => setShowModal(true)}>
-                    + New Course
-                </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button className={styles.aiBtn} onClick={() => setShowAiModal(true)}>
+                        ✨ Generate with AI
+                    </button>
+                    <button className={`btn btn-primary`} onClick={() => setShowModal(true)}>
+                        + New Course
+                    </button>
+                </div>
             </div>
 
             {loading ? <div className={styles.loading}>Loading courses...</div> : (
@@ -178,6 +216,58 @@ export default function AdminCoursesPage() {
                             <div className={styles.modalActions}>
                                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary" disabled={creating}>{creating ? 'Creating...' : 'Create Course'}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showAiModal && (
+                <div className={styles.modalOverlay} onClick={() => !generating && setShowAiModal(false)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <h2>✨ AI Course Generator</h2>
+                            <button className={styles.closeBtn} onClick={() => !generating && setShowAiModal(false)} disabled={generating}>✕</button>
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
+                            Describe the course you want to create. Our AI will automatically write a title, description, and generate a complete lesson modules outline for you in seconds.
+                        </p>
+                        <form onSubmit={handleAiGenerate} className={styles.modalForm}>
+                            <div className={styles.field}>
+                                <label>Course Topic</label>
+                                <input
+                                    required
+                                    value={aiTopic}
+                                    onChange={e => setAiTopic(e.target.value)}
+                                    placeholder="e.g. Master React and Next.js for Beginners"
+                                    className="input"
+                                    disabled={generating}
+                                />
+                            </div>
+                            <div className={styles.field}>
+                                <label>Specific Instructions (Optional)</label>
+                                <textarea
+                                    rows={3}
+                                    value={aiInstructions}
+                                    onChange={e => setAiInstructions(e.target.value)}
+                                    placeholder="e.g. Make sure it includes a chapter on authentication and deploying to Vercel."
+                                    className="input"
+                                    disabled={generating}
+                                />
+                            </div>
+
+                            {generating && (
+                                <div className={styles.aiLoadingStatus}>
+                                    <div className={styles.spinner}></div>
+                                    <span>AI is writing your curriculum... This takes about 5-10 seconds.</span>
+                                </div>
+                            )}
+
+                            <div className={styles.modalActions}>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowAiModal(false)} disabled={generating}>Cancel</button>
+                                <button type="submit" className={`${styles.aiBtn} ${styles.aiBtnSubmit}`} disabled={generating || !aiTopic.trim()}>
+                                    {generating ? 'Generating...' : '✨ Generate Course'}
+                                </button>
                             </div>
                         </form>
                     </div>

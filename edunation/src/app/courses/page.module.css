@@ -197,24 +197,50 @@
 /* Skeleton loading */
 .loadingGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
 }
 
-.skeleton {
-    height: 320px;
+.skeletonCard {
+    height: 380px;
     border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.skeletonThumb {
+    height: 180px;
+    width: 100%;
+}
+
+.skeletonBody {
+    padding: 20px;
+    flex: 1;
+}
+
+.skeletonLine {
+    height: 12px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+
+.skeleton {
+    background: #e2e8f0;
     background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: shimmer 1.5s infinite linear;
+    opacity: 0.6;
 }
 
 @keyframes shimmer {
-    0% {
+    from {
         background-position: 200% 0;
     }
 
-    100% {
+    to {
         background-position: -200% 0;
     }
 }

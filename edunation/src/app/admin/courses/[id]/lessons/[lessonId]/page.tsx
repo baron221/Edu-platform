@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import styles from './page.module.css';
+import * as Upchunk from '@mux/upchunk';
 
 interface Lesson {
     id: string;
@@ -10,6 +11,7 @@ interface Lesson {
     description: string | null;
     videoUrl: string | null;
     duration: string | null;
+    content: string | null;
     isFree: boolean;
     videoQuality: string | null;
     meetLink: string | null;
@@ -29,6 +31,7 @@ export default function LessonEditorPage() {
     const [saved, setSaved] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [generatingContent, setGeneratingContent] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -58,208 +61,294 @@ export default function LessonEditorPage() {
         setSaved(true);
     };
 
+    const handleGenerateContent = async () => {
+        if (!lesson) return;
+        setGeneratingContent(true);
+        try {
+            const res = await fetch('/api/admin/generate-lesson', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lessonId: lesson.id,
+                    courseTitle: 'Course', // We could fetch actual course title, but 'Course' works as fallback
+                    lessonTitle: lesson.title,
+                    lessonDescription: lesson.description
+                }),
+            });
+            const data = await res.json();
+            if (res.ok && data.lesson) {
+                setLesson(data.lesson);
+                setSaved(false); // Enable save button to confirm
+            } else {
+                alert(data.error || 'Failed to generate content');
+            }
+        } catch (err) {
+            alert('An error occurred during generation');
+        } finally {
+            setGeneratingContent(false);
+        }
+    };
+
     const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploading(true);
         setUploadProgress(0);
 
-        // Note: Real progressive upload tracking requires XMLHttpRequest or Axios,
-        // but for fetch we can show a continuous fast indeterminate progress.
-        const interval = setInterval(() => {
-            setUploadProgress(p => {
-                if (p >= 90) return p;
-                return p + Math.random() * 10;
-            });
-        }, 300);
-
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const res = await fetch('/api/upload', {
+            // 1. Get a direct upload ticket from our new Mux API
+            const ticketRes = await fetch(`/api/admin/courses/${courseId}/lessons/${lessonId}/mux-upload`, {
                 method: 'POST',
-                body: formData
+            });
+            const ticketData = await ticketRes.json();
+
+            if (!ticketRes.ok) {
+                throw new Error(ticketData.error || 'Failed to get upload ticket');
+            }
+
+            // 2. Use @mux/upchunk to stream the file directly from the browser to Mux
+            // This safely bypasses Vercel's 4.5MB payload limit!
+            const upload = Upchunk.createUpload({
+                endpoint: ticketData.url, // The Mux Google Cloud Storage URL
+                file: file,
+                chunkSize: 5120, // 5MB chunks
             });
 
-            clearInterval(interval);
-            setUploadProgress(100);
+            upload.on('progress', progress => {
+                setUploadProgress(progress.detail);
+            });
 
-            if (res.ok) {
-                const data = await res.json();
-                handleChange('videoUrl', data.url);
-                handleChange('duration', '00:00'); // Note: actual duration extraction requires a hidden video element
-            } else {
-                alert('File upload failed. Please try again.');
-            }
+            upload.on('success', () => {
+                setUploadProgress(100);
+                setTimeout(() => setUploading(false), 1000);
+                // We clear the old videoUrl if it existed and let the Webhook handle the rest
+                handleChange('videoUrl', `mux-upload:${ticketData.uploadId}`);
+                alert('Success! Mux is now encoding your video. It will appear here shortly.');
+            });
+
+            upload.on('error', err => {
+                console.error('Mux Upchunk Error:', err);
+                alert('An error occurred during upload to Mux.');
+                setUploading(false);
+            });
+
         } catch (err) {
-            clearInterval(interval);
-            alert('An error occurred during upload.');
-        } finally {
+            console.error('Upload init error:', err);
+            alert('An error occurred starting the upload.');
             setUploading(false);
         }
     };
 
-    if (!lesson) return <div className={styles.loading}>Loading lesson...</div>;
+    if (!lesson) return <div className={styles.loading}>Loading lesson data...</div>;
 
     return (
         <div className={styles.page}>
-            <div className={styles.breadcrumb}>
-                <Link href={`/admin/courses/${courseId}`} className={styles.backLink}>← Course Editor</Link>
-            </div>
-
-            <div className={styles.header}>
-                <h1 className={styles.title}>Edit Lesson</h1>
-                <div className={styles.headerActions}>
-                    {saved && <span className={styles.savedMsg}>✓ Saved</span>}
+            <div className={styles.topBar}>
+                <div className={styles.breadcrumb}>
+                    <Link href={`/admin/courses/${courseId}`} className={styles.backBtn} title="Back to Course">
+                        ←
+                    </Link>
+                    <h1 className={styles.title}>Edit Lesson</h1>
+                </div>
+                <div className={styles.actions}>
+                    {saved && <span className={styles.savedMsg}>✨ Saved successfully</span>}
                     <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
                         {saving ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </div>
 
-            <div className={styles.grid}>
-                {/* Basic Info */}
-                <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Basic Info</h2>
-                    <div className={styles.field}>
-                        <label className={styles.label}>Title</label>
-                        <input className={styles.input} value={lesson.title} onChange={e => handleChange('title', e.target.value)} />
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>Description</label>
-                        <textarea className={styles.textarea} value={lesson.description ?? ''} onChange={e => handleChange('description', e.target.value)} rows={3} />
-                    </div>
-                    <div className={styles.twoCol}>
-                        <div className={styles.field}>
-                            <label className={styles.label}>Duration</label>
-                            <input className={styles.input} value={lesson.duration ?? ''} onChange={e => handleChange('duration', e.target.value)} placeholder="12:30" />
+            <div className={styles.mainContainer}>
+                <div className={styles.leftCol}>
+                    {/* Basic Info */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>📝 Basic Information</h2>
                         </div>
                         <div className={styles.field}>
-                            <label className={styles.toggleLabel} style={{ marginTop: 24 }}>
-                                <input type="checkbox" checked={lesson.isFree} onChange={e => handleChange('isFree', e.target.checked)} />
-                                Free Preview
-                            </label>
+                            <label className={styles.label}>Lesson Title</label>
+                            <input className={styles.input} value={lesson.title} onChange={e => handleChange('title', e.target.value)} placeholder="e.g. Introduction to React state" />
+                        </div>
+                        <div className={styles.field}>
+                            <label className={styles.label}>Short Description</label>
+                            <textarea className={styles.textarea} value={lesson.description ?? ''} onChange={e => handleChange('description', e.target.value)} rows={2} placeholder="Brief summary of what this lesson covers..." />
                         </div>
                     </div>
-                </div>
 
-                {/* Video Upload */}
-                <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>📹 Video</h2>
+                    {/* Text Content (RAG KB) */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>📖 Lesson Content (Markdown)</h2>
+                            <button
+                                className={styles.aiBtn}
+                                onClick={handleGenerateContent}
+                                disabled={generatingContent}
+                            >
+                                {generatingContent ? '✨ Generating...' : '✨ Auto-Generate with AI'}
+                            </button>
+                        </div>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', lineHeight: '1.5' }}>
+                            This content is displayed below the video for students to read. It also serves as the knowledge base for the AI Tutor to answer questions specifically about this lesson.
+                        </p>
+                        <div className={styles.markdownContentArea}>
+                            <textarea
+                                className={styles.textarea}
+                                value={lesson.content ?? ''}
+                                onChange={e => handleChange('content', e.target.value)}
+                                rows={16}
+                                placeholder="# Welcome to this lesson!&#10;&#10;In this lesson we will cover..."
+                                style={{ fontFamily: 'monospace', fontSize: '14px', lineHeight: '1.6' }}
+                            />
+                        </div>
+                    </div>
 
-                    <div className={styles.uploadZone} onClick={() => fileRef.current?.click()}>
-                        {lesson.videoUrl ? (
-                            <div className={styles.videoPreview}>
-                                <div className={styles.videoPreviewIcon}>🎬</div>
-                                <div className={styles.videoPreviewName}>{lesson.videoUrl}</div>
-                                <span className={styles.changeVideo}>Click to change</span>
-                            </div>
-                        ) : (
-                            <div className={styles.uploadPrompt}>
-                                <div className={styles.uploadIcon}>⬆️</div>
-                                <div className={styles.uploadText}>Click to upload video</div>
-                                <div className={styles.uploadHint}>MP4, MOV, AVI · Max 2GB</div>
+                    {/* Video Upload */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>📹 Video Content</h2>
+                        </div>
+
+                        <div className={styles.uploadZone} onClick={() => fileRef.current?.click()}>
+                            {lesson.videoUrl ? (
+                                <div className={styles.videoPreview}>
+                                    <div className={styles.videoPreviewIcon}>🎬</div>
+                                    <div className={styles.videoPreviewName}>{lesson.videoUrl}</div>
+                                    <span className={styles.changeVideo}>Change Video File</span>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className={styles.uploadIcon}>⬆️</div>
+                                    <div className={styles.uploadText}>Drop your video file here or click to browse</div>
+                                    <div className={styles.uploadHint}>Supports MP4, MOV, WebM (Max 2GB)</div>
+                                </div>
+                            )}
+                            <input
+                                ref={fileRef}
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoUpload}
+                                style={{ display: 'none' }}
+                            />
+                        </div>
+
+                        {uploading && (
+                            <div className={styles.progressWrap}>
+                                <div className={styles.progressBar}>
+                                    <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
+                                </div>
+                                <span className={styles.progressText}>{Math.round(uploadProgress)}%</span>
                             </div>
                         )}
-                        <input
-                            ref={fileRef}
-                            type="file"
-                            accept="video/*"
-                            onChange={handleVideoUpload}
-                            style={{ display: 'none' }}
-                        />
-                    </div>
 
-                    {uploading && (
-                        <div className={styles.progressWrap}>
-                            <div className={styles.progressBar}>
-                                <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
-                            </div>
-                            <span className={styles.progressText}>{Math.round(uploadProgress)}%</span>
-                        </div>
-                    )}
-
-                    <div className={styles.field} style={{ marginTop: 16 }}>
-                        <label className={styles.label}>Or paste video URL</label>
-                        <input
-                            className={styles.input}
-                            value={lesson.videoUrl ?? ''}
-                            onChange={e => handleChange('videoUrl', e.target.value)}
-                            placeholder="https://youtube.com/embed/... or /videos/lesson.mp4"
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label className={styles.label}>Default Video Quality</label>
-                        <div className={styles.qualityGrid}>
-                            {QUALITY_OPTIONS.map(q => (
-                                <button
-                                    key={q}
-                                    className={`${styles.qualityBtn} ${lesson.videoQuality === q ? styles.qualityActive : ''}`}
-                                    onClick={() => handleChange('videoQuality', q)}
-                                    type="button"
-                                >
-                                    {q}
-                                </button>
-                            ))}
+                        <div className={styles.field} style={{ marginTop: '24px' }}>
+                            <label className={styles.label}>Or embed from URL (YouTube/Vimeo)</label>
+                            <input
+                                className={styles.input}
+                                value={lesson.videoUrl ?? ''}
+                                onChange={e => handleChange('videoUrl', e.target.value)}
+                                placeholder="https://youtube.com/embed/..."
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Live Stream */}
-                <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                        <h2 className={styles.cardTitle}>📡 Live Stream (Google Meet)</h2>
-                        <label className={styles.toggleLabel}>
-                            <input
-                                type="checkbox"
-                                checked={lesson.isLiveEnabled}
-                                onChange={e => handleChange('isLiveEnabled', e.target.checked)}
-                            />
-                            Enable Live
-                        </label>
+                <div className={styles.rightCol}>
+                    {/* Settings */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>⚙️ Settings</h2>
+                        </div>
+
+                        <div className={styles.field}>
+                            <div className={styles.toggleWrapper}>
+                                <label className={styles.toggleLabel}>
+                                    <input type="checkbox" checked={lesson.isFree} onChange={e => handleChange('isFree', e.target.checked)} />
+                                    Make this lesson a Free Preview 🎁
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.label}>Estimated Duration</label>
+                            <input className={styles.input} value={lesson.duration ?? ''} onChange={e => handleChange('duration', e.target.value)} placeholder="e.g. 12:30" />
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.label}>Default Video Quality</label>
+                            <div className={styles.qualityGrid}>
+                                {QUALITY_OPTIONS.map(q => (
+                                    <button
+                                        key={q}
+                                        className={`${styles.qualityBtn} ${lesson.videoQuality === q ? styles.qualityActive : ''}`}
+                                        onClick={() => handleChange('videoQuality', q)}
+                                        type="button"
+                                    >
+                                        {q}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
-                    {lesson.isLiveEnabled ? (
-                        <>
-                            <div className={styles.liveAlert}>
-                                Students will see a <strong>"Join Live Class"</strong> button when a meet link is set and live is enabled.
-                            </div>
-                            <div className={styles.field}>
-                                <label className={styles.label}>Google Meet Link</label>
-                                <input
-                                    className={styles.input}
-                                    value={lesson.meetLink ?? ''}
-                                    onChange={e => handleChange('meetLink', e.target.value)}
-                                    placeholder="https://meet.google.com/abc-def-ghi"
-                                />
-                            </div>
-                            <div className={styles.field}>
-                                <label className={styles.label}>Scheduled Date & Time</label>
-                                <input
-                                    className={styles.input}
-                                    type="datetime-local"
-                                    value={lesson.liveAt ? lesson.liveAt.slice(0, 16) : ''}
-                                    onChange={e => handleChange('liveAt', e.target.value)}
-                                />
-                            </div>
-                            {lesson.meetLink && (
-                                <a
-                                    href={lesson.meetLink}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className={styles.meetPreviewBtn}
-                                >
-                                    🔗 Preview Meet Link
-                                </a>
-                            )}
-                        </>
-                    ) : (
-                        <div className={styles.liveDisabled}>
-                            Enable live stream to add a Google Meet link for this lesson.
+                    {/* Live Stream */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>📡 Live Stream</h2>
                         </div>
-                    )}
+
+                        <div className={styles.field}>
+                            <div className={styles.toggleWrapper} style={{ marginBottom: '16px' }}>
+                                <label className={styles.toggleLabel}>
+                                    <input
+                                        type="checkbox"
+                                        checked={lesson.isLiveEnabled}
+                                        onChange={e => handleChange('isLiveEnabled', e.target.checked)}
+                                    />
+                                    Enable Live Session
+                                </label>
+                            </div>
+                        </div>
+
+                        {lesson.isLiveEnabled ? (
+                            <>
+                                <div className={styles.liveAlert}>
+                                    When enabled, students will see a <strong>"Join Live Class"</strong> button instead of the recorded video until the session ends.
+                                </div>
+                                <div className={styles.field}>
+                                    <label className={styles.label}>Google Meet / Zoom Link</label>
+                                    <input
+                                        className={styles.input}
+                                        value={lesson.meetLink ?? ''}
+                                        onChange={e => handleChange('meetLink', e.target.value)}
+                                        placeholder="https://meet.google.com/..."
+                                    />
+                                </div>
+                                <div className={styles.field}>
+                                    <label className={styles.label}>Scheduled Date & Time</label>
+                                    <input
+                                        className={styles.input}
+                                        type="datetime-local"
+                                        value={lesson.liveAt ? lesson.liveAt.slice(0, 16) : ''}
+                                        onChange={e => handleChange('liveAt', e.target.value)}
+                                    />
+                                </div>
+                                {lesson.meetLink && (
+                                    <a
+                                        href={lesson.meetLink}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className={styles.meetPreviewBtn}
+                                    >
+                                        🔗 Test Meeting Link
+                                    </a>
+                                )}
+                            </>
+                        ) : (
+                            <div className={styles.liveDisabled}>
+                                Enable true live streaming to schedule a real-time class for this lesson via Google Meet or Zoom.
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

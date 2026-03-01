@@ -1,0 +1,244 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.closeBtn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.closeBtn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modalTitle {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.modalText {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.certWrapper {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+/* Certificate Styling */
+.certificate {
+    background: #ffffff;
+    width: 800px;
+    /* Exact width to match aspect ratio * /
+    height: 565px; /* A4 landscape proportions roughly */
+    min-width: 800px;
+    color: #1e293b;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    font-family: 'Times New Roman', serif;
+}
+
+.certBorder {
+    border: 10px solid #cbd5e1;
+    height: 100%;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.certBorder::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    left: -5px;
+    right: -5px;
+    border: 2px solid #94a3b8;
+}
+
+.certHeader h1 {
+    font-size: 3rem;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    font-family: 'Georgia', serif;
+}
+
+.certHeader p {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-style: italic;
+    margin-bottom: 3rem;
+}
+
+.studentName {
+    font-size: 4rem;
+    color: #3b82f6;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 10px;
+    margin-bottom: 2rem;
+    min-width: 400px;
+    font-family: 'Brush Script MT', 'Great Vibes', cursive, serif;
+}
+
+.certBody p {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.certBody h2 {
+    font-size: 2rem;
+    color: #1e293b;
+    font-family: 'Georgia', serif;
+    font-weight: 500;
+}
+
+.certFooter {
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 2rem;
+}
+
+.signatureBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+}
+
+.signatureLine {
+    width: 100%;
+    height: 2px;
+    background: #0f172a;
+    margin-bottom: 10px;
+}
+
+.signatureBlock span {
+    font-size: 1.2rem;
+    color: #0f172a;
+    font-family: 'Brush Script MT', cursive;
+}
+
+.signatureTitle {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-family: sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.logoBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo {
+    font-size: 2rem;
+    font-family: sans-serif;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.dateText {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-family: sans-serif;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.downloadBtn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.downloadBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px -3px rgba(37, 99, 235, 0.5);
+}
+
+.downloadBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}

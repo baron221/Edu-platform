@@ -69,9 +69,10 @@ export const authOptions: NextAuthOptions = {
                 const userId = (token.id ?? token.sub) as string;
                 const dbUser = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { role: true },
+                    select: { role: true, points: true },
                 });
                 token.role = dbUser?.role ?? 'student';
+                token.points = dbUser?.points ?? 0;
             }
             return token;
         },
@@ -79,11 +80,13 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token, user }) {
             if (session.user) {
                 if (token) {
-                    (session.user as { id?: string; role?: string }).id = token.sub;
-                    (session.user as { id?: string; role?: string }).role = token.role as string;
+                    (session.user as any).id = token.sub;
+                    (session.user as any).role = token.role as string;
+                    (session.user as any).points = token.points as number;
                 } else if (user) {
-                    (session.user as { id?: string; role?: string }).id = user.id;
-                    (session.user as { id?: string; role?: string }).role = (user as { role?: string }).role ?? 'student';
+                    (session.user as any).id = user.id;
+                    (session.user as any).role = (user as any).role ?? 'student';
+                    (session.user as any).points = (user as any).points ?? 0;
                 }
             }
             return session;

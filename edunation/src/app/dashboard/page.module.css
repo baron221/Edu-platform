@@ -1,56 +1,370 @@
 .page {
+    padding-top: var(--nav-height);
     min-height: 100vh;
-    padding-top: 80px;
-    background: #f8fafc;
-    color: #0f172a;
 }
 
+/* Header */
 .header {
     padding: 60px 0 40px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    background: white;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04));
+    border-bottom: 1px solid var(--border);
+}
+
+.headerFlex {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
 }
 
 .title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 10px;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: #64748b;
+    color: #94a3b8;
+    font-size: 16px;
     margin: 0;
 }
 
-.content {
-    padding: 50px 0;
+.streakBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #f59e0b;
+    font-weight: 700;
+    font-size: 15px;
 }
 
+/* Stats Row */
+.statsRow {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.statCard {
+    flex: 1;
+    min-width: 120px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.statCard:hover {
+    border-color: rgba(124, 58, 237, 0.3);
+    transform: translateY(-2px);
+}
+
+.statNum {
+    display: block;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+}
+
+.statLabel {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Content */
+.content {
+    padding: 48px 0 80px;
+}
+
+.sectionTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 20px;
+}
+
+.sectionSubtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin: -14px 0 20px;
+}
+
+/* Continue Learning */
+.continueSection {
+    margin-bottom: 40px;
+}
+
+.continueCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.06));
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    border-radius: 20px;
+    padding: 24px 28px;
+    transition: border-color 0.2s;
+}
+
+.continueCard:hover {
+    border-color: rgba(124, 58, 237, 0.4);
+}
+
+.continueInfo {
+    flex: 1;
+}
+
+.continueCourseName {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7c3aed;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.continueLessonTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 6px 0 0;
+}
+
+/* Course Progress Grid */
+.courseProgressGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+}
+
+.progressCard {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.progressCard:hover {
+    border-color: rgba(124, 58, 237, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.progressCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.progressCardCat {
+    font-size: 11px;
+    font-weight: 600;
+    color: #7c3aed;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.progressCardPct {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.progressCardTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.progressTrack {
+    height: 6px;
+    background: rgba(124, 58, 237, 0.15);
+    border-radius: 50px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    border-radius: 50px;
+    transition: width 0.5s ease;
+}
+
+.progressMeta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.completedBadge {
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* Certificates */
+.certificatesSection {
+    margin-bottom: 48px;
+}
+
+.certsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.certCard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(245, 158, 11, 0.04));
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    border-radius: 16px;
+    padding: 20px 24px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.certCard:hover {
+    border-color: rgba(251, 191, 36, 0.5);
+    transform: translateX(4px);
+}
+
+.certIcon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.certInfo {
+    flex: 1;
+}
+
+.certTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.certDate {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.certArrow {
+    font-size: 20px;
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+/* Recommendations */
+.recommendationsSection {
+    margin-top: 8px;
+}
+
+.recCard {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.25s ease;
+}
+
+.recCard:hover {
+    border-color: rgba(124, 58, 237, 0.3);
+    transform: translateY(-3px);
+}
+
+.recCat {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7c3aed;
+    margin-bottom: 8px;
+}
+
+.recTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+    line-height: 1.4;
+}
+
+.recMeta {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Empty */
 .empty {
     text-align: center;
-    padding: 80px 20px;
-    background: white;
-    border: 1px dashed #cbd5e1;
-    border-radius: 16px;
-    max-width: 600px;
-    margin: 0 auto;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    padding: 60px 0;
+    color: #64748b;
 }
 
 .emptyIcon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    opacity: 0.9;
+    font-size: 52px;
+    margin-bottom: 16px;
 }
 
 .empty h3 {
-    font-size: 1.5rem;
-    margin: 0 0 10px;
-    color: #0f172a;
+    font-size: 20px;
+    color: var(--text-primary);
+    margin: 0 0 8px;
 }
 
-.empty p {
-    color: #64748b;
-    margin: 0;
+/* Responsive */
+@media (max-width: 768px) {
+    .statsRow {
+        gap: 10px;
+    }
+
+    .statCard {
+        padding: 14px;
+        min-width: 90px;
+    }
+
+    .statNum {
+        font-size: 20px;
+    }
+
+    .courseProgressGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .continueCard {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

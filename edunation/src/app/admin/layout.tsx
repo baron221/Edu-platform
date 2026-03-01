@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import AIAssistant from '@/components/AIAssistant';
 import styles from './layout.module.css';
 
 const navItems = [
@@ -19,8 +20,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Sidebar */}
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
-                    <span className={styles.brandIcon}>🎓</span>
-                    <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
+                    <div className={styles.brandLogo}>
+                        <span className={styles.brandIcon}>🎓</span>
+                        <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
+                    </div>
                     <span className={styles.adminBadge}>{(session?.user as any)?.role === 'admin' ? 'ADMIN' : 'INSTRUCTOR'}</span>
                 </div>
 
@@ -70,6 +73,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <main className={styles.main}>
                 {children}
             </main>
+
+            {/* Global AI Assistant for Instructors/Admins */}
+            <AIAssistant />
         </div>
     );
 }

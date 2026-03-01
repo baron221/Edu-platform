@@ -5,6 +5,14 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 import AIAssistant from '@/components/AIAssistant';
+import AIQuizPlayer from '@/components/AIQuizPlayer';
+import ReactMarkdown from 'react-markdown';
+import MuxPlayer from '@mux/mux-player-react';
+import QuizViewer from '@/components/QuizViewer';
+import ResourceList from '@/components/ResourceList';
+import CertificateModal from '@/components/CertificateModal';
+import ReviewsSection from '@/components/ReviewsSection';
+import { useSession } from 'next-auth/react';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -14,7 +22,7 @@ function formatUZS(price: number, currLabel: string) {
 export default function CourseDetailPage() {
     const params = useParams();
     const id = params.id as string;
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,6 +38,10 @@ export default function CourseDetailPage() {
     const [error, setError] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
     const [updatingProgress, setUpdatingProgress] = useState(false);
+    const [showCert, setShowCert] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [processingPayment, setProcessingPayment] = useState(false);
+    const { data: session } = useSession();
 
     useEffect(() => {
         setLoading(true);
@@ -78,12 +90,52 @@ export default function CourseDetailPage() {
         }
     };
 
+    const handlePaymentClick = async (provider: string) => {
+        if (!session?.user) {
+            router.push('/login');
+            return;
+        }
+        setProcessingPayment(true);
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: course.id, provider })
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else if (res.status === 401) {
+                router.push('/login');
+            } else {
+                alert(data.error || 'Payment initialization failed.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Payment error occurred.');
+        } finally {
+            setProcessingPayment(false);
+        }
+    };
+
     const handleMarkComplete = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!activeLesson || !isEnrolled || updatingProgress) return;
+        if (e && e.stopPropagation) e.stopPropagation();
+        if (!activeLesson || !isEnrolled) return;
 
         const isCurrentlyCompleted = isLessonCompleted(activeLesson.id);
         const newCompletedStatus = !isCurrentlyCompleted;
+
+        // --- OPTIMISTIC UPDATE ---
+        const previousProgress = [...progress];
+
+        // Update local state immediately
+        setProgress(prev => {
+            const existing = prev.find(p => p.lessonId === activeLesson.id);
+            if (existing) {
+                return prev.map(p => p.lessonId === activeLesson.id ? { ...existing, completed: newCompletedStatus } : p);
+            }
+            return [...prev, { lessonId: activeLesson.id, completed: newCompletedStatus, updatedAt: new Date().toISOString() }];
+        });
 
         setUpdatingProgress(true);
         try {
@@ -97,18 +149,19 @@ export default function CourseDetailPage() {
                 })
             });
 
-            if (res.ok) {
-                const updatedProgress = await res.json();
-                setProgress(prev => {
-                    const existing = prev.find(p => p.lessonId === activeLesson.id);
-                    if (existing) {
-                        return prev.map(p => p.lessonId === activeLesson.id ? updatedProgress : p);
-                    }
-                    return [...prev, updatedProgress];
-                });
+            if (!res.ok) {
+                throw new Error('Failed to update progress');
             }
+
+            const updatedProgress = await res.json();
+            // Optional: Sync with server data to ensure consistency (e.g. updatedAt timestamps)
+            setProgress(prev => prev.map(p => p.lessonId === activeLesson.id ? updatedProgress : p));
+
         } catch (err) {
             console.error('Error updating progress:', err);
+            // --- ROLLBACK ON ERROR ---
+            setProgress(previousProgress);
+            alert('Failed to update progress. Reverting changes.');
         } finally {
             setUpdatingProgress(false);
         }
@@ -118,8 +171,21 @@ export default function CourseDetailPage() {
     if (loading || !course) {
         return (
             <div className={styles.page}>
-                <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
-                    <h2>Loading...</h2>
+                <div className={`${styles.skeleton} ${styles.skeletonHero}`} />
+                <div className="container">
+                    <div className={styles.layout}>
+                        <div className={styles.main}>
+                            <div className={`${styles.skeleton} ${styles.videoWrapper}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`} />
+                        </div>
+                        <div className={styles.sidebar}>
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className={`${styles.skeleton} ${styles.skeletonSidebarCard}`} />
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -140,51 +206,46 @@ export default function CourseDetailPage() {
     const durationStr = '12 hours'; // Placeholder for total duration
     const instructorAvatar = '👨‍🏫'; // Placeholder
 
+    // Parse multi-lingual description (Format assumption: "English text | Uzbek text" or separated by newlines)
+    let localizedDescription = course.description || '';
+    if (localizedDescription) {
+        const parts = localizedDescription.includes('|')
+            ? localizedDescription.split('|')
+            : localizedDescription.split('\n').filter((p: string) => p.trim().length > 0);
+
+        if (parts.length > 1) {
+            // If language is Uzbek ('uz' or 'uz-UZ'), pick the second part, else the first part (English)
+            if (language === 'uz') {
+                localizedDescription = parts[1]?.trim() || parts[0]?.trim();
+            } else if (language === 'ru') {
+                localizedDescription = parts[2]?.trim() || parts[0]?.trim();
+            } else {
+                localizedDescription = parts[0]?.trim();
+            }
+        }
+    }
+
     return (
         <div className={styles.page}>
             {/* Hero */}
-            <div className={styles.hero} style={{
-                background: course.category === 'Web Development'
-                    ? 'linear-gradient(135deg, #0f0a2e 0%, #1e1b4b 100%)'
-                    : course.category === 'Design'
-                        ? 'linear-gradient(135deg, #180228 0%, #2d1345 100%)'
-                        : 'linear-gradient(135deg, #071428 0%, #0f2445 100%)'
-            }}>
+            <div className={styles.hero}>
+                <div className={styles.heroBg}>
+                    <div className={styles.glowOrb1} />
+                    <div className={styles.glowOrb2} />
+                </div>
                 <div className="container">
                     <div className={styles.heroContent}>
                         <Link href="/courses" className={styles.back}>{t.courseDetail.back}</Link>
                         <div className={styles.heroCat}>{course.category}</div>
                         <h1 className={styles.heroTitle}>{course.title}</h1>
-                        <p className={styles.heroDesc}>{course.description}</p>
+                        <p className={styles.heroDesc}>{localizedDescription}</p>
 
-                        <div className={styles.heroMeta}>
-                            <div className={styles.metaItem}>
-                                <span className={styles.stars}>{'★'.repeat(Math.floor(rating))}</span>
-                                <span className={styles.ratingNum}>{rating}</span>
-                                <span className={styles.ratingCount}>({reviewsCount.toLocaleString()} {t.courseDetail.reviews})</span>
-                            </div>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>👥 {students.toLocaleString()} {t.courseDetail.students}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>📹 {totalLessons} {t.courseDetail.lessons}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>⏱ {durationStr}</span>
-                            <div className={styles.metaDivider} />
-                            <span className={styles.metaItem}>
-                                {course.isFree
-                                    ? <span className="badge badge-free">{t.courseDetail.freeCourseLabel}</span>
-                                    : <span className="badge badge-premium">{t.shared.premium}</span>
-                                }
-                            </span>
-                        </div>
-
-                        <div className={styles.instructor}>
+                        <div className={styles.premiumInstructorPill}>
                             <div className={styles.instructorAvatar}>{instructorAvatar}</div>
-                            <div>
-                                <div className={styles.instructorLabel}>{t.courseDetail.instructor}</div>
-                                <div className={styles.instructorName}>{course.instructor}</div>
-                            </div>
+                            <span className={styles.instructorName}>{course.instructor}</span>
                         </div>
+
+
                     </div>
                 </div>
             </div>
@@ -197,7 +258,28 @@ export default function CourseDetailPage() {
                         <div className={styles.videoSection}>
                             <div className={styles.videoWrapper}>
                                 {activeLesson && canWatch(activeLesson) ? (
-                                    activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
+                                    activeLesson.muxPlaybackId ? (
+                                        <MuxPlayer
+                                            playbackId={activeLesson.muxPlaybackId}
+                                            metadata={{
+                                                video_id: activeLesson.id,
+                                                video_title: activeLesson.title,
+                                            }}
+                                            streamType="on-demand"
+                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            onEnded={() => {
+                                                if (!isLessonCompleted(activeLesson.id)) {
+                                                    handleMarkComplete(activeLesson.id);
+                                                }
+                                            }}
+                                        />
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
+                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
+                                            <div className={styles.spinner}></div>
+                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
+                                            <p className={styles.lockedDesc}>This video was just uploaded to Mux and is currently being encoded. Check back in a few minutes!</p>
+                                        </div>
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
                                         <iframe
                                             className={styles.videoIframe}
                                             src={activeLesson.videoUrl}
@@ -206,10 +288,10 @@ export default function CourseDetailPage() {
                                             allowFullScreen
                                         />
                                     ) : (
-                                        <div className={styles.locked}>
+                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.lockedIcon}>⏳</div>
-                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
-                                            <p className={styles.lockedDesc}>The video for this lesson is currently being processed or has not been uploaded yet.</p>
+                                            <h3 className={styles.lockedTitle}>Not Uploaded</h3>
+                                            <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
                                         </div>
                                     )
                                 ) : activeLesson ? (
@@ -247,6 +329,35 @@ export default function CourseDetailPage() {
                                             </button>
                                         )}
                                     </div>
+
+                                    {/* Render the AI-generated Lesson Text Content */}
+                                    {activeLesson.content && (
+                                        <div className={styles.lessonTextContent}>
+                                            <ReactMarkdown>{activeLesson.content}</ReactMarkdown>
+                                        </div>
+                                    )}
+
+                                    {/* AI-Generated Extra Resources */}
+                                    {isEnrolled && canWatch(activeLesson) && activeLesson.resources && activeLesson.resources.length > 0 && (
+                                        <div style={{ marginTop: '24px' }}>
+                                            <ResourceList resources={activeLesson.resources} />
+                                        </div>
+                                    )}
+
+                                    {/* Pre-Generated Lesson Quiz */}
+                                    {isEnrolled && canWatch(activeLesson) && activeLesson.quizzes && activeLesson.quizzes.length > 0 && (
+                                        <div style={{ marginTop: '24px' }}>
+                                            <QuizViewer quiz={activeLesson.quizzes[0]} />
+                                        </div>
+                                    )}
+
+                                    {/* Dynamic On-Demand AI Practice Space */}
+                                    {isEnrolled && canWatch(activeLesson) && (!activeLesson.quizzes || activeLesson.quizzes.length === 0) && (
+                                        <div className={styles.quizWrapper} style={{ marginTop: '24px' }}>
+                                            <h3 className={styles.quizSectionTitle}>🤖 Dynamic AI Practice Space</h3>
+                                            <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -260,6 +371,21 @@ export default function CourseDetailPage() {
 
                     {/* Sidebar */}
                     <div className={styles.sidebar}>
+                        {/* Essential Stats Card */}
+                        <div className={styles.statsCard}>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>⏱ Duration</span>
+                                <span className={styles.statValue}>{durationStr}</span>
+                            </div>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>📚 Level</span>
+                                <span className={styles.statValue}>{course.level}</span>
+                            </div>
+                            <div className={styles.statRow}>
+                                <span className={styles.statLabel}>📹 Lessons</span>
+                                <span className={styles.statValue}>{totalLessons} lessons</span>
+                            </div>
+                        </div>
                         {getsUniversityFreeAccess && !isEnrolled && (
                             <div className={styles.enrollCard} style={{ border: '2px solid #10b981' }}>
                                 <div className={styles.enrollFree}>University Free Access</div>
@@ -274,7 +400,7 @@ export default function CourseDetailPage() {
                             <div className={styles.enrollCard}>
                                 <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
                                 <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>
-                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
+                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setShowPaymentModal(true)} disabled={enrolling}>
                                     {enrolling ? 'Enrolling...' : t.courseDetail.enrollNow}
                                 </button>
                                 <Link href="/pricing" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}>
@@ -291,19 +417,6 @@ export default function CourseDetailPage() {
                                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
                                     {enrolling ? 'Enrolling...' : t.courseDetail.getAccessFree}
                                 </button>
-                            </div>
-                        )}
-
-                        {isEnrolled && (
-                            <div className={styles.enrollCard}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h4 style={{ margin: 0 }}>Your Progress</h4>
-                                    <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{progressPercentage}%</span>
-                                </div>
-                                <div style={{ background: 'var(--card-bg-hover)', height: '8px', borderRadius: '4px', overflow: 'hidden', marginTop: '10px' }}>
-                                    <div style={{ background: 'var(--primary-color)', height: '100%', width: `${progressPercentage}%`, transition: 'width 0.3s' }}></div>
-                                </div>
-                                <p className={styles.enrollDesc} style={{ marginTop: '10px' }}>{completedLessonsCount} of {totalLessons} lessons completed</p>
                             </div>
                         )}
 
@@ -340,12 +453,109 @@ export default function CourseDetailPage() {
                                 ))}
                             </div>
                         </div>
+
+                        {isEnrolled && (
+                            <div className={styles.enrollCard}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{t.courseDetail.yourProgress}</h4>
+                                    <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '16px' }}>{progressPercentage}%</span>
+                                </div>
+                                <div className={styles.premiumProgressTrack}>
+                                    <div
+                                        className={styles.premiumProgressFill}
+                                        style={{ width: `${progressPercentage}%` }}
+                                    />
+                                </div>
+                                <p className={styles.enrollDesc} style={{ margin: '14px 0 0', fontWeight: 500 }}>
+                                    {t.courseDetail.lessonsCompleted(completedLessonsCount, totalLessons)}
+                                </p>
+                                {progressPercentage === 100 && (
+                                    <button
+                                        className="btn btn-primary"
+                                        style={{ width: '100%', justifyContent: 'center', marginTop: '1rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', border: 'none', color: '#1e293b', fontWeight: 'bold' }}
+                                        onClick={async () => {
+                                            // Call API to ensure certificate is recorded
+                                            await fetch('/api/certificates', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ courseId: course.id })
+                                            });
+                                            setShowCert(true);
+                                        }}
+                                    >
+                                        🏆 View Certificate
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* Reviews Section */}
+            <div className="container" style={{ paddingBottom: '60px' }}>
+                <ReviewsSection courseId={course.id} isEnrolled={isEnrolled} />
+            </div>
+
             {/* Floating AI Tutor */}
-            <AIAssistant />
+            <AIAssistant
+                context={`The student is currently viewing the course titled "${course.title}" (${course.category}). ${activeLesson ? `They are currently on the lesson: "${activeLesson.title}".` : ''}`}
+                lessonId={activeLesson?.id}
+            />
+
+            {showCert && (
+                <CertificateModal
+                    courseName={course.title}
+                    studentName={session?.user?.name || 'Dedicated Learner'}
+                    instructorName={course.instructor}
+                    date={new Date().toISOString()}
+                    onClose={() => setShowCert(false)}
+                />
+            )}
+
+            {showPaymentModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
+                    <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.paymentHeader}>
+                            <h2>Select Payment Method</h2>
+                            <p>Choose how you would like to secure your access to <strong>{course.title}</strong>.</p>
+                        </div>
+
+                        <div className={styles.paymentOptions}>
+                            <button
+                                className={`${styles.payBtn} ${styles.paymeBtn}`}
+                                onClick={() => handlePaymentClick('payme')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>Payme</div>
+                                <span>Pay with Payme</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.clickBtn}`}
+                                onClick={() => handlePaymentClick('click')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>CLICK</div>
+                                <span>Pay with Click</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.stripeBtn}`}
+                                onClick={() => handlePaymentClick('stripe')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>💳</div>
+                                <span>Visa / Mastercard</span>
+                            </button>
+                        </div>
+
+                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

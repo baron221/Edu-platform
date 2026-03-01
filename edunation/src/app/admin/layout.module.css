@@ -22,10 +22,17 @@
 
 .brand {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     padding: 24px 20px;
     border-bottom: 1px solid #f1f5f9;
+}
+
+.brandLogo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .brandIcon {
@@ -48,7 +55,6 @@
 }
 
 .adminBadge {
-    margin-left: auto;
     padding: 2px 8px;
     background: rgba(124, 58, 237, 0.1);
     color: #7c3aed;

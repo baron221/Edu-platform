@@ -1,0 +1,341 @@
+.container {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    margin-top: 32px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Intro State */
+.introState {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.introState h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.introState p {
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto 24px;
+}
+
+.errorBanner {
+    background: #fef2f2;
+    color: #ef4444;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    border: 1px solid #fecaca;
+}
+
+.startBtn {
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+.startBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+}
+
+.startBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Quiz Active State */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.badge {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.progressText {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.progressBar {
+    width: 100%;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    margin-bottom: 32px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    border-radius: 10px;
+    transition: width 0.3s ease-out;
+}
+
+.questionText {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+.optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.optionBtn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.optionBtn:hover:not(:disabled) {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.optionLetter {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.optionText {
+    font-size: 15px;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* Option States */
+.selectedOption {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+}
+
+.selectedOption .optionLetter {
+    background: #7c3aed;
+    color: white;
+}
+
+.correctOption {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.correctOption .optionLetter {
+    background: #10b981;
+    color: white;
+}
+
+.wrongOption {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.wrongOption .optionLetter {
+    background: #ef4444;
+    color: white;
+}
+
+.disabledOption {
+    opacity: 0.6;
+}
+
+/* Explanation */
+.explanationCorrect {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.explanationCorrect h4 {
+    color: #059669;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.explanationCorrect p {
+    color: #065f46;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.explanationWrong {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.explanationWrong h4 {
+    color: #dc2626;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.explanationWrong p {
+    color: #991b1b;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submitBtn {
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.submitBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nextBtn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.nextBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* Results State */
+.resultState {
+    text-align: center;
+    padding: 32px 0;
+}
+
+.scoreTrophy {
+    font-size: 64px;
+    margin-bottom: 16px;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.resultState h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 28px;
+    color: #0f172a;
+    margin-bottom: 16px;
+}
+
+.scoreDisplay {
+    font-size: 20px;
+    color: #475569;
+    margin-bottom: 16px;
+    background: #f8fafc;
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: 1px solid #e2e8f0;
+}
+
+.scoreDisplay strong {
+    color: #7c3aed;
+    font-size: 24px;
+}
+
+.scoreMessage {
+    color: #64748b;
+    font-size: 16px;
+    margin-bottom: 32px;
+}

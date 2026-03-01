@@ -141,7 +141,20 @@ export default function CoursesPage() {
                         </div>
                     ) : (
                         <div className={styles.loadingGrid}>
-                            {[...Array(6)].map((_, i) => <div key={i} className={styles.skeleton} />)}
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className={styles.skeletonCard}>
+                                    <div className={`${styles.skeleton} ${styles.skeletonThumb}`} />
+                                    <div className={styles.skeletonBody}>
+                                        <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: '40%' }} />
+                                        <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: '80%', height: '24px' }} />
+                                        <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: '60%' }} />
+                                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between' }}>
+                                            <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: '30%', height: '20px' }} />
+                                            <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: '30%', height: '20px' }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
