@@ -1,97 +1,68 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import prisma from '@/lib/prisma';
+'use client';
+import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { useEffect, useState } from 'react';
 
-export const metadata = {
-    title: 'My Learning | EduNation',
-};
-
-export default function DashboardPage() {
-    return <DashboardContent />;
+interface DashboardData {
+    enrollments: any[];
+    allProgress: any[];
+    user: { currentStreak: number; lastActivityDate: string | null; points: number } | null;
+    certificates: any[];
+    recommendations: any[];
+    nextLesson: any;
+    recentEnrollmentTitle: string | null;
+    recentEnrollmentSlug: string | null;
+    activeStreak: number;
+    totalLessonsDone: number;
+    totalCompleted: number;
 }
 
-async function DashboardContent() {
-    const session = await getServerSession(authOptions);
-    const userId = (session?.user as any)?.id;
+export default function DashboardPage() {
+    const { t } = useLanguage();
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!userId) {
-        redirect('/login?callbackUrl=/dashboard');
+    useEffect(() => {
+        fetch('/api/dashboard')
+            .then(r => r.json())
+            .then(d => { setData(d); setLoading(false); })
+            .catch(() => setLoading(false));
+    }, []);
+
+    if (loading || !data) {
+        return (
+            <div className={styles.page}>
+                <section className={styles.header}>
+                    <div className="container">
+                        <div className={styles.headerFlex}>
+                            <div>
+                                <div style={{ width: 200, height: 36, background: 'var(--border)', borderRadius: 8, marginBottom: 8 }} />
+                                <div style={{ width: 140, height: 20, background: 'var(--border)', borderRadius: 6 }} />
+                            </div>
+                        </div>
+                        <div className={styles.statsRow}>
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className={styles.statCard} style={{ background: 'var(--border)' }} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        );
     }
 
-    // Fetch enrollments with course + lesson count
-    const enrollments = await prisma.enrollment.findMany({
-        where: { userId },
-        include: {
-            course: {
-                include: {
-                    _count: { select: { lessons: true, enrollments: true } }
-                }
-            }
-        },
-        orderBy: { enrolledAt: 'desc' }
-    });
+    const {
+        enrollments, allProgress, certificates, recommendations,
+        nextLesson, recentEnrollmentTitle, recentEnrollmentSlug,
+        activeStreak, totalLessonsDone, totalCompleted, user
+    } = data;
 
-    // Fetch all progress for per-course progress bars
-    const allProgress = await prisma.progress.findMany({
-        where: { userId, completed: true },
-    });
-
-    // Fetch user info (streak, points)
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { currentStreak: true, lastActivityDate: true, points: true }
-    });
-
-    // Fetch certificates
-    const certificates = await prisma.certificate.findMany({
-        where: { userId },
-        include: { course: { select: { title: true, slug: true, category: true } } },
-        orderBy: { issuedAt: 'desc' }
-    });
-
-    // Calculate streak
-    let activeStreak = user?.currentStreak || 0;
-    if (user?.lastActivityDate) {
-        const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
-        const lastMidnight = new Date(user.lastActivityDate); lastMidnight.setHours(0, 0, 0, 0);
-        const diffDays = Math.round((todayMidnight.getTime() - lastMidnight.getTime()) / 86400000);
-        if (diffDays > 1) activeStreak = 0;
-    }
-
-    // Find "Continue Learning" — first non-completed enrollment
-    const recentEnrollment = enrollments.find(e => !e.completed);
-    let nextLesson = null;
-    if (recentEnrollment) {
-        const completedIds = allProgress.filter(p => p.courseId === recentEnrollment.courseId).map(p => p.lessonId);
-        const allLessons = await prisma.lesson.findMany({
-            where: { courseId: recentEnrollment.courseId },
-            orderBy: { order: 'asc' }
-        });
-        nextLesson = allLessons.find(l => !completedIds.includes(l.id));
-    }
-
-    // Recommendations
-    const enrolledCourseIds = enrollments.map(e => e.courseId);
-    const recommendations = await prisma.course.findMany({
-        where: { id: { notIn: enrolledCourseIds }, published: true },
-        take: 3,
-        orderBy: { enrollments: { _count: 'desc' } },
-        include: { _count: { select: { lessons: true, enrollments: true } } }
-    });
-
-    // Helper: progress % per course
     const progressFor = (courseId: string, totalLessons: number) => {
         if (totalLessons === 0) return 0;
-        const done = allProgress.filter(p => p.courseId === courseId).length;
+        const done = allProgress.filter((p: any) => p.courseId === courseId).length;
         return Math.round((done / totalLessons) * 100);
     };
-
-    const totalLessonsDone = allProgress.length;
-    const totalEnrolled = enrollments.length;
-    const totalCompleted = enrollments.filter(e => e.completed).length;
 
     return (
         <div className={styles.page}>
@@ -100,33 +71,33 @@ async function DashboardContent() {
                 <div className="container">
                     <div className={styles.headerFlex}>
                         <div>
-                            <h1 className={styles.title}>My Learning</h1>
-                            <p className={styles.subtitle}>Welcome back, {session?.user?.name?.split(' ')[0] || 'Student'}! 👋</p>
+                            <h1 className={styles.title}>{t.dashboard.title}</h1>
+                            <p className={styles.subtitle}>{t.dashboard.subtitle} 👋</p>
                         </div>
-                        <div className={styles.streakBadge}>🔥 {activeStreak} Day Streak</div>
+                        <div className={styles.streakBadge}>🔥 {activeStreak} {t.dashboard.streak}</div>
                     </div>
 
                     {/* Stats Row */}
                     <div className={styles.statsRow}>
                         <div className={styles.statCard}>
-                            <span className={styles.statNum}>{totalEnrolled}</span>
-                            <span className={styles.statLabel}>Courses Enrolled</span>
+                            <span className={styles.statNum}>{enrollments.length}</span>
+                            <span className={styles.statLabel}>{t.dashboard.stats.enrolled}</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statNum}>{totalLessonsDone}</span>
-                            <span className={styles.statLabel}>Lessons Completed</span>
+                            <span className={styles.statLabel}>{t.dashboard.stats.lessonsCompleted}</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statNum}>{totalCompleted}</span>
-                            <span className={styles.statLabel}>Courses Finished</span>
+                            <span className={styles.statLabel}>{t.dashboard.stats.coursesFinished}</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statNum}>{certificates.length}</span>
-                            <span className={styles.statLabel}>Certificates Earned</span>
+                            <span className={styles.statLabel}>{t.dashboard.stats.certificates}</span>
                         </div>
                         <div className={styles.statCard}>
                             <span className={styles.statNum}>{user?.points || 0}</span>
-                            <span className={styles.statLabel}>XP Points</span>
+                            <span className={styles.statLabel}>{t.dashboard.stats.xp}</span>
                         </div>
                     </div>
                 </div>
@@ -136,27 +107,28 @@ async function DashboardContent() {
                 <div className="container">
 
                     {/* Continue Learning */}
-                    {nextLesson && recentEnrollment && (
+                    {nextLesson && recentEnrollmentSlug && (
                         <div className={styles.continueSection}>
-                            <h2 className={styles.sectionTitle}>▶ Continue Learning</h2>
+                            <h2 className={styles.sectionTitle}>{t.dashboard.continueLearning}</h2>
                             <div className={styles.continueCard}>
                                 <div className={styles.continueInfo}>
-                                    <span className={styles.continueCourseName}>{recentEnrollment.course.title}</span>
+                                    <span className={styles.continueCourseName}>{recentEnrollmentTitle}</span>
                                     <h3 className={styles.continueLessonTitle}>{nextLesson.title}</h3>
                                 </div>
-                                <Link href={`/courses/${recentEnrollment.course.slug}`} className="btn btn-primary" style={{ flexShrink: 0 }}>
-                                    Resume →
+                                <Link href={`/courses/${recentEnrollmentSlug}`} className="btn btn-primary" style={{ flexShrink: 0 }}>
+                                    {t.dashboard.resume}
                                 </Link>
                             </div>
                         </div>
                     )}
 
-                    {/* My Courses with progress */}
-                    <h2 className={styles.sectionTitle}>📚 My Courses</h2>
+                    {/* My Courses */}
+                    <h2 className={styles.sectionTitle}>{t.dashboard.myCourses}</h2>
                     {enrollments.length > 0 ? (
                         <div className={styles.courseProgressGrid}>
                             {enrollments.map((en: any) => {
                                 const pct = progressFor(en.courseId, en.course._count.lessons);
+                                const doneLessons = allProgress.filter((p: any) => p.courseId === en.courseId).length;
                                 return (
                                     <Link key={en.course.id} href={`/courses/${en.course.slug}`} className={styles.progressCard}>
                                         <div className={styles.progressCardHeader}>
@@ -168,8 +140,8 @@ async function DashboardContent() {
                                             <div className={styles.progressFill} style={{ width: `${pct}%` }} />
                                         </div>
                                         <div className={styles.progressMeta}>
-                                            <span>{allProgress.filter(p => p.courseId === en.courseId).length}/{en.course._count.lessons} lessons</span>
-                                            {en.completed && <span className={styles.completedBadge}>✅ Completed</span>}
+                                            <span>{t.dashboard.lessonsProgress(doneLessons, en.course._count.lessons)}</span>
+                                            {en.completed && <span className={styles.completedBadge}>{t.dashboard.completed}</span>}
                                         </div>
                                     </Link>
                                 );
@@ -178,10 +150,10 @@ async function DashboardContent() {
                     ) : (
                         <div className={styles.empty}>
                             <div className={styles.emptyIcon}>📚</div>
-                            <h3>No courses yet</h3>
-                            <p>Explore our catalog to start learning today.</p>
+                            <h3>{t.dashboard.noCourses}</h3>
+                            <p>{t.dashboard.noCoursesDesc}</p>
                             <Link href="/courses" className="btn btn-primary" style={{ marginTop: '20px', display: 'inline-block' }}>
-                                Browse Courses
+                                {t.dashboard.browseCourses}
                             </Link>
                         </div>
                     )}
@@ -189,7 +161,7 @@ async function DashboardContent() {
                     {/* Certificates */}
                     {certificates.length > 0 && (
                         <div className={styles.certificatesSection}>
-                            <h2 className={styles.sectionTitle}>🎓 My Certificates</h2>
+                            <h2 className={styles.sectionTitle}>{t.dashboard.myCertificates}</h2>
                             <div className={styles.certsGrid}>
                                 {certificates.map((cert: any) => (
                                     <Link key={cert.id} href={`/certificate/${cert.id}`} className={styles.certCard}>
@@ -197,7 +169,7 @@ async function DashboardContent() {
                                         <div className={styles.certInfo}>
                                             <div className={styles.certTitle}>{cert.course.title}</div>
                                             <div className={styles.certDate}>
-                                                Issued {new Date(cert.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                                {t.dashboard.certIssued} {new Date(cert.issuedAt).toLocaleDateString()}
                                             </div>
                                         </div>
                                         <div className={styles.certArrow}>→</div>
@@ -210,8 +182,8 @@ async function DashboardContent() {
                     {/* Recommendations */}
                     {recommendations.length > 0 && (
                         <div className={styles.recommendationsSection}>
-                            <h2 className={styles.sectionTitle}>✨ Recommended For You</h2>
-                            <p className={styles.sectionSubtitle}>Popular courses you haven&apos;t taken yet.</p>
+                            <h2 className={styles.sectionTitle}>{t.dashboard.recommended}</h2>
+                            <p className={styles.sectionSubtitle}>{t.dashboard.recommendedDesc}</p>
                             <div className="grid-3">
                                 {recommendations.map((course: any) => (
                                     <Link key={course.id} href={`/courses/${course.slug}`} className={styles.recCard}>
