@@ -43,12 +43,12 @@ export default function InstructorsPage() {
             {/* Hero */}
             <section className={styles.hero}>
                 <div className="container">
-                    <div className="section-label" style={{ margin: '0 auto 16px' }}>Our Experts</div>
+                    <div className="section-label" style={{ margin: '0 auto 16px' }}>{t.instructors.label}</div>
                     <h1 className={styles.heroTitle}>
-                        Meet Our <span className="gradient-text">Instructors</span>
+                        {t.instructors.title1} <span className="gradient-text">{t.instructors.titleGrad}</span>
                     </h1>
                     <p className={styles.heroSub}>
-                        Learn from industry professionals with real-world experience.
+                        {t.instructors.subtitle}
                     </p>
                 </div>
             </section>
@@ -65,8 +65,8 @@ export default function InstructorsPage() {
                     ) : instructors.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '100px 0', background: 'white', border: '1px dashed #cbd5e1', borderRadius: '32px', marginBottom: '80px' }}>
                             <div style={{ fontSize: 72, marginBottom: 24 }}>👨‍🏫</div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>No instructors yet</h3>
-                            <p style={{ color: '#64748b' }}>Check back later for new experts.</p>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{t.instructors.noInstructors}</h3>
+                            <p style={{ color: '#64748b' }}>{t.instructors.noInstructorsDesc}</p>
                         </div>
                     ) : (
                         <div className={styles.grid}>
@@ -108,19 +108,19 @@ export default function InstructorsPage() {
                                         <div className={styles.stats}>
                                             <div className={styles.stat}>
                                                 <span className={styles.statNum}>{instructor.courseCount}</span>
-                                                <span className={styles.statLabel}>Courses</span>
+                                                <span className={styles.statLabel}>{t.instructors.courses}</span>
                                             </div>
                                             <div className={styles.stat}>
                                                 <span className={styles.statNum}>{instructor.totalStudents.toLocaleString()}</span>
-                                                <span className={styles.statLabel}>Students</span>
+                                                <span className={styles.statLabel}>{t.instructors.students}</span>
                                             </div>
                                             <div className={styles.stat}>
                                                 <span className={styles.statNum}>{instructor.avgRating > 0 ? `${instructor.avgRating}★` : '—'}</span>
-                                                <span className={styles.statLabel}>Rating</span>
+                                                <span className={styles.statLabel}>{t.instructors.rating}</span>
                                             </div>
                                         </div>
 
-                                        <div className={styles.viewBtn}>View Profile →</div>
+                                        <div className={styles.viewBtn}>{t.instructors.viewProfile}</div>
                                     </Link>
                                 );
                             })}
@@ -130,10 +130,10 @@ export default function InstructorsPage() {
                     {/* Become instructor CTA */}
                     <div className={styles.becomeCta}>
                         <div className={styles.becomeInner}>
-                            <h2>Share your expertise with the world</h2>
-                            <p>Join our instructor community and start earning from your knowledge today.</p>
+                            <h2>{t.instructors.ctaTitle}</h2>
+                            <p>{t.instructors.ctaDesc}</p>
                             <Link href="/instructor/subscribe" className="btn btn-primary btn-lg">
-                                Become an Instructor →
+                                {t.instructors.ctaBtn}
                             </Link>
                         </div>
                     </div>

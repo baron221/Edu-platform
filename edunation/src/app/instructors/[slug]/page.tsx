@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import CourseCard, { CourseDB } from '@/components/CourseCard';
 import styles from './page.module.css';
 
@@ -31,6 +32,7 @@ const planLabel: Record<string, { label: string; color: string }> = {
 
 export default function InstructorProfilePage() {
     const { slug } = useParams() as { slug: string };
+    const { t } = useLanguage();
     const [data, setData] = useState<InstructorData | null>(null);
     const [notFound, setNotFound] = useState(false);
 
@@ -43,8 +45,8 @@ export default function InstructorProfilePage() {
     if (notFound) return (
         <div style={{ textAlign: 'center', padding: '120px 24px', color: '#94a3b8' }}>
             <div style={{ fontSize: 60 }}>🔍</div>
-            <h2>Instructor not found</h2>
-            <Link href="/instructors" className="btn btn-primary" style={{ marginTop: 24, display: 'inline-block' }}>Browse Instructors</Link>
+            <h2>{t.instructorProfile.notFound}</h2>
+            <Link href="/instructors" className="btn btn-primary" style={{ marginTop: 24, display: 'inline-block' }}>{t.instructorProfile.browse}</Link>
         </div>
     );
 
@@ -89,10 +91,10 @@ export default function InstructorProfilePage() {
 
                             {/* Social links */}
                             <div className={styles.socialLinks}>
-                                {profile.website && <a href={profile.website} target="_blank" rel="noopener" className={styles.socialLink}>🌐 Website</a>}
-                                {profile.twitter && <a href={`https://twitter.com/${profile.twitter}`} target="_blank" rel="noopener" className={styles.socialLink}>🐦 Twitter</a>}
-                                {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener" className={styles.socialLink}>💼 LinkedIn</a>}
-                                {profile.youtube && <a href={profile.youtube} target="_blank" rel="noopener" className={styles.socialLink}>▶️ YouTube</a>}
+                                {profile.website && <a href={profile.website} target="_blank" rel="noopener" className={styles.socialLink}>🌐 {t.instructorProfile.website}</a>}
+                                {profile.twitter && <a href={`https://twitter.com/${profile.twitter}`} target="_blank" rel="noopener" className={styles.socialLink}>🐦 {t.instructorProfile.twitter}</a>}
+                                {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener" className={styles.socialLink}>💼 {t.instructorProfile.linkedin}</a>}
+                                {profile.youtube && <a href={profile.youtube} target="_blank" rel="noopener" className={styles.socialLink}>▶️ {t.instructorProfile.youtube}</a>}
                             </div>
                         </div>
                     </div>
@@ -101,22 +103,22 @@ export default function InstructorProfilePage() {
                     <div className={styles.statsRow}>
                         <div className={styles.statBox}>
                             <div className={styles.statNum}>{stats.courseCount}</div>
-                            <div className={styles.statLabel}>Courses</div>
+                            <div className={styles.statLabel}>{t.instructorProfile.courses}</div>
                         </div>
                         <div className={styles.statDivider} />
                         <div className={styles.statBox}>
                             <div className={styles.statNum}>{stats.totalStudents.toLocaleString()}</div>
-                            <div className={styles.statLabel}>Students</div>
+                            <div className={styles.statLabel}>{t.instructorProfile.students}</div>
                         </div>
                         <div className={styles.statDivider} />
                         <div className={styles.statBox}>
                             <div className={styles.statNum}>{stats.avgRating > 0 ? `${stats.avgRating} ★` : '—'}</div>
-                            <div className={styles.statLabel}>Avg Rating</div>
+                            <div className={styles.statLabel}>{t.instructorProfile.avgRating}</div>
                         </div>
                         <div className={styles.statDivider} />
                         <div className={styles.statBox}>
                             <div className={styles.statNum}>{stats.totalReviews.toLocaleString()}</div>
-                            <div className={styles.statLabel}>Reviews</div>
+                            <div className={styles.statLabel}>{t.instructorProfile.reviews}</div>
                         </div>
                     </div>
                 </div>
@@ -130,7 +132,7 @@ export default function InstructorProfilePage() {
                         <aside className={styles.sidebar}>
                             {profile.bio && (
                                 <div className={styles.bioCard}>
-                                    <h3 className={styles.sectionTitle}>About</h3>
+                                    <h3 className={styles.sectionTitle}>{t.instructorProfile.about}</h3>
                                     <p className={styles.bio}>{profile.bio}</p>
                                 </div>
                             )}
@@ -139,13 +141,13 @@ export default function InstructorProfilePage() {
                         {/* Right: Courses */}
                         <main className={styles.main}>
                             <h2 className={styles.sectionTitle}>
-                                Courses by {name} <span style={{ color: '#7c3aed', fontSize: '1rem', fontWeight: 600 }}>({courses.length})</span>
+                                {t.instructorProfile.coursesBy} {name} <span style={{ color: '#7c3aed', fontSize: '1rem', fontWeight: 600 }}>({courses.length})</span>
                             </h2>
                             {courses.length === 0 ? (
                                 <div style={{ color: '#64748b', textAlign: 'center', padding: '64px 0', background: 'white', borderRadius: '24px', border: '1px dashed #cbd5e1' }}>
                                     <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📚</div>
-                                    <h3>No courses yet</h3>
-                                    <p>Check back later for new content.</p>
+                                    <h3>{t.instructorProfile.noCourses}</h3>
+                                    <p>{t.instructorProfile.noCoursesDesc}</p>
                                 </div>
                             ) : (
                                 <div className="grid-3">
