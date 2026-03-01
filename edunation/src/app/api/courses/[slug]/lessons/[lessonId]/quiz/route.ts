@@ -6,7 +6,6 @@ import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-// Define the Strict JSON Schema for Gemini
 const quizSchema = z.object({
     questions: z.array(
         z.object({
@@ -17,6 +16,16 @@ const quizSchema = z.object({
         })
     ).length(5).describe("An array of exactly 5 multiple choice questions")
 });
+
+function getLangInstruction(language: string): string {
+    if (language === 'uz') {
+        return "Respond entirely in Uzbek language. All questions, options, and explanations must be written in Uzbek.";
+    }
+    if (language === 'ru') {
+        return "Respond entirely in Russian language. All questions, options, and explanations must be written in Russian.";
+    }
+    return "Respond entirely in English.";
+}
 
 export async function POST(
     request: NextRequest,
@@ -29,6 +38,9 @@ export async function POST(
         }
 
         const resolvedParams = await params;
+        const body = await request.json().catch(() => ({}));
+        const language: string = (body.language as string) || 'en';
+        const langInstruction = getLangInstruction(language);
 
         // 1. Fetch lesson + course context
         const lesson = await prisma.lesson.findUnique({
@@ -48,21 +60,25 @@ export async function POST(
 
         // Build prompt — use rich content if available, fall back to title + course context
         const prompt = hasContent
-            ? `You are an expert educational AI.
-Generate a 5-question multiple-choice quiz based STRICTLY on the following lesson text.
-Do not include external knowledge that isn't covered in the text.
-
-Course: ${lesson.course?.title || ''} (${lesson.course?.category || ''})
-Lesson Title: ${lesson.title}
-
-Lesson Content:
-${lesson.content}`
-            : `You are an expert educational AI.
-Generate a 5-question multiple-choice quiz that tests understanding of the topic "${lesson.title}" 
-from the course "${lesson.course?.title || 'the course'}" (category: ${lesson.course?.category || 'general'}).
-
-The quiz should cover fundamental concepts, best practices, and key ideas a student would learn 
-in a real video lesson on this topic. Make the questions practical and educational.`;
+            ? [
+                `You are an expert educational AI. ${langInstruction}`,
+                `Generate a 5-question multiple-choice quiz based STRICTLY on the following lesson text.`,
+                `Do not include external knowledge that is not covered in the text.`,
+                ``,
+                `Course: ${lesson.course?.title || ''} (${lesson.course?.category || ''})`,
+                `Lesson Title: ${lesson.title}`,
+                ``,
+                `Lesson Content:`,
+                lesson.content,
+            ].join('\n')
+            : [
+                `You are an expert educational AI. ${langInstruction}`,
+                `Generate a 5-question multiple-choice quiz that tests understanding of the topic "${lesson.title}"`,
+                `from the course "${lesson.course?.title || 'the course'}" (category: ${lesson.course?.category || 'general'}).`,
+                ``,
+                `The quiz should cover fundamental concepts, best practices, and key ideas a student would learn`,
+                `in a real video lesson on this topic. Make the questions practical and educational.`,
+            ].join('\n');
 
         // 2. Call Gemini to generate the quiz
         const { object: quizResponse } = await generateObject({
