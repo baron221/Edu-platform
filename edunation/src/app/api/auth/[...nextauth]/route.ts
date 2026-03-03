@@ -4,7 +4,9 @@ import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import prisma from '@/lib/prisma';
+import { notifyNewUser, notifySignIn } from '@/lib/telegram';
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -43,6 +45,39 @@ export const authOptions: NextAuthOptions = {
                     image: user.image,
                     role: user.role,
                 };
+            },
+        }),
+
+        // ── Telegram Login Widget ──────────────────────────────────────
+        CredentialsProvider({
+            id: 'telegram',
+            name: 'Telegram',
+            credentials: { telegramToken: { label: 'Telegram Token', type: 'text' } },
+            async authorize(credentials) {
+                if (!credentials?.telegramToken) return null;
+
+                try {
+                    const [b64, sig] = credentials.telegramToken.split('.');
+                    if (!b64 || !sig) return null;
+
+                    const payload = Buffer.from(b64, 'base64url').toString();
+                    const [userId, expiryStr] = payload.split(':');
+
+                    // Verify signature
+                    const secret = process.env.NEXTAUTH_SECRET ?? 'fallback';
+                    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+                    if (expected !== sig) return null;
+
+                    // Check expiry
+                    if (Date.now() > parseInt(expiryStr, 10)) return null;
+
+                    const user = await prisma.user.findUnique({ where: { id: userId } });
+                    if (!user) return null;
+
+                    return { id: user.id, name: user.name, email: user.email, image: user.image, role: user.role };
+                } catch {
+                    return null;
+                }
             },
         }),
     ],
@@ -107,6 +142,17 @@ export const authOptions: NextAuthOptions = {
                     data: { userId: user.id, plan: 'free', status: 'active' },
                 });
             }
+
+            // 🔔 Detect provider from Account table (created just before this event)
+            const account = await prisma.account.findFirst({ where: { userId: user.id } });
+            const provider = (account?.provider ?? 'email') as 'google' | 'github' | 'telegram' | 'email';
+            notifyNewUser({ name: user.name ?? null, email: user.email ?? null, role: (user as any).role ?? 'student', provider });
+        },
+
+        async signIn({ user, account }) {
+            // Fires on every successful sign-in (not just first time)
+            const provider = account?.provider ?? 'credentials';
+            notifySignIn({ name: user.name ?? null, email: user.email ?? null, provider });
         },
     },
 

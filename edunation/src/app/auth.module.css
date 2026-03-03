@@ -244,6 +244,18 @@
     transform: translateY(-1px);
 }
 
+.oauthTelegram {
+    background: #229ED9;
+    color: white;
+    box-shadow: 0 2px 12px rgba(34, 158, 217, 0.3);
+}
+
+.oauthTelegram:hover:not(:disabled) {
+    background: #1a8abf;
+    box-shadow: 0 4px 20px rgba(34, 158, 217, 0.45);
+    transform: translateY(-1px);
+}
+
 /* Loading Spinner */
 .spinner {
     display: inline-block;

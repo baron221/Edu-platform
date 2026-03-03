@@ -60,6 +60,57 @@ export default function LoginPage() {
         }
     };
 
+    const handleTelegram = () => {
+        setLoading('telegram');
+        setError('');
+
+        const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? '8657675755';
+        const origin = window.location.origin;
+        const returnTo = `${origin}/api/auth/telegram/callback`;
+
+        const popup = window.open(
+            `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(origin)}&return_to=${encodeURIComponent(returnTo)}&request_access=write`,
+            'telegram_login',
+            'width=550,height=470,top=200,left=200'
+        );
+
+        const onMessage = async (event: MessageEvent) => {
+            if (event.origin !== origin) return;
+            if (event.data?.type !== 'telegram_auth') return;
+
+            window.removeEventListener('message', onMessage);
+            clearInterval(closedTimer);
+
+            if (event.data.error) {
+                setError('Telegram sign-in failed: ' + event.data.error);
+                setLoading(null);
+                return;
+            }
+
+            try {
+                const result = await signIn('telegram', {
+                    redirect: false,
+                    telegramToken: event.data.token,
+                });
+                if (result?.error) throw new Error(result.error);
+            } catch (err: any) {
+                setError(err.message ?? 'Telegram sign-in failed.');
+                setLoading(null);
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+
+        // Reset loading if popup closed without auth
+        const closedTimer = setInterval(() => {
+            if (popup?.closed) {
+                clearInterval(closedTimer);
+                window.removeEventListener('message', onMessage);
+                setLoading(null);
+            }
+        }, 500);
+    };
+
     return (
         <div className={styles.page}>
             <div className={styles.bg} />
@@ -113,6 +164,26 @@ export default function LoginPage() {
                         )}
                         <span>{loading === 'github' ? t.shared.loading : 'Continue with GitHub'}</span>
                     </button>
+
+                    {/* Telegram */}
+                    <button
+                        type="button"
+                        className={`${styles.oauthBtn} ${styles.oauthTelegram}`}
+                        onClick={handleTelegram}
+                        disabled={loading !== null}
+                        id="btn-telegram-login"
+                    >
+                        {loading === 'telegram' ? (
+                            <span className={styles.spinner} />
+                        ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="12" fill="#29B6F6" />
+                                <path d="M17.76 7.28L15.4 17.6c-.17.76-.63.95-1.27.59l-3.5-2.58-1.69 1.63c-.19.18-.34.34-.7.34l.25-3.54 6.4-5.78c.28-.25-.06-.38-.43-.14L6.2 13.15 2.76 12.1c-.74-.23-.75-.74.15-1.1L16.71 6.18c.62-.23 1.16.14.96 1.1" />
+                            </svg>
+                        )}
+                        <span>{loading === 'telegram' ? t.shared.loading : 'Continue with Telegram'}</span>
+                    </button>
+
                 </div>
 
                 {error && (
