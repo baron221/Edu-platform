@@ -212,6 +212,12 @@ export const translations = {
             termsLink: 'Terms of Service',
             and: 'and',
             privacyLink: 'Privacy Policy',
+            methodEmail: 'Email',
+            methodPhone: 'Phone (UZB)',
+            roleLabel: 'I am signing up as',
+            roleWarning: 'Important: This cannot be changed later',
+            roleStudent: 'Student',
+            roleTeacher: 'Teacher',
         },
         // Shared
         shared: {
@@ -558,6 +564,12 @@ export const translations = {
             termsLink: 'Foydalanish shartlari',
             and: 'va',
             privacyLink: 'Maxfiylik siyosati',
+            methodEmail: 'Email',
+            methodPhone: 'Telefon (UZB)',
+            roleLabel: 'Men quyidagi sifatida ro\'yxatdan o\'tyapman',
+            roleWarning: 'Muhim: Buni keyin o\'zgartirib bo\'lmaydi',
+            roleStudent: 'Talaba',
+            roleTeacher: 'O\'qituvchi',
         },
         shared: {
             free: 'Bepul',
@@ -900,6 +912,12 @@ export const translations = {
             termsLink: 'Условиями использования',
             and: 'и',
             privacyLink: 'Политикой конфиденциальности',
+            methodEmail: 'Эл. почта',
+            methodPhone: 'Телефон (UZB)',
+            roleLabel: 'Я регистрируюсь как',
+            roleWarning: 'Важно: Это нельзя будет изменить',
+            roleStudent: 'Студент',
+            roleTeacher: 'Преподаватель',
         },
         shared: {
             free: 'Бесплатно',

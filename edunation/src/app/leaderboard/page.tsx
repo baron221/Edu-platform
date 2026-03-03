@@ -4,7 +4,7 @@ import Image from 'next/image';
 import styles from './page.module.css';
 
 interface LeaderboardUser {
-    id: string;
+    id: string;         
     name: string | null;
     image: string | null;
     points: number;

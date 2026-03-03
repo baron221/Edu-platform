@@ -65,6 +65,7 @@ model User {
   image         String?
   password      String? // hashed with bcryptjs (null for OAuth users)
   telegramId    String?   @unique // Telegram user ID for Telegram login
+  phone         String?   @unique // Phone number for OTP login (+998...)
   role          String    @default("student") // student | instructor | admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -91,6 +92,21 @@ model User {
   currentStreak       Int                   @default(0)
   lastActivityDate    DateTime?
   subscriptionPayments SubscriptionPayment[]
+}
+
+// =====================================================================
+// PHONE AUTHENTICATION
+// =====================================================================
+
+model PhoneOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
 }
 
 // =====================================================================
