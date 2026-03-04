@@ -86,6 +86,7 @@ model User {
   instructorSubscription InstructorSubscription?
   communityPosts         CommunityPost[]
   communityReplies       CommunityReply[]
+  communityMessages      CommunityMessage[]
 
   // Gamification
   points              Int                   @default(0)
@@ -427,8 +428,9 @@ model Community {
   description String?
   createdAt   DateTime @default(now())
 
-  course Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  posts  CommunityPost[]
+  course   Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  posts    CommunityPost[]
+  messages CommunityMessage[]
 }
 
 model CommunityPost {
@@ -456,6 +458,22 @@ model CommunityReply {
 
   post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model CommunityMessage {
+  id          String   @id @default(cuid())
+  communityId String
+  authorId    String
+  text        String
+  replyToId   String?  // optional: replying to another message
+  createdAt   DateTime @default(now())
+
+  community Community         @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo   CommunityMessage? @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies   CommunityMessage[] @relation("MessageReplies")
+
+  @@index([communityId, createdAt])
 }
 
 // =====================================================================

@@ -488,6 +488,29 @@ export default function CourseDetailPage() {
                                 )}
                             </div>
                         )}
+
+                        {/* Community Chat link */}
+                        <Link
+                            href={`/community/${course.id}`}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '12px 16px',
+                                background: 'rgba(124, 58, 237, 0.08)',
+                                border: '1px solid rgba(124, 58, 237, 0.2)',
+                                borderRadius: '12px',
+                                color: '#a78bfa',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '14px',
+                                marginTop: '12px',
+                                transition: 'background 0.15s',
+                            }}
+                        >
+                            💬 Course Community Chat
+                        </Link>
                     </div>
                 </div>
             </div>
