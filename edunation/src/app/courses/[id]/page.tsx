@@ -274,20 +274,29 @@ export default function CourseDetailPage() {
                                             }}
                                         />
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
-                                        // Local video uploaded via the /api/upload route
-                                        <video
-                                            key={activeLesson.id}
-                                            controls
-                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
-                                            onEnded={() => {
-                                                if (!isLessonCompleted(activeLesson.id)) {
-                                                    handleMarkComplete(activeLesson.id);
-                                                }
-                                            }}
+                                        // Local video — streamed through the protected /api/video/ endpoint
+                                        // which verifies auth + enrollment before serving bytes
+                                        <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', background: '#000' }}
+                                            onContextMenu={e => e.preventDefault()}
                                         >
-                                            <source src={activeLesson.videoUrl} />
-                                            Your browser does not support the video tag.
-                                        </video>
+                                            <video
+                                                key={activeLesson.id}
+                                                controls
+                                                controlsList="nodownload noremoteplayback"
+                                                disablePictureInPicture
+                                                style={{ width: '100%', height: '100%', borderRadius: '12px', background: '#000' }}
+                                                onContextMenu={e => e.preventDefault()}
+                                                onEnded={() => {
+                                                    if (!isLessonCompleted(activeLesson.id)) {
+                                                        handleMarkComplete(activeLesson.id);
+                                                    }
+                                                }}
+                                            >
+                                                {/* Route through protected API instead of serving /uploads/ directly */}
+                                                <source src={activeLesson.videoUrl.replace('/uploads/', '/api/video/')} />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.spinner}></div>

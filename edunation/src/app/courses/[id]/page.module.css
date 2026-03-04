@@ -149,7 +149,30 @@
     overflow: hidden;
     margin-bottom: 24px;
     border: 1px solid var(--border);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
+
+.videoWrapper video {
+    outline: none;
+}
+
+/* Hide the download button in most browsers */
+.videoWrapper video::-internal-media-controls-download-button {
+    display: none;
+}
+
+.videoWrapper video::-webkit-media-controls-enclosure {
+    overflow: hidden;
+}
+
+.videoWrapper video::-webkit-media-controls-panel {
+    width: calc(100% + 30px);
+    /* Move the '...' menu out of view if possible */
+}
+
 
 .videoIframe {
     width: 100%;
