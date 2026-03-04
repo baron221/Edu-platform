@@ -97,7 +97,7 @@ export default function LessonEditorPage() {
 
         try {
             // 1. Get a direct upload ticket from our new Mux API
-            const ticketRes = await fetch(`/api/admin/courses/${courseId}/lessons/${lessonId}/mux-upload`, {
+            const ticketRes = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/mux-upload`, {
                 method: 'POST',
             });
             const ticketData = await ticketRes.json();
