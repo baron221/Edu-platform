@@ -65,7 +65,7 @@ export default function CourseCard({ course }: Props) {
         <Link href={`/courses/${course.slug}`} className={styles.card}>
             {/* Thumbnail */}
             <div className={styles.thumbnail}>
-                {course.thumbnail && !imgError ? (
+                {course.thumbnail && !imgError && !course.thumbnail.includes('source.unsplash.com') ? (
                     <Image
                         src={course.thumbnail}
                         alt={course.title}

@@ -14,9 +14,9 @@ const nextConfig: NextConfig = {
         hostname: 'avatars.githubusercontent.com',
       },
       {
-        // Unsplash Images (both old and new domains)
+        // Picsum (reliable random course thumbnails)
         protocol: 'https',
-        hostname: 'source.unsplash.com',
+        hostname: 'picsum.photos',
       },
       {
         protocol: 'https',
