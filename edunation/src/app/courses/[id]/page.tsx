@@ -273,6 +273,21 @@ export default function CourseDetailPage() {
                                                 }
                                             }}
                                         />
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
+                                        // Local video uploaded via the /api/upload route
+                                        <video
+                                            key={activeLesson.id}
+                                            controls
+                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            onEnded={() => {
+                                                if (!isLessonCompleted(activeLesson.id)) {
+                                                    handleMarkComplete(activeLesson.id);
+                                                }
+                                            }}
+                                        >
+                                            <source src={activeLesson.videoUrl} />
+                                            Your browser does not support the video tag.
+                                        </video>
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.spinner}></div>
