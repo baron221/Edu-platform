@@ -81,11 +81,16 @@ export async function GET(
     const fileSize = stat.size;
     const rangeHeader = request.headers.get('range');
 
-    // Determine MIME type
     const ext = filePath.split('.').pop()?.toLowerCase();
     const mimeTypes: Record<string, string> = {
-        mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm',
-        mkv: 'video/x-matroska', avi: 'video/x-msvideo', m4v: 'video/mp4',
+        'mp4': 'video/mp4',
+        'mov': 'video/mp4',
+        'webm': 'video/webm',
+        'mkv': 'video/x-matroska',
+        'avi': 'video/x-msvideo',
+        'm4v': 'video/mp4',
+        '3gp': 'video/3gpp',
+        'wmv': 'video/x-ms-wmv'
     };
     const contentType = mimeTypes[ext || ''] || 'video/mp4';
 
@@ -103,7 +108,10 @@ export async function GET(
             start(controller) {
                 fileStream.on('data', (chunk) => {
                     try {
-                        controller.enqueue(new Uint8Array(chunk));
+                        // Node.js Buffers are Uint8Arrays. Using Buffer.from ensures we have
+                        // a valid input for the controller even if chunk is a string.
+                        const data = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+                        controller.enqueue(new Uint8Array(data));
                     } catch (e) {
                         // Controller might be closed already if request was aborted
                         fileStream.destroy();

@@ -6,6 +6,7 @@
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_CHAT = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const EXPERT_CHAT = process.env.TELEGRAM_EXPERT_CHAT_ID;
 
 export async function notifyAdmin(message: string): Promise<void> {
     if (!BOT_TOKEN || !ADMIN_CHAT) return; // Silently skip if not configured
@@ -23,6 +24,23 @@ export async function notifyAdmin(message: string): Promise<void> {
     } catch (err) {
         // Non-critical — never let notification failure break the main flow
         console.error('[TELEGRAM_NOTIFY_ERROR]', err);
+    }
+}
+
+export async function sendTelegramDM(chatId: string, message: string): Promise<void> {
+    if (!BOT_TOKEN || !chatId) return;
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: 'HTML',
+            }),
+        });
+    } catch (err) {
+        console.error(`[TELEGRAM_DM_ERROR][${chatId}]`, err);
     }
 }
 
@@ -102,4 +120,101 @@ export function notifySignIn(opts: {
         `📩 <b>Email:</b> ${opts.email ?? '—'}\n` +
         `🕐 <b>Time:</b> ${new Date().toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}`
     );
+}
+
+// ── Expert Channel Notifications ────────────────────────────────────────────
+
+export async function notifyExpertChannel(message: string): Promise<void> {
+    if (!BOT_TOKEN || !EXPERT_CHAT) return;
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: EXPERT_CHAT,
+                text: message,
+                parse_mode: 'HTML',
+            }),
+        });
+    } catch (err) {
+        console.error('[TELEGRAM_EXPERT_NOTIFY_ERROR]', err);
+    }
+}
+
+export function notifyExpertApplication(opts: {
+    name: string | null;
+    email: string | null;
+    skills: string;
+    motivation: string;
+    hourlyRate: number;
+    telegramUsername?: string | null;
+}) {
+    const msg = `🌟 <b>New Expert Application!</b>\n\n` +
+        `👤 <b>Name:</b> ${opts.name ?? '—'}\n` +
+        `📩 <b>Email:</b> ${opts.email ?? '—'}\n` +
+        `🔧 <b>Skills:</b> ${opts.skills}\n` +
+        `💰 <b>Hourly Rate:</b> ${opts.hourlyRate.toLocaleString()} UZS\n` +
+        (opts.telegramUsername ? `📲 <b>Telegram:</b> @${opts.telegramUsername}\n` : '') +
+        `📝 <b>Motivation:</b> ${opts.motivation}\n` +
+        `🕐 <b>Time:</b> ${new Date().toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}`;
+
+    return Promise.allSettled([
+        notifyExpertChannel(msg),
+        notifyAdmin(msg)
+    ]);
+}
+
+export function notifyExpertApproved(opts: {
+    name: string | null;
+    email: string | null;
+    telegramId?: string | null;
+}) {
+    const msg = `✅ <b>Expert Approved!</b>\n\n` +
+        `👤 <b>Name:</b> ${opts.name ?? '—'}\n` +
+        `📩 <b>Email:</b> ${opts.email ?? '—'}\n` +
+        `🕐 <b>Time:</b> ${new Date().toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}`;
+
+    const promises = [notifyExpertChannel(msg)];
+    if (opts.telegramId) promises.push(sendTelegramDM(opts.telegramId, msg));
+    return Promise.allSettled(promises);
+}
+
+export function notifyExpertRejected(opts: {
+    name: string | null;
+    email: string | null;
+    adminNote?: string | null;
+    telegramId?: string | null;
+}) {
+    const msg = `❌ <b>Expert Application Rejected</b>\n\n` +
+        `👤 <b>Name:</b> ${opts.name ?? '—'}\n` +
+        `📩 <b>Email:</b> ${opts.email ?? '—'}\n` +
+        (opts.adminNote ? `📋 <b>Reason:</b> ${opts.adminNote}\n` : '') +
+        `🕐 <b>Time:</b> ${new Date().toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}`;
+
+    const promises = [notifyExpertChannel(msg)];
+    if (opts.telegramId) promises.push(sendTelegramDM(opts.telegramId, msg));
+    return Promise.allSettled(promises);
+}
+
+export function notifyNewExpertSession(opts: {
+    expertName: string | null;
+    studentName: string | null;
+    topic: string;
+    scheduledAt: Date;
+    totalPrice: number;
+    expertTelegramId?: string | null;
+}) {
+    const msg = `📅 <b>New Session Booked!</b>\n\n` +
+        `🎓 <b>Expert:</b> ${opts.expertName ?? '—'}\n` +
+        `👤 <b>Student:</b> ${opts.studentName ?? '—'}\n` +
+        `📖 <b>Topic:</b> ${opts.topic}\n` +
+        `🕐 <b>Scheduled:</b> ${opts.scheduledAt.toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' })}\n` +
+        `💰 <b>Price:</b> ${opts.totalPrice.toLocaleString()} UZS`;
+
+    const promises = [
+        notifyExpertChannel(msg),
+        notifyAdmin(msg)
+    ];
+    if (opts.expertTelegramId) promises.push(sendTelegramDM(opts.expertTelegramId, msg));
+    return Promise.allSettled(promises);
 }

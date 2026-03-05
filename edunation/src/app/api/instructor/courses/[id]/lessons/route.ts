@@ -58,6 +58,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             meetLink: body.meetLink ?? '',
             liveAt: body.liveAt ? new Date(body.liveAt) : null,
             isLiveEnabled: body.isLiveEnabled ?? false,
+            subtitleUrl: body.subtitleUrl ?? '',
         },
     });
     return NextResponse.json(lesson, { status: 201 });

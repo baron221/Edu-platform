@@ -17,6 +17,7 @@ interface Lesson {
     meetLink: string | null;
     liveAt: string | null;
     isLiveEnabled: boolean;
+    subtitleUrl: string | null;
 }
 
 const QUALITY_OPTIONS = ['auto', '1080p', '720p', '480p', '360p'];
@@ -247,6 +248,57 @@ export default function LessonEditorPage() {
                                 value={lesson.videoUrl ?? ''}
                                 onChange={e => handleChange('videoUrl', e.target.value)}
                                 placeholder="https://youtube.com/embed/..."
+                            />
+                        </div>
+                    </div>
+
+                    {/* Subtitles / Captions */}
+                    <div className={styles.card}>
+                        <div className={styles.cardHeader}>
+                            <h2 className={styles.cardTitle}>💬 Subtitles / Captions</h2>
+                        </div>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', lineHeight: '1.5' }}>
+                            Upload a <strong>.vtt</strong> or <strong>.srt</strong> file to add closed captions to your video. This is great for accessibility and "YouTube-like" features.
+                        </p>
+
+                        <div className={styles.field}>
+                            <label className={styles.label}>Subtitle File URL</label>
+                            <input
+                                className={styles.input}
+                                value={lesson.subtitleUrl ?? ''}
+                                onChange={e => handleChange('subtitleUrl', e.target.value)}
+                                placeholder="https://.../captions.vtt or /uploads/..."
+                            />
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.label}>Upload Subtitle File (.vtt)</label>
+                            <input
+                                type="file"
+                                accept=".vtt,.srt"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+
+                                    try {
+                                        const res = await fetch('/api/upload', {
+                                            method: 'POST',
+                                            body: formData,
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok && data.url) {
+                                            handleChange('subtitleUrl', data.url);
+                                            alert('Subtitle file uploaded successfully!');
+                                        } else {
+                                            alert(data.error || 'Upload failed');
+                                        }
+                                    } catch (err) {
+                                        alert('An error occurred during upload');
+                                    }
+                                }}
                             />
                         </div>
                     </div>

@@ -87,8 +87,39 @@
 .cta {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     flex-shrink: 0;
+}
+
+.expertCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: var(--grad-primary);
+    border: none;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+    box-shadow: var(--shadow-glow);
+}
+
+.expertCta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+    filter: brightness(1.05);
+}
+
+@media (max-width: 1024px) {
+    .expertCta {
+        display: none;
+        /* Hide on small screens where mobile menu is used */
+    }
 }
 
 /* Language Switcher */
@@ -373,12 +404,12 @@
     display: none;
     flex-direction: column;
     gap: 4px;
-    padding: 16px 24px 20px;
+    padding: 0 24px;
     background: rgba(7, 7, 17, 0.98);
-    border-top: 1px solid var(--border);
+    border-top: none;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease;
+    transition: all 0.4s ease;
 }
 
 .mobileMenu>a {
@@ -392,6 +423,8 @@
 
 .mobileOpen {
     max-height: 600px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
 }
 
 /* Mobile Language Switcher */
