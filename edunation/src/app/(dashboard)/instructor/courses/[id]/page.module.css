@@ -198,6 +198,12 @@
     margin-bottom: 24px;
 }
 
+@media (max-width: 600px) {
+    .twoCol {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Toggles */
 .toggleWrapper {
     display: flex;

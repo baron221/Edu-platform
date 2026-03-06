@@ -118,7 +118,6 @@
 @media (max-width: 1024px) {
     .expertCta {
         display: none;
-        /* Hide on small screens where mobile menu is used */
     }
 }
 
@@ -401,15 +400,22 @@
 
 /* Mobile Menu */
 .mobileMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     display: none;
     flex-direction: column;
     gap: 4px;
     padding: 0 24px;
     background: rgba(7, 7, 17, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-top: none;
     max-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
     transition: all 0.4s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .mobileMenu>a {
@@ -422,9 +428,9 @@
 }
 
 .mobileOpen {
-    max-height: 600px;
-    padding: 16px 24px 20px;
-    border-top: 1px solid var(--border);
+    max-height: 80vh;
+    padding: 16px 24px 32px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Mobile Language Switcher */
@@ -472,7 +478,7 @@
     justify-content: center;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
 
     .links,
     .cta {

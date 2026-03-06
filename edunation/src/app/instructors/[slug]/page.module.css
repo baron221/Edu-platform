@@ -296,3 +296,16 @@
         top: 0;
     }
 }
+
+@media (max-width: 600px) {
+
+    .avatar,
+    .avatarFallback {
+        width: 100px;
+        height: 100px;
+    }
+
+    .avatarFallback {
+        font-size: 32px;
+    }
+}
