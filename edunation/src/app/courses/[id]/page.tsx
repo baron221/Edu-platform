@@ -225,6 +225,42 @@ export default function CourseDetailPage() {
         }
     }
 
+    const renderLessonsList = (className = '') => (
+        <div className={`${styles.lessonsList} ${className}`}>
+            <h3 className={styles.lessonsTitle}>
+                {t.courseDetail.courseContent}
+                <span className={styles.lessonsCount}>{totalLessons} {t.courseDetail.lessons}</span>
+            </h3>
+
+            <div className={styles.lessons}>
+                {course.lessons?.map((lesson: any, idx: number) => (
+                    <button
+                        key={lesson.id}
+                        className={`${styles.lessonItem} ${activeLesson?.id === lesson.id ? styles.lessonActive : ''} ${!canWatch(lesson) ? styles.lessonLocked : ''}`}
+                        onClick={() => setActiveLesson(lesson)}
+                    >
+                        <div className={styles.lessonNum}>{idx + 1}</div>
+                        <div className={styles.lessonInfo}>
+                            <div className={styles.lessonTitle}>{lesson.title}</div>
+                            <div className={styles.lessonDuration}>{lesson.duration}</div>
+                        </div>
+                        <div className={styles.lessonStatus}>
+                            {isLessonCompleted(lesson.id) ? (
+                                <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>✓</span>
+                            ) : lesson.isFree ? (
+                                <span className={styles.freeTag}>{t.courseDetail.free}</span>
+                            ) : canWatch(lesson) ? (
+                                <span>▶</span>
+                            ) : (
+                                <span className={styles.lockIcon}>🔒</span>
+                            )}
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+
     return (
         <div className={styles.page}>
             {/* Hero */}
@@ -265,14 +301,56 @@ export default function CourseDetailPage() {
                                                 video_id: activeLesson.id,
                                                 video_title: activeLesson.title,
                                             }}
+                                            playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
                                             streamType="on-demand"
+                                            primaryColor="#7c3aed"
+                                            accentColor="#06b6d4"
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
                                             onEnded={() => {
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
                                                 }
                                             }}
-                                        />
+                                        >
+                                            {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
+                                                <track
+                                                    label="English"
+                                                    kind="subtitles"
+                                                    srcLang="en"
+                                                    src={activeLesson.subtitleUrl}
+                                                    default
+                                                />
+                                            )}
+                                        </MuxPlayer>
+                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
+                                        <MuxPlayer
+                                            key={activeLesson.id}
+                                            src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`}
+                                            type="video/mp4"
+                                            metadata={{
+                                                video_id: activeLesson.id,
+                                                video_title: activeLesson.title,
+                                            }}
+                                            playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
+                                            primaryColor="#7c3aed"
+                                            accentColor="#06b6d4"
+                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            onEnded={() => {
+                                                if (!isLessonCompleted(activeLesson.id)) {
+                                                    handleMarkComplete(activeLesson.id);
+                                                }
+                                            }}
+                                        >
+                                            {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
+                                                <track
+                                                    label="English"
+                                                    kind="subtitles"
+                                                    srcLang="en"
+                                                    src={activeLesson.subtitleUrl}
+                                                    default
+                                                />
+                                            )}
+                                        </MuxPlayer>
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.spinner}></div>
@@ -309,6 +387,8 @@ export default function CourseDetailPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {renderLessonsList(styles.mobileOnly)}
 
                             {activeLesson && (
                                 <div className={styles.videoInfo}>
@@ -420,39 +500,7 @@ export default function CourseDetailPage() {
                             </div>
                         )}
 
-                        <div className={styles.lessonsList}>
-                            <h3 className={styles.lessonsTitle}>
-                                {t.courseDetail.courseContent}
-                                <span className={styles.lessonsCount}>{totalLessons} {t.courseDetail.lessons}</span>
-                            </h3>
-
-                            <div className={styles.lessons}>
-                                {course.lessons?.map((lesson: any, idx: number) => (
-                                    <button
-                                        key={lesson.id}
-                                        className={`${styles.lessonItem} ${activeLesson?.id === lesson.id ? styles.lessonActive : ''} ${!canWatch(lesson) ? styles.lessonLocked : ''}`}
-                                        onClick={() => setActiveLesson(lesson)}
-                                    >
-                                        <div className={styles.lessonNum}>{idx + 1}</div>
-                                        <div className={styles.lessonInfo}>
-                                            <div className={styles.lessonTitle}>{lesson.title}</div>
-                                            <div className={styles.lessonDuration}>{lesson.duration}</div>
-                                        </div>
-                                        <div className={styles.lessonStatus}>
-                                            {isLessonCompleted(lesson.id) ? (
-                                                <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>✓</span>
-                                            ) : lesson.isFree ? (
-                                                <span className={styles.freeTag}>{t.courseDetail.free}</span>
-                                            ) : canWatch(lesson) ? (
-                                                <span>▶</span>
-                                            ) : (
-                                                <span className={styles.lockIcon}>🔒</span>
-                                            )}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {renderLessonsList(styles.desktopOnly)}
 
                         {isEnrolled && (
                             <div className={styles.enrollCard}>
@@ -488,6 +536,29 @@ export default function CourseDetailPage() {
                                 )}
                             </div>
                         )}
+
+                        {/* Community Chat link */}
+                        <Link
+                            href={`/community/${course.id}`}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '12px 16px',
+                                background: 'rgba(124, 58, 237, 0.08)',
+                                border: '1px solid rgba(124, 58, 237, 0.2)',
+                                borderRadius: '12px',
+                                color: '#a78bfa',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '14px',
+                                marginTop: '12px',
+                                transition: 'background 0.15s',
+                            }}
+                        >
+                            💬 Course Community Chat
+                        </Link>
                     </div>
                 </div>
             </div>

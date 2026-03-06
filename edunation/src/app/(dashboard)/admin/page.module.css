@@ -103,7 +103,7 @@
     background: white;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
@@ -124,6 +124,7 @@
 .tableHead {
     display: grid;
     grid-template-columns: 1fr 1fr 100px 110px;
+    min-width: 600px;
     padding: 10px 24px;
     background: #f8fafc;
     font-size: 11px;
@@ -136,6 +137,7 @@
 .tableRow {
     display: grid;
     grid-template-columns: 1fr 1fr 100px 110px;
+    min-width: 600px;
     padding: 12px 24px;
     border-top: 1px solid #f1f5f9;
     align-items: center;
@@ -418,4 +420,20 @@
     padding: 40px;
     color: #64748b;
     font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .analyticsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .dropoffMetrics {
+        grid-template-columns: 1fr;
+    }
 }

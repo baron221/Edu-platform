@@ -24,22 +24,50 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <span className={styles.brandIcon}>🎓</span>
                         <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
                     </div>
-                    <span className={styles.adminBadge}>{(session?.user as any)?.role === 'admin' ? 'ADMIN' : 'INSTRUCTOR'}</span>
+                    <span className={styles.adminBadge}>
+                        {(() => {
+                            const u = session?.user as any;
+                            if (u?.role === 'admin') return 'ADMIN';
+                            if (u?.role === 'instructor') return 'INSTRUCTOR';
+                            if (u?.isExpert) return 'EXPERT';
+                            return 'STUDENT';
+                        })()}
+                    </span>
                 </div>
 
                 <nav className={styles.nav}>
                     {(() => {
-                        const userRole = (session?.user as any)?.role;
-                        const items = userRole === 'admin' ? [
-                            { href: '/admin', label: 'Admin Dashboard', icon: '📊' },
-                            { href: '/admin/courses/all', label: 'Global Courses', icon: '🌍' },
-                            { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
-                            { href: '/admin/users', label: 'Users', icon: '👥' },
-                            { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
-                        ] : [
-                            { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
-                            { href: '/instructor/subscribe', label: 'Subscription', icon: '💳' },
-                        ];
+                        const u = session?.user as any;
+                        const userRole = u?.role;
+                        const isExpert = u?.isExpert;
+
+                        let items = [];
+                        if (userRole === 'admin') {
+                            items = [
+                                { href: '/admin', label: 'Admin Dashboard', icon: '📊' },
+                                { href: '/admin/courses/all', label: 'Global Courses', icon: '🌍' },
+                                { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
+                                { href: '/admin/users', label: 'Users', icon: '👥' },
+                                { href: '/admin/experts', label: 'Experts', icon: '⭐' },
+                                { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
+                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                            ];
+                        } else if (userRole === 'instructor') {
+                            items = [
+                                { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
+                                { href: '/instructor/subscribe', label: 'Subscription', icon: '💳' },
+                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                            ];
+                        } else {
+                            // Student or Expert
+                            items = [
+                                { href: '/dashboard', label: 'Learning Center', icon: '🎓' },
+                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                            ];
+                        }
+
+                        // If user is an expert but not instructor/admin, maybe they need some instructor-like links? 
+                        // For now keep it simple and focus on Sessions.
 
                         return items.map(item => {
                             const isActive = pathname === item.href || (item.href !== '/admin' && item.href !== '/instructor/courses' ? pathname.startsWith(item.href) : pathname === item.href || pathname.startsWith(item.href + '/'));
@@ -63,8 +91,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
                         </div>
                         <div>
-                            <div className={styles.userName}>{session?.user?.name ?? 'Instructor'}</div>
-                            <div className={styles.userRole}>{(session?.user as any)?.role === 'admin' ? 'Administrator' : 'Instructor'}</div>
+                            <div className={styles.userName}>{session?.user?.name ?? 'User'}</div>
+                            <div className={styles.userRole}>
+                                {(() => {
+                                    const u = session?.user as any;
+                                    if (u?.role === 'admin') return 'Administrator';
+                                    if (u?.role === 'instructor') return 'Instructor';
+                                    if (u?.isExpert) return 'Expert';
+                                    return 'Student';
+                                })()}
+                            </div>
                         </div>
                     </div>
                     <button

@@ -32,9 +32,9 @@ export default function Footer() {
                         <nav>
                             <Link href="/courses" className={styles.colLink}>{t.footer.webDev}</Link>
                             <Link href="/courses" className={styles.colLink}>{t.footer.dataScience}</Link>
-                            <Link href="/courses" className={styles.colLink}>{t.footer.uiux}</Link>
-                            <Link href="/courses" className={styles.colLink}>{t.footer.marketing}</Link>
-                            <Link href="/courses" className={styles.colLink}>{t.footer.mobileDev}</Link>
+                            <Link href="/courses" className={styles.colLink}>Mathematics</Link>
+                            <Link href="/courses" className={styles.colLink}>English Language</Link>
+                            <Link href="/courses" className={styles.colLink}>Video Editing</Link>
                         </nav>
                     </div>
 

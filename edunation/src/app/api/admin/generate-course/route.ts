@@ -76,9 +76,9 @@ export async function POST(req: Request) {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)+/g, '');
 
-        // Generate a random thumbnail (we can use unplash source for a placeholder)
-        const encodedTopic = encodeURIComponent(object.category.toLowerCase() || topic);
-        const randomThumbnail = `https://source.unsplash.com/800x600/?${encodedTopic},education`;
+        // Generate a reliable thumbnail using picsum.photos (seeded by topic for consistency)
+        const encodedTopic = encodeURIComponent(topic.toLowerCase().replace(/\s+/g, '-'));
+        const randomThumbnail = `https://picsum.photos/seed/${encodedTopic}/800/600`;
 
         // Attempt to create the entire course bundle in a Prisma transaction
         // First ensure slug is unique

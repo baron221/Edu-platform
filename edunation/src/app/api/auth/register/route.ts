@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
+import { notifyNewUser } from '@/lib/telegram';
 
 export async function POST(req: Request) {
     try {
@@ -45,6 +46,9 @@ export async function POST(req: Request) {
                 status: 'active',
             },
         });
+
+        // 🔔 Notify admin on Telegram
+        notifyNewUser({ name, email, role: assignedRole, provider: 'email' });
 
         return NextResponse.json({ ok: true, userId: user.id }, { status: 201 });
     } catch (err) {

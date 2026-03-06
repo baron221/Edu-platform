@@ -46,7 +46,7 @@ export default function Navbar() {
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
-    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe';
+    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe' || pathname.startsWith('/community');
     const hasScrolledBackground = scrolled || isDarkPage;
 
     return (
@@ -68,8 +68,13 @@ export default function Navbar() {
                     <Link href="/about" className={styles.link}>{t.nav.about}</Link>
                 </div>
 
-                {/* Right Side: Language + Auth */}
+                {/* Right Side: CTA + Language + Auth */}
                 <div className={styles.cta}>
+                    {/* Experts CTA */}
+                    <Link href="/experts" className={styles.expertCta}>
+                        {t.experts?.label || '⭐ Experts'}
+                    </Link>
+
                     {/* Language Dropdown */}
                     <div className={styles.langSwitcher} ref={langRef}>
                         <button
@@ -144,6 +149,9 @@ export default function Navbar() {
                                     <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         🎓 My Learning
                                     </Link>
+                                    <Link href="/dashboard/sessions" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                        📅 My Sessions
+                                    </Link>
                                     <Link href="/leaderboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         🏆 Leaderboard
                                     </Link>
@@ -205,6 +213,7 @@ export default function Navbar() {
             <div className={`${styles.mobileMenu} ${menuOpen ? styles.mobileOpen : ''}`}>
                 <Link href="/courses" onClick={() => setMenuOpen(false)}>{t.nav.courses}</Link>
                 <Link href="/instructors" onClick={() => setMenuOpen(false)}>Instructors</Link>
+                <Link href="/experts" onClick={() => setMenuOpen(false)}>{t.experts?.label || '⭐ Experts'}</Link>
                 <Link href="/pricing" onClick={() => setMenuOpen(false)}>{t.nav.pricing}</Link>
                 <Link href="/about" onClick={() => setMenuOpen(false)}>{t.nav.about}</Link>
 
@@ -231,6 +240,14 @@ export default function Navbar() {
                                 onClick={() => setMenuOpen(false)}
                             >
                                 🎓 My Learning
+                            </Link>
+                            <Link
+                                href="/dashboard/sessions"
+                                className="btn btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                📅 My Sessions
                             </Link>
                             <button
                                 className="btn btn-secondary"

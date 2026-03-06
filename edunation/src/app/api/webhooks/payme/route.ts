@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { notifyNewPurchase, notifyNewSubscription } from '@/lib/telegram';
 
 // Helper to send Payme JSON-RPC responses
 const respond = (result: any = null, error: any = null, id: string | number | null = null) => {
@@ -154,6 +155,16 @@ export async function POST(req: Request) {
                         create: { userId: order.userId, slug, tagline: 'Passionate educator on EduNationUz' },
                     });
 
+                    // 🔔 Notify admin
+                    notifyNewSubscription({
+                        userName: user?.name ?? null,
+                        userEmail: user?.email ?? null,
+                        plan: order.plan,
+                        amount: order.amount,
+                        currency: order.currency ?? 'UZS',
+                        provider: 'payme',
+                    });
+
                     return respond({
                         transaction: order.id,
                         perform_time: updatedOrder.updatedAt.getTime(),
@@ -180,6 +191,18 @@ export async function POST(req: Request) {
                             courseId: order.courseId,
                             completed: false,
                         }
+                    });
+
+                    // 🔔 Notify admin
+                    const buyer = await prisma.user.findUnique({ where: { id: order.userId } });
+                    const course = await prisma.course.findUnique({ where: { id: order.courseId }, select: { title: true } });
+                    notifyNewPurchase({
+                        userName: buyer?.name ?? null,
+                        userEmail: buyer?.email ?? null,
+                        courseTitle: course?.title,
+                        amount: order.amount,
+                        currency: order.currency ?? 'UZS',
+                        provider: 'payme',
                     });
 
                     return respond({

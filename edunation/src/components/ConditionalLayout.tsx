@@ -5,13 +5,14 @@ import Footer from '@/components/Footer';
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isAdminRoute = pathname?.startsWith('/admin') || pathname?.startsWith('/instructor/courses') || pathname?.startsWith('/instructor/dashboard');
+    const isDashboardRoute = /^\/(admin|instructor|dashboard|sessions)(\/|$)/.test(pathname || '') &&
+        !pathname?.startsWith('/instructors');
 
     return (
         <>
-            {!isAdminRoute && <Navbar />}
+            {!isDashboardRoute && <Navbar />}
             <main>{children}</main>
-            {!isAdminRoute && <Footer />}
+            {!isDashboardRoute && <Footer />}
         </>
     );
 }

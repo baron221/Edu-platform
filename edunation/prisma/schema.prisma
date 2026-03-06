@@ -64,6 +64,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String? // hashed with bcryptjs (null for OAuth users)
+  telegramId    String?   @unique // Telegram user ID for Telegram login
+  phone         String?   @unique // Phone number for OTP login (+998...)
   role          String    @default("student") // student | instructor | admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -84,12 +86,34 @@ model User {
   instructorSubscription InstructorSubscription?
   communityPosts         CommunityPost[]
   communityReplies       CommunityReply[]
+  communityMessages      CommunityMessage[]
+
+  // Expert feature
+  isExpert           Boolean              @default(false)
+  expertApplications ExpertApplication[]
+  expertSessions     ExpertSession[]      @relation("ExpertSessions")
+  studentSessions    ExpertSession[]      @relation("StudentSessions")
 
   // Gamification
   points              Int                   @default(0)
   currentStreak       Int                   @default(0)
   lastActivityDate    DateTime?
-  SubscriptionPayment SubscriptionPayment[]
+  subscriptionPayments SubscriptionPayment[]
+}
+
+// =====================================================================
+// PHONE AUTHENTICATION
+// =====================================================================
+
+model PhoneOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
 }
 
 // =====================================================================
@@ -198,6 +222,7 @@ model Lesson {
   videoQuality  String? @default("auto") // auto | 1080p | 720p | 480p | 360p
   muxPlaybackId String? // Used to render the Mux Player on the frontend
   muxAssetId    String? // Used to track the asset in the Mux Dashboard
+  subtitleUrl   String? // Path to the uploaded .vtt or .srt caption file
 
   // Live stream / Google Meet
   meetLink      String? // Google Meet URL
@@ -410,8 +435,9 @@ model Community {
   description String?
   createdAt   DateTime @default(now())
 
-  course Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  posts  CommunityPost[]
+  course   Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  posts    CommunityPost[]
+  messages CommunityMessage[]
 }
 
 model CommunityPost {
@@ -441,6 +467,22 @@ model CommunityReply {
   author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
+model CommunityMessage {
+  id          String   @id @default(cuid())
+  communityId String
+  authorId    String
+  text        String
+  replyToId   String?  // optional: replying to another message
+  createdAt   DateTime @default(now())
+
+  community Community         @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo   CommunityMessage? @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies   CommunityMessage[] @relation("MessageReplies")
+
+  @@index([communityId, createdAt])
+}
+
 // =====================================================================
 // COURSE ADVERTISEMENT
 // =====================================================================
@@ -455,4 +497,53 @@ model CourseAd {
   createdAt DateTime @default(now())
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// =====================================================================
+// EXPERT APPLICATIONS
+// =====================================================================
+
+model ExpertApplication {
+  id               String   @id @default(cuid())
+  userId           String
+  motivation       String
+  skills           String   // comma-separated e.g. "AI, C++, Python"
+  hourlyRate       Int      // price in UZS
+  telegramUsername String?
+  status           String   @default("pending") // pending | approved | rejected
+  adminNote        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([userId])
+}
+
+// =====================================================================
+// EXPERT SESSIONS
+// =====================================================================
+
+model ExpertSession {
+  id            String   @id @default(cuid())
+  expertId      String
+  studentId     String
+  topic         String
+  scheduledAt   DateTime
+  durationHours Int      @default(1)
+  totalPrice    Int      // snapshot of hourlyRate at booking time
+  receiptUrl    String?  // uploaded payment screenshot
+  meetLink      String?  // set by Make/n8n automation
+  status        String   @default("pending")
+  // pending | receipt_uploaded | confirmed | cancelled | completed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  expert  User @relation("ExpertSessions",  fields: [expertId],  references: [id], onDelete: Cascade)
+  student User @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([expertId])
+  @@index([studentId])
+  @@index([status])
 }

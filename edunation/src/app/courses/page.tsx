@@ -12,6 +12,9 @@ const CATEGORIES = [
     { name: 'Marketing', icon: '📢' },
     { name: 'Mobile Development', icon: '📱' },
     { name: 'Business', icon: '💼' },
+    { name: 'Mathematics', icon: '📐' },
+    { name: 'English Language', icon: '🇬🇧' },
+    { name: 'Video Editing', icon: '🎬' },
 ];
 
 export interface CourseDB {

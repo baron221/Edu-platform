@@ -54,13 +54,14 @@
     background: white;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .tableHead {
     display: grid;
     grid-template-columns: 1.2fr 1.8fr 100px 110px 110px 130px;
+    min-width: 900px;
     padding: 10px 20px;
     background: #f8fafc;
     font-size: 11px;
@@ -73,6 +74,7 @@
 .tableRow {
     display: grid;
     grid-template-columns: 1.2fr 1.8fr 100px 110px 110px 130px;
+    min-width: 900px;
     padding: 13px 20px;
     border-top: 1px solid #f1f5f9;
     align-items: center;

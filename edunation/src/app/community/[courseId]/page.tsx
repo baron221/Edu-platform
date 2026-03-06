@@ -1,166 +1,301 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
-interface Author { id: string; name: string | null; image: string | null; role: string; }
-interface Post {
-    id: string; communityId: string; authorId: string;
-    title: string; body: string; isPinned: boolean; isAnnouncement: boolean;
-    createdAt: string; author: Author; _count: { replies: number };
+interface Author {
+    id: string;
+    name: string | null;
+    image: string | null;
+    role: string;
+}
+interface ReplyTo {
+    id: string;
+    text: string;
+    author: { name: string | null };
+}
+interface Message {
+    id: string;
+    text: string;
+    createdAt: string;
+    author: Author;
+    replyTo: ReplyTo | null;
 }
 
-function Avatar({ user }: { user: Author }) {
+function Avatar({ user, size = 36 }: { user: Author; size?: number }) {
     const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    return user.image
-        ? <img src={user.image} className={styles.avatar} alt={user.name || ''} />
-        : <div className={styles.avatarFallback}>{initials}</div>;
+    if (user.image) {
+        return <img src={user.image} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt={user.name || ''} />;
+    }
+    const colors = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+    const color = colors[user.name ? user.name.charCodeAt(0) % colors.length : 0];
+    return (
+        <div style={{ width: size, height: size, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.38, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+            {initials}
+        </div>
+    );
+}
+
+function timeStr(d: string) {
+    const date = new Date(d);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function dateSep(d: string) {
+    const date = new Date(d);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString([], { month: 'long', day: 'numeric' });
 }
 
 export default function CommunityPage() {
     const { courseId } = useParams() as { courseId: string };
     const { data: session } = useSession();
-    const router = useRouter();
     const userId = (session?.user as any)?.id;
     const role = (session?.user as any)?.role || 'student';
 
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showing, setShowing] = useState(false);
-    const [title, setTitle] = useState('');
-    const [body, setBody] = useState('');
-    const [isAnnouncement, setIsAnnouncement] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
+    const [text, setText] = useState('');
+    const [sending, setSending] = useState(false);
+    const [replyTo, setReplyTo] = useState<Message | null>(null);
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const [courseName, setCourseName] = useState('');
 
-    const fetchPosts = () => {
-        fetch(`/api/community/posts?courseId=${courseId}`)
-            .then(r => r.json())
-            .then(d => { setPosts(Array.isArray(d) ? d : []); setLoading(false); });
-    };
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const lastTimestampRef = useRef<string | null>(null);
+    const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => { fetchPosts(); }, [courseId]);
+    // Initial load
+    const loadMessages = useCallback(async () => {
+        const res = await fetch(`/api/community/messages?courseId=${courseId}`);
+        if (!res.ok) return;
+        const data: Message[] = await res.json();
+        setMessages(data);
+        if (data.length > 0) lastTimestampRef.current = data[data.length - 1].createdAt;
+        setLoading(false);
+    }, [courseId]);
 
-    const submit = async () => {
-        if (!title.trim() || !body.trim()) return;
-        setSubmitting(true);
-        await fetch('/api/community/posts', {
+    // Poll for new messages
+    const pollMessages = useCallback(async () => {
+        if (!lastTimestampRef.current) return;
+        const res = await fetch(`/api/community/messages?courseId=${courseId}&after=${encodeURIComponent(lastTimestampRef.current)}`);
+        if (!res.ok) return;
+        const newMsgs: Message[] = await res.json();
+        if (newMsgs.length > 0) {
+            setMessages(prev => [...prev, ...newMsgs]);
+            lastTimestampRef.current = newMsgs[newMsgs.length - 1].createdAt;
+        }
+    }, [courseId]);
+
+    useEffect(() => {
+        // Fetch course name
+        fetch(`/api/courses/${courseId}`).then(r => r.json()).then(d => setCourseName(d?.title || 'Course'));
+        loadMessages();
+    }, [courseId, loadMessages]);
+
+    useEffect(() => {
+        if (!loading) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [loading]);
+
+    // Auto-scroll on new messages
+    useEffect(() => {
+        if (messages.length > 0) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages.length]);
+
+    // Polling
+    useEffect(() => {
+        if (loading) return;
+        pollingRef.current = setInterval(pollMessages, 3000);
+        return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
+    }, [loading, pollMessages]);
+
+    const send = async () => {
+        if (!text.trim() || sending || !session) return;
+        setSending(true);
+        const body = { courseId, text: text.trim(), replyToId: replyTo?.id };
+        setText('');
+        setReplyTo(null);
+
+        const res = await fetch('/api/community/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ courseId, title, body, isAnnouncement }),
+            body: JSON.stringify(body),
         });
-        setTitle(''); setBody(''); setShowing(false); setSubmitting(false);
-        fetchPosts();
+        if (res.ok) {
+            const msg: Message = await res.json();
+            setMessages(prev => [...prev, msg]);
+            lastTimestampRef.current = msg.createdAt;
+        }
+        setSending(false);
+        inputRef.current?.focus();
     };
 
-    const togglePin = async (postId: string) => {
-        await fetch('/api/community/pin', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId }),
-        });
-        fetchPosts();
+    const deleteMsg = async (id: string) => {
+        await fetch(`/api/community/messages?id=${id}`, { method: 'DELETE' });
+        setMessages(prev => prev.filter(m => m.id !== id));
     };
 
-    const timeAgo = (d: string) => {
-        const diff = Date.now() - new Date(d).getTime();
-        const min = Math.floor(diff / 60000);
-        if (min < 1) return 'just now';
-        if (min < 60) return `${min}m ago`;
-        const hr = Math.floor(min / 60);
-        if (hr < 24) return `${hr}h ago`;
-        return `${Math.floor(hr / 24)}d ago`;
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            send();
+        }
     };
+
+    // Group messages by date
+    const grouped: { date: string; msgs: Message[] }[] = [];
+    messages.forEach(msg => {
+        const day = new Date(msg.createdAt).toDateString();
+        const last = grouped[grouped.length - 1];
+        if (!last || last.date !== day) {
+            grouped.push({ date: day, msgs: [msg] });
+        } else {
+            last.msgs.push(msg);
+        }
+    });
 
     return (
-        <div className={styles.page}>
-            <section className={styles.hero}>
-                <div className="container">
-                    <h1 className={styles.heroTitle}>💬 Course Community</h1>
-                    <p className={styles.heroSub}>Ask questions, share ideas, and connect with fellow learners.</p>
+        <div className={styles.shell}>
+            {/* Header */}
+            <div className={styles.header}>
+                <Link href={`/courses/${courseId}`} className={styles.backBtn}>←</Link>
+                <div className={styles.headerInfo}>
+                    <div className={styles.headerTitle}>💬 {courseName || 'Course Community'}</div>
+                    <div className={styles.headerSub}>{messages.length} messages · polling every 3s</div>
                 </div>
-            </section>
+            </div>
 
-            <section className="section">
-                <div className="container">
-                    <div className={styles.toolbar}>
-                        <h2 className={styles.sectionTitle}>Discussions</h2>
-                        {session && (
-                            <button className="btn btn-primary" onClick={() => setShowing(!showing)}>
-                                {showing ? '✕ Cancel' : '+ New Post'}
-                            </button>
-                        )}
+            {/* Messages area */}
+            <div className={styles.messages}>
+                {loading ? (
+                    <div className={styles.loadingWrap}>
+                        <div className={styles.spinner} />
+                        <span>Loading messages...</span>
                     </div>
+                ) : messages.length === 0 ? (
+                    <div className={styles.empty}>
+                        <div style={{ fontSize: 56, marginBottom: 12 }}>💬</div>
+                        <h3>No messages yet</h3>
+                        <p>Be the first to say something!</p>
+                    </div>
+                ) : (
+                    grouped.map(group => (
+                        <div key={group.date}>
+                            <div className={styles.dateSep}>
+                                <span>{dateSep(group.msgs[0].createdAt)}</span>
+                            </div>
+                            {group.msgs.map((msg, idx) => {
+                                const isOwn = msg.author.id === userId;
+                                const isInstructor = msg.author.role === 'instructor' || msg.author.role === 'admin';
+                                const showAvatar = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
+                                const showName = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
 
-                    {/* New post form */}
-                    {showing && (
-                        <div className={styles.newPostForm}>
-                            <input
-                                className={styles.input}
-                                placeholder="Post title..."
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
-                            />
-                            <textarea
-                                className={styles.textarea}
-                                placeholder="Write your question or discussion..."
-                                rows={5}
-                                value={body}
-                                onChange={e => setBody(e.target.value)}
-                            />
-                            {(role === 'instructor' || role === 'admin') && (
-                                <label className={styles.checkLabel}>
-                                    <input type="checkbox" checked={isAnnouncement} onChange={e => setIsAnnouncement(e.target.checked)} />
-                                    📢 Mark as Announcement
-                                </label>
-                            )}
-                            <button className="btn btn-primary" onClick={submit} disabled={submitting || !title.trim() || !body.trim()}>
-                                {submitting ? 'Posting...' : 'Post'}
-                            </button>
-                        </div>
-                    )}
+                                return (
+                                    <div
+                                        key={msg.id}
+                                        className={`${styles.row} ${isOwn ? styles.rowOwn : styles.rowOther}`}
+                                        onMouseEnter={() => setHoveredId(msg.id)}
+                                        onMouseLeave={() => setHoveredId(null)}
+                                    >
+                                        {/* Avatar placeholder for alignment */}
+                                        {!isOwn && (
+                                            <div style={{ width: 36, flexShrink: 0, alignSelf: 'flex-end' }}>
+                                                {showAvatar && <Avatar user={msg.author} size={36} />}
+                                            </div>
+                                        )}
 
-                    {loading ? (
-                        <div className={styles.skeletonStack}>{[...Array(4)].map((_, i) => <div key={i} className={styles.skeletonRow} />)}</div>
-                    ) : posts.length === 0 ? (
-                        <div className={styles.empty}>
-                            <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
-                            <h3>No discussions yet</h3>
-                            <p>Be the first to start a conversation!</p>
-                        </div>
-                    ) : (
-                        <div className={styles.postList}>
-                            {posts.map(post => (
-                                <div key={post.id} className={`${styles.postCard} ${post.isPinned ? styles.pinned : ''} ${post.isAnnouncement ? styles.announcement : ''}`}>
-                                    <div className={styles.postLeft}>
-                                        <Avatar user={post.author} />
-                                    </div>
-                                    <div className={styles.postBody}>
-                                        <div className={styles.postMeta}>
-                                            <span className={styles.authorName}>{post.author.name}</span>
-                                            {post.author.role === 'instructor' && <span className={styles.instructorBadge}>Instructor</span>}
-                                            {post.isAnnouncement && <span className={styles.annBadge}>📢 Announcement</span>}
-                                            {post.isPinned && <span className={styles.pinBadge}>📌 Pinned</span>}
-                                            <span className={styles.timeAgo}>{timeAgo(post.createdAt)}</span>
-                                        </div>
-                                        <Link href={`/community/${courseId}/post/${post.id}`} className={styles.postTitle}>{post.title}</Link>
-                                        <p className={styles.postExcerpt}>{post.body.slice(0, 140)}{post.body.length > 140 ? '...' : ''}</p>
-                                        <div className={styles.postFooter}>
-                                            <span className={styles.replyCount}>💬 {post._count.replies} {post._count.replies === 1 ? 'reply' : 'replies'}</span>
-                                            {(role === 'instructor' || role === 'admin') && (
-                                                <button className={styles.pinBtn} onClick={() => togglePin(post.id)}>
-                                                    {post.isPinned ? '📌 Unpin' : '📌 Pin'}
-                                                </button>
+                                        <div className={styles.bubbleWrap}>
+                                            {/* Action buttons (hover) */}
+                                            {hoveredId === msg.id && (
+                                                <div className={`${styles.actions} ${isOwn ? styles.actionsOwn : styles.actionsOther}`}>
+                                                    <button className={styles.actionBtn} onClick={() => { setReplyTo(msg); inputRef.current?.focus(); }} title="Reply">↩</button>
+                                                    {(isOwn || role === 'admin' || role === 'instructor') && (
+                                                        <button className={`${styles.actionBtn} ${styles.actionDel}`} onClick={() => deleteMsg(msg.id)} title="Delete">🗑</button>
+                                                    )}
+                                                </div>
                                             )}
+
+                                            <div className={`${styles.bubble} ${isOwn ? styles.bubbleOwn : styles.bubbleOther} ${isInstructor && !isOwn ? styles.bubbleInstructor : ''}`}>
+                                                {/* Sender name */}
+                                                {showName && (
+                                                    <div className={styles.senderName}>
+                                                        {msg.author.name}
+                                                        {isInstructor && <span className={styles.instructorTag}>✦ Instructor</span>}
+                                                    </div>
+                                                )}
+
+                                                {/* Reply-to preview */}
+                                                {msg.replyTo && (
+                                                    <div className={styles.replyPreview}>
+                                                        <div className={styles.replyAuthor}>{msg.replyTo.author.name}</div>
+                                                        <div className={styles.replyText}>{msg.replyTo.text.slice(0, 80)}{msg.replyTo.text.length > 80 ? '…' : ''}</div>
+                                                    </div>
+                                                )}
+
+                                                {/* Message text */}
+                                                <div className={styles.msgText}>{msg.text}</div>
+
+                                                {/* Timestamp */}
+                                                <div className={styles.msgTime}>{timeStr(msg.createdAt)}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
-            </section>
+                    ))
+                )}
+                <div ref={bottomRef} />
+            </div>
+
+            {/* Input bar */}
+            <div className={styles.inputBar}>
+                {replyTo && (
+                    <div className={styles.replyBanner}>
+                        <div>
+                            <div className={styles.replyBannerAuthor}>Replying to {replyTo.author.name}</div>
+                            <div className={styles.replyBannerText}>{replyTo.text.slice(0, 60)}{replyTo.text.length > 60 ? '…' : ''}</div>
+                        </div>
+                        <button className={styles.replyClose} onClick={() => setReplyTo(null)}>✕</button>
+                    </div>
+                )}
+
+                {session ? (
+                    <div className={styles.inputRow}>
+                        <textarea
+                            ref={inputRef}
+                            className={styles.input}
+                            placeholder="Write a message..."
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            rows={1}
+                        />
+                        <button
+                            className={styles.sendBtn}
+                            onClick={send}
+                            disabled={sending || !text.trim()}
+                        >
+                            ➤
+                        </button>
+                    </div>
+                ) : (
+                    <div className={styles.loginPrompt}>
+                        <Link href="/login" className={styles.loginLink}>Sign in to send messages</Link>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
