@@ -285,7 +285,7 @@ export default function LoginPage() {
                             <div className={styles.field}>
                                 <div className={styles.labelRow}>
                                     <label className={styles.label}>{t.auth.passwordLabel}</label>
-                                    <a href="#" className={styles.forgot}>{t.auth.forgotPassword}</a>
+                                    <Link href="/forgot-password" className={styles.forgot}>{t.auth.forgotPassword}</Link>
                                 </div>
                                 <input
                                     type="password"

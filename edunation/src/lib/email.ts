@@ -102,3 +102,35 @@ export async function sendCourseCompletionEmail(to: string, name: string, course
         console.error('sendCourseCompletionEmail failed:', err);
     }
 }
+
+// ── Password Reset Email ──────────────────────────────────
+export async function sendPasswordResetEmail(to: string, name: string, resetLink: string) {
+    if (!process.env.RESEND_API_KEY) return;
+    try {
+        await resend.emails.send({
+            from: FROM,
+            to,
+            subject: `Reset your EduNationUz password 🔒`,
+            html: `
+<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#0f0c29;font-family:Inter,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#1e1b4b;border-radius:16px;overflow:hidden;max-width:600px;">
+<tr><td style="background:linear-gradient(135deg,#ec4899,#8b5cf6);padding:4px 0;"></td></tr>
+<tr><td align="center" style="padding:40px;">
+<div style="font-size:40px;margin-bottom:16px;">🔐</div>
+<h1 style="color:#fff;font-size:24px;font-weight:900;margin:0 0 8px;">Password Reset Request</h1>
+<p style="color:#94a3b8;font-size:16px;margin:0 0 24px;">Hi ${name}, we received a request to reset your password.</p>
+<p style="color:#64748b;font-size:15px;margin:0 0 32px;line-height:1.5;">Click the button below to securely set a new password. This link will expire in 1 hour.</p>
+<a href="${resetLink}" style="display:inline-block;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;text-decoration:none;padding:14px 32px;border-radius:50px;font-weight:700;font-size:16px;">Reset Password →</a>
+<p style="color:#475569;font-size:13px;margin:32px 0 0;">If you didn't request a password reset, you can safely ignore this email.</p>
+</td></tr>
+<tr><td style="background:linear-gradient(135deg,#ec4899,#8b5cf6);padding:3px 0;"></td></tr>
+</table></td></tr></table>
+</body></html>
+            `,
+        });
+    } catch (err) {
+        console.error('sendPasswordResetEmail failed:', err);
+    }
+}
