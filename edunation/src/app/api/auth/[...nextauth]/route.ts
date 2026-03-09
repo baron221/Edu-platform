@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     image: user.image,
                     role: user.role,
+                    currentStreak: user.currentStreak,
                 };
             },
         }),
@@ -137,10 +138,11 @@ export const authOptions: NextAuthOptions = {
                 const userId = (token.id ?? token.sub) as string;
                 const dbUser = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { role: true, points: true, isExpert: true },
+                    select: { role: true, points: true, isExpert: true, currentStreak: true },
                 });
                 token.role = dbUser?.role ?? 'student';
                 token.points = dbUser?.points ?? 0;
+                token.currentStreak = dbUser?.currentStreak ?? 0;
                 token.isExpert = dbUser?.isExpert ?? false;
             }
             return token;
@@ -152,11 +154,13 @@ export const authOptions: NextAuthOptions = {
                     (session.user as any).id = token.sub;
                     (session.user as any).role = token.role as string;
                     (session.user as any).points = token.points as number;
+                    (session.user as any).currentStreak = token.currentStreak as number;
                     (session.user as any).isExpert = token.isExpert as boolean;
                 } else if (user) {
                     (session.user as any).id = user.id;
                     (session.user as any).role = (user as any).role ?? 'student';
                     (session.user as any).points = (user as any).points ?? 0;
+                    (session.user as any).currentStreak = (user as any).currentStreak ?? 0;
                     (session.user as any).isExpert = (user as any).isExpert ?? false;
                 }
             }

@@ -3,6 +3,7 @@ import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import AuthProvider from '@/components/AuthProvider';
 import ConditionalLayout from '@/components/ConditionalLayout';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://edunationuz.com'),
@@ -43,6 +44,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ConditionalLayout>
               {children}
             </ConditionalLayout>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: '#1e293b',
+                  color: '#fff',
+                  border: '1px solid #334155',
+                }
+              }}
+            />
           </LanguageProvider>
         </AuthProvider>
       </body>

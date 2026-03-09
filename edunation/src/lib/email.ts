@@ -6,7 +6,10 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://edunationuz.com';
 
 // ── Welcome Email ──────────────────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`[LOCAL DEV EMAIL] Welcome email to ${to}`);
+        return;
+    }
     try {
         await resend.emails.send({
             from: FROM,
@@ -37,7 +40,10 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 // ── Purchase Receipt Email ─────────────────────────────────
 export async function sendPurchaseReceiptEmail(to: string, name: string, courseTitle: string, amount: number, currency: string) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`[LOCAL DEV EMAIL] Receipt to ${to} for ${courseTitle} (${amount} ${currency})`);
+        return;
+    }
     try {
         await resend.emails.send({
             from: FROM,
@@ -73,7 +79,10 @@ export async function sendPurchaseReceiptEmail(to: string, name: string, courseT
 
 // ── Course Completion Email ────────────────────────────────
 export async function sendCourseCompletionEmail(to: string, name: string, courseTitle: string, certificateId: string) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`[LOCAL DEV EMAIL] Course Completion to ${to} for ${courseTitle}. Cert: ${BASE_URL}/certificate/${certificateId}`);
+        return;
+    }
     try {
         await resend.emails.send({
             from: FROM,
@@ -105,7 +114,10 @@ export async function sendCourseCompletionEmail(to: string, name: string, course
 
 // ── Password Reset Email ──────────────────────────────────
 export async function sendPasswordResetEmail(to: string, name: string, resetLink: string) {
-    if (!process.env.RESEND_API_KEY) return;
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`\n\n======================================================\n[LOCAL DEV EMAIL] Password Reset Link for ${to}:\n${resetLink}\n======================================================\n\n`);
+        return;
+    }
     try {
         await resend.emails.send({
             from: FROM,
