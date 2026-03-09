@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from './page.module.css';
 
 interface Author {
@@ -136,6 +137,7 @@ export default function CommunityPage() {
             const msg: Message = await res.json();
             setMessages(prev => [...prev, msg]);
             lastTimestampRef.current = msg.createdAt;
+            toast.success('+5 Points Earned!', { icon: '⭐' });
         }
         setSending(false);
         inputRef.current?.focus();

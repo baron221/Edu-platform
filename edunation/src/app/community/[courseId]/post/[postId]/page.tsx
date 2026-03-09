@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from './page.module.css';
 
 interface Author { id: string; name: string | null; image: string | null; role: string; }
@@ -45,6 +46,7 @@ export default function CommunityPostPage() {
             body: JSON.stringify({ postId, body }),
         });
         setBody(''); setSubmitting(false); fetchData();
+        toast.success('+2 Points Earned!', { icon: '⭐' });
     };
 
     const timeAgo = (d: string) => {

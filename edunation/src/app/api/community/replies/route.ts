@@ -35,5 +35,11 @@ export async function POST(req: Request) {
         include: { author: { select: { id: true, name: true, image: true, role: true } } },
     });
 
+    // Award +2 points for replying
+    await prisma.user.update({
+        where: { id: userId },
+        data: { points: { increment: 2 } }
+    });
+
     return NextResponse.json(reply, { status: 201 });
 }

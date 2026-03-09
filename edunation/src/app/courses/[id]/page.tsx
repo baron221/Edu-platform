@@ -13,6 +13,7 @@ import ResourceList from '@/components/ResourceList';
 import CertificateModal from '@/components/CertificateModal';
 import ReviewsSection from '@/components/ReviewsSection';
 import { useSession } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -156,6 +157,13 @@ export default function CourseDetailPage() {
             const updatedProgress = await res.json();
             // Optional: Sync with server data to ensure consistency (e.g. updatedAt timestamps)
             setProgress(prev => prev.map(p => p.lessonId === activeLesson.id ? updatedProgress : p));
+
+            if (newCompletedStatus) {
+                toast.success('Lesson Completed! +50 Points 🏆', {
+                    duration: 4000,
+                    style: { border: '1px solid #fbbf24', background: '#fffbeb', color: '#b45309' },
+                });
+            }
 
         } catch (err) {
             console.error('Error updating progress:', err);
@@ -326,7 +334,6 @@ export default function CourseDetailPage() {
                                         <MuxPlayer
                                             key={activeLesson.id}
                                             src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`}
-                                            type="video/mp4"
                                             metadata={{
                                                 video_id: activeLesson.id,
                                                 video_title: activeLesson.title,

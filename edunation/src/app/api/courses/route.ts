@@ -21,10 +21,20 @@ export async function GET(req: Request) {
             ...(free === 'true' ? { isFree: true } : free === 'false' ? { isFree: false } : {}),
         },
         include: {
-            _count: { select: { lessons: true, enrollments: true } },
+            _count: { select: { lessons: true, enrollments: true, reviews: true } },
+            reviews: { select: { rating: true } }
         },
         orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(courses);
+    const formattedCourses = courses.map(c => {
+        const avg = c.reviews.length > 0 ? c.reviews.reduce((sum, r) => sum + r.rating, 0) / c.reviews.length : 0;
+        const { reviews, ...rest } = c;
+        return {
+            ...rest,
+            avgRating: Math.round(avg * 10) / 10
+        };
+    });
+
+    return NextResponse.json(formattedCourses);
 }

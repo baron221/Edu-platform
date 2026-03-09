@@ -126,10 +126,18 @@ export default function Navbar() {
                                     {session.user?.name?.split(' ')[0] ?? 'User'}
                                 </span>
                                 {typeof (session.user as any)?.points === 'number' && (
-                                    <span className={styles.userPoints}>
-                                        <span style={{ color: '#fbbf24', marginRight: '4px' }}>★</span>
-                                        {(session.user as any).points}
-                                    </span>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <span className={styles.userPoints}>
+                                            <span style={{ color: '#fbbf24', marginRight: '4px' }}>★</span>
+                                            {(session.user as any).points}
+                                        </span>
+                                        {(session.user as any)?.currentStreak > 0 && (
+                                            <span className={styles.userPoints}>
+                                                <span style={{ color: '#f59e0b', marginRight: '4px' }}>🔥</span>
+                                                {(session.user as any).currentStreak}
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
                                 <span className={`${styles.langArrow} ${userOpen ? styles.langArrowOpen : ''}`}>▾</span>
                             </button>

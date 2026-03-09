@@ -50,12 +50,13 @@ export function notifyNewUser(opts: {
     name: string | null;
     email: string | null;
     role: string;
-    provider: 'email' | 'google' | 'github' | 'telegram';
+    provider: 'email' | 'google' | 'github' | 'telegram' | 'phone';
 }) {
     const icon = opts.provider === 'google' ? '🟢'
         : opts.provider === 'github' ? '⚫'
             : opts.provider === 'telegram' ? '🔵'
-                : '📧';
+                : opts.provider === 'phone' ? '📱'
+                    : '📧';
 
     return notifyAdmin(
         `🎉 <b>New User Signup!</b>\n\n` +

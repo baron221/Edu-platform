@@ -20,6 +20,7 @@ export async function GET() {
                 name: true,
                 image: true,
                 points: true,
+                currentStreak: true,
                 role: true
             }
         });

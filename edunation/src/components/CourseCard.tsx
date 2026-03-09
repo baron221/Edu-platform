@@ -17,7 +17,8 @@ export interface CourseDB {
     description: string | null;
     slug: string;
     thumbnail?: string | null;
-    _count?: { lessons: number; enrollments: number };
+    _count?: { lessons: number; enrollments: number; reviews?: number };
+    avgRating?: number;
 }
 
 interface Props {
@@ -100,6 +101,7 @@ export default function CourseCard({ course }: Props) {
                 <p className={styles.instructor}>{t.shared.by} {course.instructor}</p>
 
                 <div className={styles.info}>
+                    <span>⭐ {course.avgRating && course.avgRating > 0 ? course.avgRating.toFixed(1) : t.shared.new}</span>
                     <span>📹 {lessonCount} {t.courseDetail?.lessons || 'lessons'}</span>
                     <span>🎓 {enrollmentCount.toLocaleString()} {t.courseDetail?.students || 'students'}</span>
                 </div>
