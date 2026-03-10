@@ -188,7 +188,7 @@ export default function InstructorSubscribePage() {
 
                     {/* FAQ */}
                     <div className={styles.faq}>
-                        <h2 style={{ textAlign: 'center', marginBottom: 40, color: '#f1f5f9' }}>Common Questions</h2>
+                        <h2 style={{ textAlign: 'center', marginBottom: 40, color: '#0f172a' }}>Common Questions</h2>
                         <div className={styles.faqGrid}>
                             {[
                                 { q: 'Can I switch plans?', a: 'Yes, you can upgrade or downgrade at any time. Changes take effect immediately.' },

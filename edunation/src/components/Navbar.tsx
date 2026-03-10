@@ -46,8 +46,7 @@ export default function Navbar() {
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
-    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe' || pathname.startsWith('/community');
-    const hasScrolledBackground = scrolled || isDarkPage;
+    const hasScrolledBackground = scrolled;
 
     return (
         <nav className={`${styles.nav} ${hasScrolledBackground ? styles.scrolled : ''}`}>
@@ -241,25 +240,39 @@ export default function Navbar() {
                 <div className={styles.mobileCta}>
                     {session ? (
                         <>
-                            <Link
-                                href="/dashboard"
-                                className="btn btn-primary"
-                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
-                                onClick={() => setMenuOpen(false)}
-                            >
+                            <Link href="/dashboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
                                 🎓 My Learning
                             </Link>
-                            <Link
-                                href="/dashboard/sessions"
-                                className="btn btn-secondary"
-                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
-                                onClick={() => setMenuOpen(false)}
-                            >
+                            <Link href="/dashboard/sessions" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
                                 📅 My Sessions
                             </Link>
+                            <Link href="/leaderboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                🏆 Leaderboard
+                            </Link>
+                            {(session.user as any)?.role === 'admin' && (
+                                <>
+                                    <Link href="/admin" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                        📊 Admin Dashboard
+                                    </Link>
+                                    <Link href="/instructor/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                        🛠️ Instructor Dashboard
+                                    </Link>
+                                </>
+                            )}
+                            {(session.user as any)?.role === 'instructor' && (
+                                <Link href="/instructor/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                    🛠️ Instructor Dashboard
+                                </Link>
+                            )}
+                            {(session.user as any)?.role !== 'instructor' && (session.user as any)?.role !== 'admin' && (
+                                <Link href="/instructor/subscribe" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                    🎓 Become Instructor
+                                </Link>
+                            )}
+                            <div className={styles.mobileDivider} />
                             <button
                                 className="btn btn-secondary"
-                                style={{ flex: 1, justifyContent: 'center' }}
+                                style={{ width: '100%' }}
                                 onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
                             >
                                 🚪 Sign Out

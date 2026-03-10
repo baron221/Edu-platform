@@ -19,20 +19,20 @@
 }
 
 .backLink {
-    color: #94a3b8;
+    color: #0f172a;
     text-decoration: none;
     font-size: 14px;
     transition: color 0.2s;
 }
 
 .backLink:hover {
-    color: white;
+    color: #0f172a;
 }
 
 .printBtn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    color: #0f172a;
     padding: 10px 20px;
     border-radius: 10px;
     cursor: pointer;
@@ -56,7 +56,7 @@
     position: relative;
     padding: 60px 64px;
     text-align: center;
-    color: #1e293b;
+    color: #0f172afff;
     font-family: 'Inter', sans-serif;
 }
 
@@ -102,7 +102,7 @@
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #94a3b8;
+    color: #0f172a;
     margin-bottom: 20px;
 }
 
@@ -116,7 +116,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(36px, 6vw, 56px);
     font-weight: 900;
-    color: #1e293b;
+    color: #0f172afff;
     margin: 0 0 16px;
     line-height: 1.1;
 }
@@ -174,7 +174,7 @@
 .footerValue {
     font-size: 15px;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172afff;
     margin-bottom: 4px;
     border-bottom: 2px solid #e2e8f0;
     padding-bottom: 8px;
@@ -182,7 +182,7 @@
 
 .footerLabel {
     font-size: 11px;
-    color: #94a3b8;
+    color: #0f172a;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-top: 8px;

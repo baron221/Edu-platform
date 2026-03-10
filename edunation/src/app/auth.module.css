@@ -95,7 +95,7 @@
     border: 1px solid rgba(16, 185, 129, 0.25);
     border-radius: 12px;
     font-size: 13px;
-    color: #94a3b8;
+    color: #0f172a;
     margin-bottom: 24px;
 }
 
@@ -115,7 +115,7 @@
     justify-content: center;
     padding: 14px;
     background: linear-gradient(135deg, #FF3366 0%, #FF9933 100%);
-    color: white;
+    color: #0f172a;
     font-weight: 700;
     font-size: 16px;
     border-radius: 50px;
@@ -178,7 +178,7 @@
 .label {
     font-size: 13px;
     font-weight: 600;
-    color: #94a3b8;
+    color: #0f172a;
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
@@ -287,7 +287,7 @@
 
 .oauthGithub {
     background: #24292e;
-    color: white;
+    color: #0f172a;
     border: 1px solid var(--border);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
@@ -300,7 +300,7 @@
 
 .oauthTelegram {
     background: #229ED9;
-    color: white;
+    color: #0f172a;
     box-shadow: 0 2px 12px rgba(34, 158, 217, 0.3);
 }
 
@@ -361,7 +361,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    color: #94a3b8;
+    color: #0f172a;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -443,7 +443,7 @@
 
 .roleBtnActive {
     background: var(--primary);
-    color: white;
+    color: #0f172a;
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
     border: 1px solid var(--primary);
 }

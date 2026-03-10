@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -14,16 +15,52 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { data: session } = useSession();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // Close sidebar on route change
+    useEffect(() => {
+        setIsSidebarOpen(false);
+    }, [pathname]);
 
     return (
         <div className={styles.shell}>
+            {/* Mobile Header */}
+            <header className={styles.mobileHeader}>
+                <button
+                    className={styles.menuToggle}
+                    onClick={() => setIsSidebarOpen(true)}
+                    aria-label="Open sidebar"
+                >
+                    ☰
+                </button>
+                <div className={styles.mobileBrand}>
+                    <span className={styles.brandIcon}>🎓</span>
+                    <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
+                </div>
+                <div style={{ width: 40 }} /> {/* Spacer */}
+            </header>
+
+            {/* Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div
+                    className={styles.sidebarOverlay}
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={styles.sidebar}>
+            <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.brand}>
                     <div className={styles.brandLogo}>
                         <span className={styles.brandIcon}>🎓</span>
                         <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
                     </div>
+                    <button
+                        className={styles.closeSidebar}
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
+                        ✕
+                    </button>
                     <span className={styles.adminBadge}>
                         {(() => {
                             const u = session?.user as any;
@@ -49,13 +86,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
                                 { href: '/admin/users', label: 'Users', icon: '👥' },
                                 { href: '/admin/experts', label: 'Experts', icon: '⭐' },
-                                { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
-                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                                { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
+                                { href: '/dashboard', label: 'Switch to Student', icon: '🎓' },
                             ];
                         } else if (userRole === 'instructor') {
                             items = [
-                                { href: '/instructor/courses', label: 'My Courses', icon: '📚' },
-                                { href: '/instructor/subscribe', label: 'Subscription', icon: '💳' },
+                                { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
+                                { href: '/dashboard', label: 'My Learning Center', icon: '🎓' },
                                 { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
                             ];
                         } else {
@@ -65,9 +102,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
                             ];
                         }
-
-                        // If user is an expert but not instructor/admin, maybe they need some instructor-like links? 
-                        // For now keep it simple and focus on Sessions.
 
                         return items.map(item => {
                             const isActive = pathname === item.href || (item.href !== '/admin' && item.href !== '/instructor/courses' ? pathname.startsWith(item.href) : pathname === item.href || pathname.startsWith(item.href + '/'));
@@ -110,7 +144,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         🚪 Sign Out
                     </button>
                     <Link href="/" className={styles.viewSiteBtn}>
-                        🌐 View Site
+                        🌐 Home Page
                     </Link>
                 </div>
             </aside>

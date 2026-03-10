@@ -380,7 +380,7 @@
     display: block;
     width: 22px;
     height: 2px;
-    background: white;
+    background: var(--text-primary);
     border-radius: 2px;
     transition: all 0.3s ease;
     transform-origin: center;
@@ -408,7 +408,7 @@
     flex-direction: column;
     gap: 4px;
     padding: 0 24px;
-    background: rgba(7, 7, 17, 0.98);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: none;
@@ -419,7 +419,7 @@
 }
 
 .mobileMenu>a {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-primary);
     padding: 12px 4px;
     font-size: 16px;
     border-bottom: 1px solid var(--border);
@@ -430,7 +430,31 @@
 .mobileOpen {
     max-height: 80vh;
     padding: 16px 24px 32px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border);
+}
+
+.mobileDivider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+}
+
+.mobileSectionTitle {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+}
+
+.mobileLink {
+    display: block;
+    color: var(--text-primary);
+    padding: 10px 4px;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: 500;
 }
 
 /* Mobile Language Switcher */
@@ -447,7 +471,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -469,8 +493,9 @@
 
 .mobileCta {
     display: flex;
-    gap: 12px;
-    padding-top: 16px;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
 }
 
 .mobileCta a {
