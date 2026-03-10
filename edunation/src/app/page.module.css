@@ -67,7 +67,6 @@
   padding: 80px 24px;
 }
 
-.heroContent {}
 
 .heroBadge {
   display: inline-flex;
@@ -555,9 +554,9 @@
 /* Responsive */
 @media (max-width: 900px) {
   .hero {
-    min-height: auto;
-    padding-top: calc(var(--nav-height) + 40px);
-    padding-bottom: 80px;
+    min-height: auto !important;
+    padding-top: calc(var(--nav-height) + 20px) !important;
+    padding-bottom: 40px !important;
     align-items: flex-start;
   }
 
@@ -576,6 +575,32 @@
     justify-content: center;
   }
 
+  .heroTitle {
+    font-size: 32px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .heroSubtitle {
+    font-size: 15px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .heroCta {
+    margin-bottom: 32px !important;
+  }
+
+  .statsSection {
+    padding: 24px 0 !important;
+  }
+
+  .statValue {
+    font-size: 28px !important;
+  }
+
+  .statLabel {
+    font-size: 11px !important;
+  }
+
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -589,11 +614,70 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .page {
+    padding-bottom: 80px;
+    /* Space for BottomNav */
+  }
 }
 
 @media (max-width: 600px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
+  }
+}
+
+/* App-like Scroll Containers */
+.scrollContainer {
+  margin: 0 -24px;
+  padding: 0 24px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollContent {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+.scrollItem {
+  flex: 0 0 280px;
+}
+
+.scrollItemTestimonial {
+  flex: 0 0 300px;
+}
+
+@media (min-width: 901px) {
+  .scrollContent {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding-bottom: 0;
+  }
+
+  .scrollItem {
+    flex: none;
+  }
+
+  .scrollContainer {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+/* Specific Testimonial grid adjustment */
+@media (min-width: 1200px) {
+  .scrollContent:has(.scrollItemTestimonial) {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
