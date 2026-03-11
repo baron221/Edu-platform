@@ -57,6 +57,7 @@ export async function POST(req: Request) {
                 level: body.level ?? 'Beginner',
                 price: body.price ?? 0,
                 isFree: body.isFree ?? true,
+                thumbnail: body.thumbnail,
             },
         });
         return NextResponse.json(course, { status: 201 });

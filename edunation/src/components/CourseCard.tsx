@@ -64,6 +64,9 @@ export default function CourseCard({ course }: Props) {
 
     return (
         <Link href={`/courses/${course.slug}`} className={styles.card}>
+            {/* Shine effect overlay */}
+            <div className={`${styles.shine} ${!course.isFree ? styles.shinePremium : ''}`} />
+            
             {/* Thumbnail */}
             <div className={styles.thumbnail}>
                 {course.thumbnail && !imgError && !course.thumbnail.includes('source.unsplash.com') ? (
@@ -81,39 +84,58 @@ export default function CourseCard({ course }: Props) {
                     </div>
                 )}
 
-                {/* Badges */}
+                {/* Badges Overlay */}
                 <div className={styles.badges}>
-                    {course.isNew && <span className="badge badge-new">{t.shared.new}</span>}
+                    {course.isNew && <span className={`${styles.badge} ${styles.badgeNew}`}>{t.shared.new}</span>}
                     {course.isFree
-                        ? <span className="badge badge-free">{t.shared.free}</span>
-                        : <span className="badge badge-premium">{t.shared.premium}</span>
+                        ? <span className={`${styles.badge} ${styles.badgeFree}`}>{t.shared.free}</span>
+                        : <span className={`${styles.badge} ${styles.badgePremium}`}>{t.shared.premium}</span>
                     }
                 </div>
 
-                {/* Level */}
-                <div className={styles.level}>{levelLabel}</div>
+                {/* Level Overlay */}
+                <div className={styles.levelBadge}>{levelLabel}</div>
             </div>
 
             {/* Body */}
             <div className={styles.body}>
-                <div className={styles.category}>{course.category}</div>
-                <h3 className={styles.title}>{course.title}</h3>
-                <p className={styles.instructor}>{t.shared.by} {course.instructor}</p>
+                <div className={styles.topRow}>
+                    <span className={styles.category}>{course.category}</span>
+                    <div className={styles.rating}>
+                        <span className={styles.star}>⭐</span>
+                        <span className={styles.ratingVal}>{course.avgRating && course.avgRating > 0 ? course.avgRating.toFixed(1) : '5.0'}</span>
+                    </div>
+                </div>
 
-                <div className={styles.info}>
-                    <span>⭐ {course.avgRating && course.avgRating > 0 ? course.avgRating.toFixed(1) : t.shared.new}</span>
-                    <span>📹 {lessonCount} {t.courseDetail?.lessons || 'lessons'}</span>
-                    <span>🎓 {enrollmentCount.toLocaleString()} {t.courseDetail?.students || 'students'}</span>
+                <h3 className={styles.title}>{course.title}</h3>
+                
+                <div className={styles.instructorInfo}>
+                    <div className={styles.instructorAvatar}>{course.instructor.charAt(0)}</div>
+                    <span className={styles.instructorName}>{course.instructor}</span>
+                </div>
+
+                <div className={styles.metaInfo}>
+                    <div className={styles.metaItem}>
+                        <span className={styles.metaIcon}>📹</span>
+                        <span>{lessonCount} {t.courseDetail?.lessons || 'lessons'}</span>
+                    </div>
+                    <div className={styles.metaItem}>
+                        <span className={styles.metaIcon}>🎓</span>
+                        <span>{enrollmentCount.toLocaleString()} {t.courseDetail?.students || 'students'}</span>
+                    </div>
                 </div>
 
                 <div className={styles.footer}>
-                    <div className={styles.price}>
-                        {course.isFree
-                            ? <span className={styles.freeLabel}>{t.shared.free}</span>
-                            : <span className={styles.priceAmt}>{formatPrice(course.price, t.shared.currency)}</span>
-                        }
+                    <div className={styles.priceContainer}>
+                        {course.isFree ? (
+                            <span className={styles.freeText}>{t.shared.free}</span>
+                        ) : (
+                            <div className={styles.priceLayout}>
+                                <span className={styles.priceValue}>{formatPrice(course.price, t.shared.currency)}</span>
+                            </div>
+                        )}
                     </div>
-                    <span className={`badge badge-${course.level.toLowerCase()}`}>{levelLabel}</span>
+                    <div className={styles.actionIcon}>→</div>
                 </div>
             </div>
         </Link>

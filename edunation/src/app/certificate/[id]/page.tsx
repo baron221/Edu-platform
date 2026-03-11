@@ -52,42 +52,62 @@ export default function CertificatePage() {
                 <button className={styles.printBtn} onClick={() => window.print()}>{tr.print}</button>
             </div>
 
-            <div className={styles.cert} id="certificate">
-                <div className={styles.topAccent} />
+            <div className={styles.certFrame}>
+                <div className={styles.cert} id="certificate">
+                    {/* Decorative Corner Ornaments */}
+                    <div className={`${styles.corner} ${styles.topL}`} />
+                    <div className={`${styles.corner} ${styles.topR}`} />
+                    <div className={`${styles.corner} ${styles.botL}`} />
+                    <div className={`${styles.corner} ${styles.botR}`} />
 
-                <div className={styles.platformRow}>
-                    <span className={styles.platformLogo}>🎓</span>
-                    <span className={styles.platformName}>EduNationUz</span>
-                </div>
+                    <div className={styles.innerBorder}>
+                        <div className={styles.platformRow}>
+                            <div className={styles.platformIcon}>🎓</div>
+                            <span className={styles.platformName}>EduNationUz</span>
+                        </div>
 
-                <div className={styles.label}>{tr.label}</div>
-                <p className={styles.thisIs}>{tr.thisIs}</p>
-                <h1 className={styles.studentName}>{cert.user.name || 'Dedicated Learner'}</h1>
-                <p className={styles.hasCompleted}>{tr.hasCompleted}</p>
-                <h2 className={styles.courseTitle}>{cert.course.title}</h2>
+                        <div className={styles.content}>
+                            <div className={styles.label}>{tr.label}</div>
+                            <p className={styles.thisIs}>{tr.thisIs}</p>
+                            <h1 className={styles.studentName}>{cert.user.name || 'Dedicated Learner'}</h1>
+                            <p className={styles.hasCompleted}>{tr.hasCompleted}</p>
+                            <h2 className={styles.courseTitle}>{cert.course.title}</h2>
+                            <div className={styles.categoryBadge}>{cert.course.category}</div>
+                        </div>
 
-                <div className={styles.courseMeta}>
-                    <span className={styles.category}>{cert.course.category}</span>
-                </div>
+                        <div className={styles.footer}>
+                            <div className={styles.signatureRow}>
+                                <div className={styles.signer}>
+                                    <div className={styles.signatureSlot}>
+                                        <div className={styles.signatureText}>{cert.course.instructor}</div>
+                                    </div>
+                                    <div className={styles.footerLabel}>{tr.instructor}</div>
+                                </div>
 
-                <div className={styles.divider} />
+                                <div className={styles.sealContainer}>
+                                    <div className={styles.goldenSeal}>
+                                        <div className={styles.sealInner}>
+                                            <span className={styles.sealLogo}>🎓</span>
+                                            <div className={styles.sealText}>OFFICIAL SEAL</div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <div className={styles.footer}>
-                    <div className={styles.footerCol}>
-                        <div className={styles.footerValue}>{issuedDate}</div>
-                        <div className={styles.footerLabel}>{tr.dateIssued}</div>
+                                <div className={styles.signer}>
+                                    <div className={styles.signatureSlot}>
+                                        <div className={styles.verifDate}>{issuedDate}</div>
+                                    </div>
+                                    <div className={styles.footerLabel}>{tr.dateIssued}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.bottomMeta}>
+                            <div className={styles.certId}>{tr.certId}: {cert.id}</div>
+                            <div className={styles.verifyLink}>Verify at: edunation.uz/verify</div>
+                        </div>
                     </div>
-                    <div className={styles.seal}>
-                        <span className={styles.sealEmoji}>🏅</span>
-                    </div>
-                    <div className={styles.footerCol}>
-                        <div className={styles.footerValue}>{cert.course.instructor}</div>
-                        <div className={styles.footerLabel}>{tr.instructor}</div>
-                    </div>
                 </div>
-
-                <div className={styles.certId}>{tr.certId}: {cert.id}</div>
-                <div className={styles.bottomAccent} />
             </div>
         </div>
     );
