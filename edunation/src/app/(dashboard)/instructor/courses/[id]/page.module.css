@@ -31,23 +31,26 @@
 }
 
 .backBtn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
+    gap: 6px;
+    padding: 8px 16px;
     border-radius: 10px;
     background: #f8fafc;
+    border: 1px solid #e2e8f0;
     color: #475569;
     text-decoration: none;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
     transition: all 0.2s;
 }
 
 .backBtn:hover {
     background: #e2e8f0;
+    border-color: #cbd5e1;
     color: #0f172a;
+    transform: translateX(-2px);
 }
 
 .title {

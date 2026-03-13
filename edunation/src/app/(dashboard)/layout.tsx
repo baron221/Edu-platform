@@ -87,11 +87,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 { href: '/admin/users', label: 'Users', icon: '👥' },
                                 { href: '/admin/experts', label: 'Experts', icon: '⭐' },
                                 { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
+                                { href: '/instructor/analytics', label: 'Instructor Analytics', icon: '📈' },
                                 { href: '/dashboard', label: 'Switch to Student', icon: '🎓' },
                             ];
                         } else if (userRole === 'instructor') {
                             items = [
                                 { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
+                                { href: '/instructor/analytics', label: 'Analytics', icon: '📈' },
                                 { href: '/dashboard', label: 'My Learning Center', icon: '🎓' },
                                 { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
                             ];

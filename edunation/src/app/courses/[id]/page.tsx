@@ -331,23 +331,22 @@ export default function CourseDetailPage() {
                                             )}
                                         </MuxPlayer>
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
-                                        <MuxPlayer
+                                        <video
                                             key={activeLesson.id}
-                                            src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`}
-                                            metadata={{
-                                                video_id: activeLesson.id,
-                                                video_title: activeLesson.title,
-                                            }}
-                                            playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
-                                            primaryColor="#7c3aed"
-                                            accentColor="#06b6d4"
-                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            controls
+                                            controlsList="nodownload"
+                                            onContextMenu={e => e.preventDefault()}
+                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
                                             onEnded={() => {
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
                                                 }
                                             }}
                                         >
+                                            <source 
+                                                src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`} 
+                                                type={activeLesson.videoUrl.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'}
+                                            />
                                             {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
                                                 <track
                                                     label="English"
@@ -357,7 +356,8 @@ export default function CourseDetailPage() {
                                                     default
                                                 />
                                             )}
-                                        </MuxPlayer>
+                                            Your browser does not support the video tag.
+                                        </video>
                                     ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.spinner}></div>

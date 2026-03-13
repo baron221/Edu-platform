@@ -243,7 +243,7 @@ export default function CourseEditorPage() {
                                         </div>
                                     </div>
                                     <div className={styles.lessonActions}>
-                                        <Link href={`/admin/courses/${id}/lessons/${lesson.id}`} className={styles.lessonEditBtn}>
+                                        <Link href={`/instructor/courses/${id}/lessons/${lesson.id}`} className={styles.lessonEditBtn}>
                                             Edit Lesson
                                         </Link>
                                         <button className={styles.lessonDeleteBtn} onClick={() => deleteLesson(lesson.id)} title="Delete Lesson">
