@@ -22,7 +22,7 @@ const LANGS = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { data: session } = useSession();
-    const { language, setLanguage } = useLanguage();
+    const { language, setLanguage, t } = useLanguage();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Close sidebar on route change
@@ -84,32 +84,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {(() => {
                         const u = session?.user as any;
                         const userRole = u?.role;
-                        const isExpert = u?.isExpert;
 
                         let items = [];
                         if (userRole === 'admin') {
                             items = [
-                                { href: '/admin', label: 'Admin Dashboard', icon: '📊' },
-                                { href: '/admin/courses/all', label: 'Global Courses', icon: '🌍' },
+                                { href: '/admin', label: t.sidebar.adminDashboard, icon: '📊' },
+                                { href: '/admin/courses/all', label: t.sidebar.allCourses, icon: '🌍' },
                                 { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
-                                { href: '/admin/users', label: 'Users', icon: '👥' },
-                                { href: '/admin/experts', label: 'Experts', icon: '⭐' },
-                                { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
-                                { href: '/instructor/analytics', label: 'Instructor Analytics', icon: '📈' },
-                                { href: '/dashboard', label: 'Switch to Student', icon: '🎓' },
+                                { href: '/admin/users', label: t.sidebar.users, icon: '👥' },
+                                { href: '/admin/experts', label: t.sidebar.experts, icon: '⭐' },
+                                { href: '/instructor/courses', label: t.sidebar.teachingConsole, icon: '🛠️' },
+                                { href: '/instructor/analytics', label: t.sidebar.instructorAnalytics, icon: '📈' },
+                                { href: '/dashboard', label: t.sidebar.switchToStudent, icon: '🎓' },
                             ];
                         } else if (userRole === 'instructor') {
                             items = [
-                                { href: '/instructor/courses', label: 'Teaching Console', icon: '🛠️' },
-                                { href: '/instructor/analytics', label: 'Analytics', icon: '📈' },
-                                { href: '/dashboard', label: 'My Learning Center', icon: '🎓' },
-                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                                { href: '/instructor/courses', label: t.sidebar.teachingConsole, icon: '🛠️' },
+                                { href: '/instructor/analytics', label: t.sidebar.analytics, icon: '📈' },
+                                { href: '/dashboard', label: t.sidebar.myLearning, icon: '🎓' },
+                                { href: '/dashboard/sessions', label: t.sidebar.mySessions, icon: '📅' },
                             ];
                         } else {
-                            // Student or Expert
                             items = [
-                                { href: '/dashboard', label: 'Learning Center', icon: '🎓' },
-                                { href: '/dashboard/sessions', label: 'My Sessions', icon: '📅' },
+                                { href: '/dashboard', label: t.sidebar.myLearning, icon: '🎓' },
+                                { href: '/dashboard/sessions', label: t.sidebar.mySessions, icon: '📅' },
                             ];
                         }
 
@@ -165,10 +163,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         className={styles.signOutBtn}
                         onClick={() => signOut({ callbackUrl: '/' })}
                     >
-                        🚪 Sign Out
+                        {t.sidebar.signOut}
                     </button>
                     <Link href="/" className={styles.viewSiteBtn}>
-                        🌐 Home Page
+                        {t.sidebar.viewSite}
                     </Link>
                 </div>
             </aside>

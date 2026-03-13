@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface CourseStats {
@@ -87,6 +88,7 @@ function BarChart({ data, valueKey, color }: {
 }
 
 export default function InstructorAnalyticsPage() {
+    const { t } = useLanguage();
     const [data, setData] = useState<Analytics | null>(null);
     const [loading, setLoading] = useState(true);
     const [chartTab, setChartTab] = useState<'enrollments' | 'revenue'>('enrollments');
@@ -117,28 +119,28 @@ export default function InstructorAnalyticsPage() {
         {
             icon: '💰',
             value: `${formatUZS(overview.totalEarnings)} UZS`,
-            label: 'Total Earnings',
+            label: t.instructor.totalEarnings,
             color: '#f59e0b',
             iconBg: '#fef3c7',
         },
         {
             icon: '🎓',
             value: overview.totalEnrollments.toLocaleString(),
-            label: 'Total Enrollments',
+            label: t.instructor.totalEnrollments,
             color: '#7c3aed',
             iconBg: '#f3eeff',
         },
         {
             icon: '⭐',
             value: overview.avgRating > 0 ? `${overview.avgRating}/5` : '—',
-            label: `Avg Rating (${overview.totalReviews} reviews)`,
+            label: `${t.instructor.avgRating} (${overview.totalReviews} reviews)`,
             color: '#f59e0b',
             iconBg: '#fffbeb',
         },
         {
             icon: '📚',
             value: `${overview.activeCourses}/${overview.totalCourses}`,
-            label: 'Published Courses',
+            label: t.instructor.publishedCourses,
             color: '#10b981',
             iconBg: '#ecfdf5',
         },
@@ -148,8 +150,8 @@ export default function InstructorAnalyticsPage() {
         <div className={styles.page}>
             {/* Header */}
             <div className={styles.header}>
-                <h1 className={styles.title}>📈 Analytics</h1>
-                <p className={styles.subtitle}>Your course performance overview across all time.</p>
+                <h1 className={styles.title}>{t.instructor.analyticsTitle}</h1>
+                <p className={styles.subtitle}>{t.instructor.analyticsSubtitle}</p>
             </div>
 
             {/* Stat Cards */}
@@ -172,7 +174,7 @@ export default function InstructorAnalyticsPage() {
                 {/* Top Performer */}
                 {topCourse ? (
                     <div className={styles.topCard}>
-                        <div className={styles.topLabel}>🏆 Top Performing Course</div>
+                        <div className={styles.topLabel}>{t.instructor.topCourse}</div>
                         <div className={styles.topTitle}>{topCourse.title}</div>
                         <div className={styles.topMeta}>
                             <div className={styles.topMetaItem}>
@@ -202,19 +204,19 @@ export default function InstructorAnalyticsPage() {
                 {/* Chart Card */}
                 <div className={styles.card}>
                     <div className={styles.cardHeader}>
-                        <div className={styles.cardTitle}>Trend (last 6 months)</div>
+                        <div className={styles.cardTitle}>{t.instructor.trendTitle}</div>
                         <div className={styles.tabGroup}>
                             <button
                                 className={`${styles.tab} ${chartTab === 'enrollments' ? styles.tabActive : ''}`}
                                 onClick={() => setChartTab('enrollments')}
                             >
-                                Enrollments
+                                {t.instructor.enrollmentsTab}
                             </button>
                             <button
                                 className={`${styles.tab} ${chartTab === 'revenue' ? styles.tabActive : ''}`}
                                 onClick={() => setChartTab('revenue')}
                             >
-                                Revenue
+                                {t.instructor.revenueTab}
                             </button>
                         </div>
                     </div>
@@ -231,7 +233,7 @@ export default function InstructorAnalyticsPage() {
             {/* Per-course Table */}
             <div className={styles.cardFull}>
                 <div className={styles.cardHeader}>
-                    <div className={styles.cardTitle}>📊 Course Breakdown</div>
+                    <div className={styles.cardTitle}>{t.instructor.courseBreakdown}</div>
                 </div>
                 <div className={styles.cardBody}>
                     {courseStats.length === 0 ? (
@@ -244,12 +246,12 @@ export default function InstructorAnalyticsPage() {
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
-                                        <th>Course</th>
-                                        <th>Status</th>
-                                        <th>Lessons</th>
-                                        <th>Enrollments</th>
-                                        <th>Rating</th>
-                                        <th>Revenue</th>
+                                        <th>{t.instructor.colCourse}</th>
+                                        <th>{t.instructor.colStatus}</th>
+                                        <th>{t.instructor.colLessons}</th>
+                                        <th>{t.instructor.colEnrollments}</th>
+                                        <th>{t.instructor.colRating}</th>
+                                        <th>{t.instructor.colRevenue}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -264,7 +266,7 @@ export default function InstructorAnalyticsPage() {
                                             </td>
                                             <td>
                                                 <span className={`${styles.badge} ${c.published ? styles.badgePublished : styles.badgeDraft}`}>
-                                                    {c.published ? '● Published' : '○ Draft'}
+                                                {c.published ? `● ${t.instructor.published}` : `○ ${t.instructor.draft}`}
                                                 </span>
                                             </td>
                                             <td style={{ fontWeight: 600 }}>{c.lessons}</td>

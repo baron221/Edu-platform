@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface Stats {
@@ -13,6 +14,7 @@ interface Stats {
 }
 
 export default function AdminDashboard() {
+    const { t } = useLanguage();
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [analytics, setAnalytics] = useState<any>(null);
@@ -27,10 +29,10 @@ export default function AdminDashboard() {
     if (loading) return <div className={styles.loading}>Loading dashboard...</div>;
 
     const statCards = [
-        { label: 'Total Revenue', value: `${(stats?.totalRevenue ?? 0).toLocaleString('ru-RU')} UZS`, icon: '💰', color: '#fbbf24', href: '/admin/courses' },
-        { label: 'Total Courses', value: stats?.totalCourses ?? 0, icon: '📚', color: '#7c3aed', href: '/admin/courses' },
-        { label: 'Total Users', value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
-        { label: 'Enrollments', value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
+        { label: t.admin.totalRevenue, value: `${(stats?.totalRevenue ?? 0).toLocaleString('ru-RU')} UZS`, icon: '💰', color: '#fbbf24', href: '/admin/courses' },
+        { label: t.admin.totalCourses, value: stats?.totalCourses ?? 0, icon: '📚', color: '#7c3aed', href: '/admin/courses' },
+        { label: t.admin.totalUsers, value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
+        { label: t.admin.enrollments, value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
     ];
 
     const fetchAnalytics = async () => {
@@ -55,11 +57,11 @@ export default function AdminDashboard() {
         <div className={styles.page}>
             <div className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>Dashboard</h1>
-                    <p className={styles.subtitle}>Welcome to the EduNationUz admin panel.</p>
+                    <h1 className={styles.title}>{t.admin.dashboardTitle}</h1>
+                    <p className={styles.subtitle}>{t.admin.dashboardSubtitle}</p>
                 </div>
                 <Link href="/admin/courses/new" className={styles.newBtn}>
-                    + New Course
+                    {t.admin.newCourse}
                 </Link>
             </div>
 
@@ -77,13 +79,13 @@ export default function AdminDashboard() {
             {/* AI Student Sentiment Analytics */}
             <div className={styles.section} style={{ marginBottom: '40px' }}>
                 <div className={styles.sectionHeaderFlex}>
-                    <h2 className={styles.sectionTitle} style={{ borderBottom: 'none', paddingBottom: 0 }}>🧠 AI Student Insights</h2>
+                    <h2 className={styles.sectionTitle} style={{ borderBottom: 'none', paddingBottom: 0 }}>{t.admin.aiInsights}</h2>
                     <button
                         onClick={fetchAnalytics}
                         className={styles.aiBtnSubtle}
                         disabled={loadingAnalytics}
                     >
-                        {loadingAnalytics ? 'Analyzing...' : 'Refresh Insights ✨'}
+                        {loadingAnalytics ? t.admin.loading : t.admin.loadInsights}
                     </button>
                 </div>
 
@@ -127,7 +129,7 @@ export default function AdminDashboard() {
 
             {/* Course Engagement & Drop-offs */}
             <div className={styles.section} style={{ marginBottom: '40px' }}>
-                <h2 className={styles.sectionTitle}>📉 Course Engagement & Drop-offs</h2>
+                <h2 className={styles.sectionTitle}>{t.admin.courseDropoff}</h2>
                 <div className={styles.dropoffContainer}>
                     {stats?.courseDropoffs && stats.courseDropoffs.length > 0 ? (
                         stats.courseDropoffs.map((course, i) => (
@@ -165,7 +167,7 @@ export default function AdminDashboard() {
 
             {/* Recent Users */}
             <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Recent Sign-ups</h2>
+                <h2 className={styles.sectionTitle}>{t.admin.recentUsers}</h2>
                 <div className={styles.table}>
                     <div className={styles.tableHead}>
                         <span>Name</span>
