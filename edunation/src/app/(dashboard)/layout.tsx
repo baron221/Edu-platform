@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import AIAssistant from '@/components/AIAssistant';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './layout.module.css';
 
 const navItems = [
@@ -12,9 +13,16 @@ const navItems = [
     { href: '/admin/users', label: 'Users', icon: '👥' },
 ];
 
+const LANGS = [
+    { code: 'en', label: 'EN' },
+    { code: 'uz', label: 'UZ' },
+    { code: 'ru', label: 'RU' },
+] as const;
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { data: session } = useSession();
+    const { language, setLanguage } = useLanguage();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Close sidebar on route change
@@ -122,6 +130,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
 
                 <div className={styles.sidebarFooter}>
+                    {/* Language Switcher */}
+                    <div className={styles.langSwitcher}>
+                        {LANGS.map(l => (
+                            <button
+                                key={l.code}
+                                className={`${styles.langBtn} ${language === l.code ? styles.langBtnActive : ''}`}
+                                onClick={() => setLanguage(l.code)}
+                                title={l.code.toUpperCase()}
+                            >
+                                {l.label}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className={styles.userInfo}>
                         <div className={styles.userAvatar}>
                             {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
