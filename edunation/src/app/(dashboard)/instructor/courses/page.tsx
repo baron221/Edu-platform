@@ -16,7 +16,7 @@ interface Course {
 }
 
 export default function AdminCoursesPage() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [courses, setCourses] = useState<Course[]>([]);
     const [subscription, setSubscription] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -101,7 +101,7 @@ export default function AdminCoursesPage() {
             const res = await fetch('/api/admin/generate-course', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic: aiTopic, customInstructions: aiInstructions }),
+                body: JSON.stringify({ topic: aiTopic, customInstructions: aiInstructions, language }),
             });
             const data = await res.json();
 
