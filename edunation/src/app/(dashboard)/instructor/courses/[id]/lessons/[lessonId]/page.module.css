@@ -30,23 +30,26 @@
 }
 
 .backBtn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
+    gap: 6px;
+    padding: 8px 16px;
     border-radius: 10px;
     background: #f8fafc;
+    border: 1px solid #e2e8f0;
     color: #475569;
     text-decoration: none;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
     transition: all 0.2s;
 }
 
 .backBtn:hover {
     background: #e2e8f0;
+    border-color: #cbd5e1;
     color: #0f172a;
+    transform: translateX(-2px);
 }
 
 .title {
@@ -76,8 +79,8 @@
 }
 
 .saveBtn {
-    background: #0f172a;
-    color: white;
+    background: #f8fafc;
+    color: #0f172a;
     border: none;
     padding: 10px 24px;
     border-radius: 10px;
@@ -85,12 +88,12 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    box-shadow: 0 4px 12px rgba(248, 250, 252, 0.15);
 }
 
 .saveBtn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+    box-shadow: 0 6px 16px rgba(248, 250, 252, 0.25);
 }
 
 .saveBtn:disabled {
@@ -221,7 +224,7 @@
 /* AI Button */
 .aiBtn {
     background: linear-gradient(135deg, #7c3aed, #db2777);
-    color: white;
+    color: #0f172a;
     border: none;
     padding: 8px 16px;
     border-radius: 8px;
@@ -370,7 +373,7 @@
 .qualityBtn:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
-    color: #334155;
+    color: #0f172a;
 }
 
 .qualityActive {
@@ -396,7 +399,7 @@
 }
 
 .liveDisabled {
-    color: #94a3b8;
+    color: #0f172a;
     font-size: 14px;
     font-style: italic;
     padding: 24px;

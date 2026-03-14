@@ -40,14 +40,29 @@ export default function Navbar() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Body scroll lock - refined
+    useEffect(() => {
+        if (menuOpen) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+            // We don't use touchAction: none because it blocks scrolling inside the fixed menu
+        } else {
+            document.body.style.overflow = 'unset';
+            document.documentElement.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.documentElement.style.overflow = 'unset';
+        };
+    }, [menuOpen]);
+
     const currentLang = LANGUAGES.find(l => l.code === language)!;
 
     const userInitials = session?.user?.name
         ? session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
-    const isDarkPage = pathname === '/leaderboard' || pathname === '/instructor/subscribe' || pathname.startsWith('/community');
-    const hasScrolledBackground = scrolled || isDarkPage;
+    const hasScrolledBackground = scrolled;
 
     return (
         <nav className={`${styles.nav} ${hasScrolledBackground ? styles.scrolled : ''}`}>
@@ -63,7 +78,7 @@ export default function Navbar() {
                 {/* Desktop Links */}
                 <div className={styles.links}>
                     <Link href="/courses" className={styles.link}>{t.nav.courses}</Link>
-                    <Link href="/instructors" className={styles.link}>Instructors</Link>
+                    <Link href="/instructors" className={styles.link}>{t.nav.instructors}</Link>
                     <Link href="/pricing" className={styles.link}>{t.nav.pricing}</Link>
                     <Link href="/about" className={styles.link}>{t.nav.about}</Link>
                 </div>
@@ -80,7 +95,7 @@ export default function Navbar() {
                         <button
                             className={styles.langBtn}
                             onClick={() => setLangOpen(!langOpen)}
-                            aria-label="Select language"
+                            aria-label={t.nav.selectLanguage || "Select language"}
                         >
                             <span className={styles.langFlag}>{currentLang.flag}</span>
                             <span className={`${styles.langArrow} ${langOpen ? styles.langArrowOpen : ''}`}>▾</span>
@@ -109,7 +124,7 @@ export default function Navbar() {
                             <button
                                 className={styles.userBtn}
                                 onClick={() => setUserOpen(!userOpen)}
-                                aria-label="User menu"
+                                aria-label={t.nav.userMenu || "User menu"}
                             >
                                 {session.user?.image ? (
                                     <Image
@@ -155,32 +170,32 @@ export default function Navbar() {
                                     </div>
                                     <div className={styles.userDropdownDivider} />
                                     <Link href="/dashboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                        🎓 My Learning
+                                        🎓 {t.nav.myLearning}
                                     </Link>
                                     <Link href="/dashboard/sessions" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                        📅 My Sessions
+                                        📅 {t.nav.mySessions}
                                     </Link>
                                     <Link href="/leaderboard" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                        🏆 Leaderboard
+                                        🏆 {t.nav.leaderboard}
                                     </Link>
                                     {(session.user as any)?.role === 'admin' && (
                                         <>
                                             <Link href="/admin" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                                📊 Admin Dashboard
+                                                📊 {t.nav.adminDashboard}
                                             </Link>
                                             <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                                🛠️ Instructor Dashboard
+                                                🛠️ {t.nav.instructorDashboard}
                                             </Link>
                                         </>
                                     )}
                                     {(session.user as any)?.role === 'instructor' && (
                                         <Link href="/instructor/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                            🛠️ Instructor Dashboard
+                                            🛠️ {t.nav.instructorDashboard}
                                         </Link>
                                     )}
                                     {(session.user as any)?.role !== 'instructor' && (session.user as any)?.role !== 'admin' && (
                                         <Link href="/instructor/subscribe" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
-                                            🎓 Become Instructor
+                                            🎓 {t.nav.becomeInstructor}
                                         </Link>
                                     )}
                                     <Link href="/courses" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
@@ -189,12 +204,15 @@ export default function Navbar() {
                                     <Link href="/pricing" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
                                         💎 {t.nav.pricing}
                                     </Link>
+                                    <Link href="/settings" className={styles.userDropdownItem} onClick={() => setUserOpen(false)}>
+                                        ⚙️ {t.settings?.title || 'Account Settings'}
+                                    </Link>
                                     <div className={styles.userDropdownDivider} />
                                     <button
                                         className={`${styles.userDropdownItem} ${styles.signOutBtn}`}
                                         onClick={() => signOut({ callbackUrl: '/' })}
                                     >
-                                        🚪 Sign Out
+                                        🚪 {t.nav.signOut}
                                     </button>
                                 </div>
                             )}
@@ -219,13 +237,7 @@ export default function Navbar() {
 
             {/* Mobile Menu */}
             <div className={`${styles.mobileMenu} ${menuOpen ? styles.mobileOpen : ''}`}>
-                <Link href="/courses" onClick={() => setMenuOpen(false)}>{t.nav.courses}</Link>
-                <Link href="/instructors" onClick={() => setMenuOpen(false)}>Instructors</Link>
-                <Link href="/experts" onClick={() => setMenuOpen(false)}>{t.experts?.label || '⭐ Experts'}</Link>
-                <Link href="/pricing" onClick={() => setMenuOpen(false)}>{t.nav.pricing}</Link>
-                <Link href="/about" onClick={() => setMenuOpen(false)}>{t.nav.about}</Link>
-
-                {/* Mobile Language switcher */}
+                {/* Mobile Language switcher - Moved to top */}
                 <div className={styles.mobileLang}>
                     {LANGUAGES.map(lang => (
                         <button
@@ -238,31 +250,69 @@ export default function Navbar() {
                     ))}
                 </div>
 
+                {/* Featured Expert Link - Moved to top */}
+                <Link 
+                    href="/experts" 
+                    className={styles.mobileExpertLink} 
+                    onClick={() => setMenuOpen(false)}
+                >
+                    <span className={styles.mobileExpertIcon}>⭐</span>
+                    <span className={styles.mobileExpertText}>{t.experts?.label || 'EXPERT NETWORK'}</span>
+                    <span className={styles.mobileExpertArrow}>→</span>
+                </Link>
+
+                <div className={styles.mobileMenuDivider} />
+
+                {/* Main Links */}
+                <div className={styles.mobileMainLinks}>
+                    <Link href="/courses" onClick={() => setMenuOpen(false)}>{t.nav.courses}</Link>
+                    <Link href="/instructors" onClick={() => setMenuOpen(false)}>{t.nav.instructors}</Link>
+                    <Link href="/pricing" onClick={() => setMenuOpen(false)}>{t.nav.pricing}</Link>
+                    <Link href="/about" onClick={() => setMenuOpen(false)}>{t.nav.about}</Link>
+                </div>
+
                 <div className={styles.mobileCta}>
                     {session ? (
                         <>
-                            <Link
-                                href="/dashboard"
-                                className="btn btn-primary"
-                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                🎓 My Learning
+                            <Link href="/dashboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                🎓 {t.nav.myLearning}
                             </Link>
-                            <Link
-                                href="/dashboard/sessions"
-                                className="btn btn-secondary"
-                                style={{ flex: 1, justifyContent: 'center', marginBottom: '10px' }}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                📅 My Sessions
+                            <Link href="/dashboard/sessions" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                📅 {t.nav.mySessions}
                             </Link>
+                            <Link href="/leaderboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                🏆 {t.nav.leaderboard}
+                            </Link>
+                            {(session.user as any)?.role === 'admin' && (
+                                <>
+                                    <Link href="/admin" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                        📊 {t.nav.adminDashboard}
+                                    </Link>
+                                    <Link href="/instructor/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                        🛠️ {t.nav.instructorDashboard}
+                                    </Link>
+                                </>
+                            )}
+                            {(session.user as any)?.role === 'instructor' && (
+                                <Link href="/instructor/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                    🛠️ {t.nav.instructorDashboard}
+                                </Link>
+                            )}
+                            {(session.user as any)?.role !== 'instructor' && (session.user as any)?.role !== 'admin' && (
+                                <Link href="/instructor/subscribe" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                    🎓 {t.nav.becomeInstructor}
+                                </Link>
+                            )}
+                            <Link href="/settings" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                                ⚙️ {t.settings?.title || 'Account Settings'}
+                            </Link>
+                            <div className={styles.mobileDivider} />
                             <button
                                 className="btn btn-secondary"
-                                style={{ flex: 1, justifyContent: 'center' }}
+                                style={{ width: '100%' }}
                                 onClick={() => { signOut({ callbackUrl: '/' }); setMenuOpen(false); }}
                             >
-                                🚪 Sign Out
+                                🚪 {t.nav.signOut}
                             </button>
                         </>
                     ) : (

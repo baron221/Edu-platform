@@ -76,7 +76,7 @@
     padding: 10px 16px;
     font-size: 13px;
     font-weight: 600;
-    color: #334155;
+    color: #0f172a;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
@@ -111,7 +111,7 @@
 }
 
 .opt {
-    color: #94a3b8;
+    color: #0f172a;
     font-weight: 400;
     font-size: 12px;
 }
@@ -140,7 +140,7 @@
 
 .input::placeholder,
 .textarea::placeholder {
-    color: #94a3b8;
+    color: #0f172a;
 }
 
 .textarea {
@@ -151,7 +151,7 @@
 
 .hint {
     font-size: 12px;
-    color: #94a3b8;
+    color: #0f172a;
 }
 
 .error {

@@ -26,6 +26,7 @@ interface Course {
     price: number;
     isFree: boolean;
     published: boolean;
+    thumbnail: string | null;
     lessons: Lesson[];
 }
 
@@ -48,6 +49,8 @@ export default function CourseEditorPage() {
     const { data: session } = useSession({ required: true, onUnauthenticated() { router.push('/login'); } });
     const [creatingLesson, setCreatingLesson] = useState(false);
     const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [thumbFile, setThumbFile] = useState<File | null>(null);
+    const [thumbPreview, setThumbPreview] = useState('');
     const [uploadProgress, setUploadProgress] = useState(0);
 
     useEffect(() => {
@@ -76,6 +79,23 @@ export default function CourseEditorPage() {
     const handleSave = async () => {
         if (!course) return;
         setSaving(true);
+
+        let thumbnailUrl = course.thumbnail;
+
+        // Upload new thumbnail if selected
+        if (thumbFile) {
+            const formData = new FormData();
+            formData.append('file', thumbFile);
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            if (uploadRes.ok) {
+                const data = await uploadRes.json();
+                thumbnailUrl = data.url;
+            }
+        }
+
         await fetch(`/api/instructor/courses/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -88,10 +108,12 @@ export default function CourseEditorPage() {
                 price: Number(course.price),
                 isFree: course.isFree,
                 published: course.published,
+                thumbnail: thumbnailUrl,
             }),
         });
         setSaving(false);
         setSaved(true);
+        setThumbFile(null);
     };
 
     const handleCreateLesson = async (e: React.FormEvent) => {
@@ -221,7 +243,7 @@ export default function CourseEditorPage() {
                                         </div>
                                     </div>
                                     <div className={styles.lessonActions}>
-                                        <Link href={`/admin/courses/${id}/lessons/${lesson.id}`} className={styles.lessonEditBtn}>
+                                        <Link href={`/instructor/courses/${id}/lessons/${lesson.id}`} className={styles.lessonEditBtn}>
                                             Edit Lesson
                                         </Link>
                                         <button className={styles.lessonDeleteBtn} onClick={() => deleteLesson(lesson.id)} title="Delete Lesson">
@@ -244,6 +266,30 @@ export default function CourseEditorPage() {
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <h2 className={styles.cardTitle}>⚙️ Configuration</h2>
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.label}>Course Thumbnail</label>
+                            <div className={styles.thumbWrapper}>
+                                {(thumbPreview || course.thumbnail) && (
+                                    <div className={styles.thumbPreview}>
+                                        <img src={thumbPreview || course.thumbnail || ''} alt="Thumbnail" />
+                                    </div>
+                                )}
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className={styles.input} 
+                                    onChange={e => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setThumbFile(file);
+                                            setThumbPreview(URL.createObjectURL(file));
+                                        }
+                                    }}
+                                />
+                                <p className={styles.helpText}>Used for the course card and search results.</p>
+                            </div>
                         </div>
 
                         <div className={styles.field}>

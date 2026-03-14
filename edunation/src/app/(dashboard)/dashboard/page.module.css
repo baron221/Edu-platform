@@ -19,6 +19,17 @@
     margin-bottom: 32px;
 }
 
+@media (max-width: 768px) {
+    .header {
+        padding: 40px 0 30px;
+    }
+
+    .headerFlex {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
 .title {
     font-size: clamp(28px, 4vw, 40px);
     font-weight: 900;
@@ -28,7 +39,7 @@
 }
 
 .subtitle {
-    color: #94a3b8;
+    color: #0f172a;
     font-size: 16px;
     margin: 0;
 }
@@ -119,6 +130,19 @@
     border-radius: 20px;
     padding: 24px 28px;
     transition: border-color 0.2s;
+}
+
+@media (max-width: 640px) {
+    .continueCard {
+        padding: 20px;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .continueCard :global(.btn) {
+        width: 100%;
+    }
 }
 
 .continueCard:hover {

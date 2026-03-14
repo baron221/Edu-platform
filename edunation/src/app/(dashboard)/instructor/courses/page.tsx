@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface Course {
@@ -15,6 +16,7 @@ interface Course {
 }
 
 export default function AdminCoursesPage() {
+    const { t, language } = useLanguage();
     const [courses, setCourses] = useState<Course[]>([]);
     const [subscription, setSubscription] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function AdminCoursesPage() {
             const res = await fetch('/api/admin/generate-course', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic: aiTopic, customInstructions: aiInstructions }),
+                body: JSON.stringify({ topic: aiTopic, customInstructions: aiInstructions, language }),
             });
             const data = await res.json();
 
@@ -150,15 +152,15 @@ export default function AdminCoursesPage() {
 
             <div className={styles.header}>
                 <div>
-                    <h1 className={styles.title}>Courses</h1>
-                    <p className={styles.subtitle}>{courses.length} total courses</p>
+                    <h1 className={styles.title}>{t.instructor.pageTitle}</h1>
+                    <p className={styles.subtitle}>{courses.length} {t.instructor.pageSubtitle}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <button className={styles.aiBtn} onClick={(e) => { if (!requireSubscription(e)) setShowAiModal(true); }}>
-                        ✨ Generate with AI
+                        {t.instructor.generateAI}
                     </button>
                     <button className={`btn btn-primary`} onClick={(e) => { if (!requireSubscription(e)) setShowModal(true); }}>
-                        + New Course
+                        {t.instructor.newCourse}
                     </button>
                 </div>
             </div>
@@ -167,10 +169,10 @@ export default function AdminCoursesPage() {
                 <div className={styles.tableWrapper}>
                     <div className={styles.tableHead}>
                         <span>Title</span>
-                        <span>Category</span>
-                        <span>Lessons</span>
-                        <span>Enrollments</span>
-                        <span>Status</span>
+                        <span>{t.instructor.colCourse}</span>
+                        <span>{t.instructor.colLessons}</span>
+                        <span>{t.instructor.colEnrollments}</span>
+                        <span>{t.instructor.colStatus}</span>
                         <span>Actions</span>
                     </div>
                     {courses.map(c => (
@@ -184,11 +186,11 @@ export default function AdminCoursesPage() {
                                     className={`${styles.statusBtn} ${c.published ? styles.published : styles.draft}`}
                                     onClick={() => togglePublish(c.id, c.published)}
                                 >
-                                    {c.published ? '● Published' : '○ Draft'}
+                                    {c.published ? `● ${t.instructor.published}` : `○ ${t.instructor.draft}`}
                                 </button>
                             </span>
                             <span className={styles.actions}>
-                                <Link href={`/instructor/courses/${c.id}`} className={styles.editBtn}>Edit</Link>
+                                <Link href={`/instructor/courses/${c.id}`} className={styles.editBtn}>{t.instructor.edit}</Link>
                                 <button className={styles.deleteBtn} onClick={() => deleteCourse(c.id)}>Delete</button>
                             </span>
                         </div>
@@ -205,20 +207,20 @@ export default function AdminCoursesPage() {
                         </div>
                         <form onSubmit={handleCreate} className={styles.modalForm}>
                             <div className={styles.field}>
-                                <label>Course Title</label>
-                                <input required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Advanced TypeScript" className="input" />
+                                <label>{t.instructor.titleLabel}</label>
+                                <input required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder={t.instructor.titlePlaceholder} className="input" />
                             </div>
                             <div className={styles.field}>
-                                <label>Description</label>
-                                <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="What is this course about?" className="input" />
+                                <label>{t.instructor.descLabel}</label>
+                                <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder={t.instructor.descPlaceholder} className="input" />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div className={styles.field}>
-                                    <label>Category</label>
+                                    <label>{t.instructor.categoryLabel}</label>
                                     <input required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input" />
                                 </div>
                                 <div className={styles.field}>
-                                    <label>Level</label>
+                                    <label>{t.instructor.levelLabel}</label>
                                     <select value={formData.level} onChange={e => setFormData({ ...formData, level: e.target.value })} className="input">
                                         <option>Beginner</option>
                                         <option>Intermediate</option>
@@ -243,8 +245,8 @@ export default function AdminCoursesPage() {
                                 <input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files?.[0] || null)} className="input" style={{ padding: '0.5rem' }} />
                             </div>
                             <div className={styles.modalActions}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" disabled={creating}>{creating ? 'Creating...' : 'Create Course'}</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>{t.instructor.cancel}</button>
+                                <button type="submit" className="btn btn-primary" disabled={creating}>{creating ? t.instructor.creating : t.instructor.createBtn}</button>
                             </div>
                         </form>
                     </div>
@@ -263,7 +265,7 @@ export default function AdminCoursesPage() {
                         </p>
                         <form onSubmit={handleAiGenerate} className={styles.modalForm}>
                             <div className={styles.field}>
-                                <label>Course Topic</label>
+                                <label>{t.instructor.aiTopicLabel}</label>
                                 <input
                                     required
                                     value={aiTopic}
@@ -274,7 +276,7 @@ export default function AdminCoursesPage() {
                                 />
                             </div>
                             <div className={styles.field}>
-                                <label>Specific Instructions (Optional)</label>
+                                <label>{t.instructor.aiInstructionsLabel}</label>
                                 <textarea
                                     rows={3}
                                     value={aiInstructions}
@@ -293,9 +295,9 @@ export default function AdminCoursesPage() {
                             )}
 
                             <div className={styles.modalActions}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowAiModal(false)} disabled={generating}>Cancel</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowAiModal(false)} disabled={generating}>{t.instructor.cancel}</button>
                                 <button type="submit" className={`${styles.aiBtn} ${styles.aiBtnSubmit}`} disabled={generating || !aiTopic.trim()}>
-                                    {generating ? 'Generating...' : '✨ Generate Course'}
+                                    {generating ? t.instructor.generating : t.instructor.generateBtn}
                                 </button>
                             </div>
                         </form>

@@ -36,7 +36,7 @@ export default function LessonEditorPage() {
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch(`/api/admin/courses/${courseId}/lessons`)
+        fetch(`/api/instructor/courses/${courseId}/lessons`)
             .then(r => r.json())
             .then((lessons: Lesson[]) => {
                 const found = lessons.find(l => l.id === lessonId);
@@ -53,7 +53,7 @@ export default function LessonEditorPage() {
     const handleSave = async () => {
         if (!lesson) return;
         setSaving(true);
-        await fetch(`/api/admin/courses/${courseId}/lessons/${lessonId}`, {
+        await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(lesson),
@@ -146,7 +146,7 @@ export default function LessonEditorPage() {
         <div className={styles.page}>
             <div className={styles.topBar}>
                 <div className={styles.breadcrumb}>
-                    <Link href={`/admin/courses/${courseId}`} className={styles.backBtn} title="Back to Course">
+                    <Link href={`/instructor/courses/${courseId}`} className={styles.backBtn} title="Back to Course">
                         ←
                     </Link>
                     <h1 className={styles.title}>Edit Lesson</h1>

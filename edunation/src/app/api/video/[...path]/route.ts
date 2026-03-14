@@ -84,7 +84,7 @@ export async function GET(
     const ext = filePath.split('.').pop()?.toLowerCase();
     const mimeTypes: Record<string, string> = {
         'mp4': 'video/mp4',
-        'mov': 'video/mp4',
+        'mov': 'video/quicktime',
         'webm': 'video/webm',
         'mkv': 'video/x-matroska',
         'avi': 'video/x-msvideo',

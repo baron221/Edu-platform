@@ -69,7 +69,7 @@ export default function HomePage() {
 
   // Fetch courses once
   useEffect(() => {
-    fetch('/api/courses')
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/courses`)
       .then(r => r.json())
       .then((data: CourseDB[]) => {
         setFeaturedCourses(data.slice(0, 3));
@@ -79,7 +79,7 @@ export default function HomePage() {
 
   // Fetch stats + poll every 30s for realtime
   const fetchStats = () => {
-    fetch('/api/stats')
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/stats`)
       .then(r => r.json())
       .then((d: SiteStats) => { setStats(d); setLastUpdated(new Date()); })
       .catch(() => { });
@@ -246,10 +246,14 @@ export default function HomePage() {
             <Link href="/courses" className="btn btn-outline">{t.home.viewAllFree}</Link>
           </div>
 
-          <div className="grid-3">
-            {freeCourses.map(course => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+          <div className={styles.scrollContainer}>
+            <div className={styles.scrollContent}>
+              {freeCourses.map(course => (
+                <div key={course.id} className={styles.scrollItem}>
+                  <CourseCard course={course} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -290,10 +294,14 @@ export default function HomePage() {
             <Link href="/courses" className="btn btn-outline">{t.home.seeAll}</Link>
           </div>
 
-          <div className="grid-3">
-            {featuredCourses.map(course => (
-              <CourseCard key={course.id} course={course} />
-            ))}
+          <div className={styles.scrollContainer}>
+            <div className={styles.scrollContent}>
+              {featuredCourses.map(course => (
+                <div key={course.id} className={styles.scrollItem}>
+                  <CourseCard course={course} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -356,26 +364,30 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid-4">
-            {[
-              { id: 1, name: 'Ryan Mitchell', role: 'Frontend Developer at Google', avatar: 'RM', rating: 5, text: t.language === 'uz' ? "EduNationUz mening kareramni to'liq o'zgartirdi. React kursi juda chuqur bo'lib, 3 oyda Google'da orzuimdagi ishga kirdim!" : t.language === 'ru' ? 'EduNationUz полностью изменил мою карьеру. Курс React был невероятно глубоким, и через 3 месяца я получил работу мечты в Google!' : 'EduNationUz completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google!', course: 'React 18 Mastery' },
-              { id: 2, name: 'Fatima Al-Hassan', role: 'UX Designer at Apple', avatar: 'FA', rating: 5, text: t.language === 'uz' ? "UI/UX dizayn kursi ajoyib. Sarah's ta'lim uslubi juda aniq va qiziqarli. Noldan to'liq portfolio qurishgacha yetdim." : t.language === 'ru' ? 'Курс UI/UX дизайна феноменален. Стиль преподавания Сары такой ясный и увлекательный. Я прошла путь от нуля до полного портфолио.' : "The UI/UX design course is phenomenal. Sarah's teaching style is so clear and engaging. I went from zero to building a full portfolio.", course: 'UI/UX Design Masterclass' },
-              { id: 3, name: 'Carlos Mendez', role: 'Data Scientist at Netflix', avatar: 'CM', rating: 5, text: t.language === 'uz' ? "Python AI bootcamp hech shubhasiz eng yaxshi ML kursi. Dr. Webb murakkab tushunchalarni juda aniq tushuntiradi. Maoshim ikki barobarga o'sdi!" : t.language === 'ru' ? 'Буткемп Python AI — бесспорно лучший курс по ML. Доктор Вебб объясняет сложные концепции с такой ясностью. Моя зарплата удвоилась!' : 'The Python AI bootcamp is hands-down the best ML course available. My salary doubled after completing it.', course: 'Python & AI Bootcamp' },
-              { id: 4, name: 'Yuki Tanaka', role: 'Full-Stack Engineer at Stripe', avatar: 'YT', rating: 5, text: t.language === 'uz' ? "Pro rejaga obuna bo'ldim va bu ajoyib narx! Netflix obunasidan ham arzonroq narxda barcha kurslarga kirish. 3 ta to'liq loyiha qurib, ishga oldim!" : t.language === 'ru' ? 'Подписался на план Pro — это невероятная ценность. Доступ ко всем курсам дешевле подписки на Netflix. Построил 3 проекта и устроился!' : "Subscribed to the Pro plan and it's insane value. Access to all courses for less than a Netflix subscription. Built 3 projects and got hired!", course: 'Next.js Full-Stack' },
-            ].map(testimonial => (
-              <div key={testimonial.id} className={styles.testimonialCard}>
-                <div className={styles.testimonialQuote}>&quot;</div>
-                <p className={styles.testimonialText}>{testimonial.text}</p>
-                <div className={styles.testimonialMeta}>
-                  <div className={styles.testimonialAvatar}>{testimonial.avatar}</div>
-                  <div>
-                    <div className={styles.testimonialName}>{testimonial.name}</div>
-                    <div className={styles.testimonialRole}>{testimonial.role}</div>
+          <div className={styles.scrollContainer}>
+            <div className={styles.scrollContent}>
+              {[
+                { id: 1, name: 'Ryan Mitchell', role: 'Frontend Developer at Google', avatar: 'RM', rating: 5, text: t.language === 'uz' ? "EduNationUz mening kareramni to'liq o'zgartirdi. React kursi juda chuqur bo'lib, 3 oyda Google'da orzuimdagi ishga kirdim!" : t.language === 'ru' ? 'EduNationUz полностью изменил мою карьеру. Курс React был невероятно глубоким, и через 3 месяца я получил работу мечты в Google!' : 'EduNationUz completely transformed my career. The React course was incredibly in-depth, and within 3 months I landed my dream job at Google!', course: 'React 18 Mastery' },
+                { id: 2, name: 'Fatima Al-Hassan', role: 'UX Designer at Apple', avatar: 'FA', rating: 5, text: t.language === 'uz' ? "UI/UX dizayn kursi ajoyib. Sarah's ta'lim uslubi juda aniq va qiziqarli. Noldan to'liq portfolio qurishgacha yetdim." : t.language === 'ru' ? 'Курс UI/UX дизайна феноменален. Стиль преподавания Сары такой ясный и увлекательный. Я прошла путь от нуля до полного портфолио.' : "The UI/UX design course is phenomenal. Sarah's teaching style is so clear and engaging. I went from zero to building a full portfolio.", course: 'UI/UX Design Masterclass' },
+                { id: 3, name: 'Carlos Mendez', role: 'Data Scientist at Netflix', avatar: 'CM', rating: 5, text: t.language === 'uz' ? "Python AI bootcamp hech shubhasiz eng yaxshi ML kursi. Dr. Webb murakkab tushunchalarni juda aniq tushuntiradi. Maoshim ikki barobarga o'sdi!" : t.language === 'ru' ? 'Буткемп Python AI — бесспорно лучший курс по ML. Доктор Вебб объясняет сложные концепции с такой ясностью. Моя зарплата удвоилась!' : 'The Python AI bootcamp is hands-down the best ML course available. My salary doubled after completing it.', course: 'Python & AI Bootcamp' },
+                { id: 4, name: 'Yuki Tanaka', role: 'Full-Stack Engineer at Stripe', avatar: 'YT', rating: 5, text: t.language === 'uz' ? "Pro rejaga obuna bo'ldim va bu ajoyib narx! Netflix obunasidan ham arzonroq narxda barcha kurslarga kiring. 3 ta to'liq loyiha qurib, ishga oldim!" : t.language === 'ru' ? 'Подписался на план Pro — это невероятная ценность. Доступ ко всем курсам дешевле подписки на Netflix. Построил 3 проекта и устроился!' : "Subscribed to the Pro plan and it's insane value. Access to all courses for less than a Netflix subscription. Built 3 projects and got hired!", course: 'Next.js Full-Stack' },
+              ].map(testimonial => (
+                <div key={testimonial.id} className={styles.scrollItemTestimonial}>
+                  <div className={styles.testimonialCard}>
+                    <div className={styles.testimonialQuote}>&quot;</div>
+                    <p className={styles.testimonialText}>{testimonial.text}</p>
+                    <div className={styles.testimonialMeta}>
+                      <div className={styles.testimonialAvatar}>{testimonial.avatar}</div>
+                      <div>
+                        <div className={styles.testimonialName}>{testimonial.name}</div>
+                        <div className={styles.testimonialRole}>{testimonial.role}</div>
+                      </div>
+                    </div>
+                    <div className={styles.testimonialStars}>{'★'.repeat(testimonial.rating)}</div>
                   </div>
                 </div>
-                <div className={styles.testimonialStars}>{'★'.repeat(testimonial.rating)}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>

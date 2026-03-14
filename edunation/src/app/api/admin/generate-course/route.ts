@@ -55,16 +55,24 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { topic, customInstructions } = body;
+        const { topic, customInstructions, language } = body;
 
-        console.log("Generating AI Course for topic:", topic);
+        const languageMap: Record<string, string> = {
+            en: 'English',
+            uz: 'Uzbek',
+            ru: 'Russian',
+        };
+        const targetLanguage = languageMap[language] || 'English';
+
+        console.log('Generating AI Course for topic:', topic, '| Language:', targetLanguage);
 
         // Instruct Gemini 2.5 Flash to generate the course based on our highly specific JSON schema
         const { object } = await generateObject({
             model: google('gemini-2.5-flash'),
             schema: courseSchema,
-            system: `You are an expert curriculum designer and educator for EduNationUz. 
-            Create a highly structured, engaging, and comprehensive course outline about the requested topic. 
+            system: `You are an expert curriculum designer and educator for EduNationUz.
+            IMPORTANT: Generate ALL content — including the course title, description, lesson titles, lesson descriptions, quiz questions, quiz answer options, quiz explanations, and resource titles/descriptions — entirely in ${targetLanguage}. Do not mix in any other language.
+            Create a highly structured, engaging, and comprehensive course outline about the requested topic.
             Ensure the content is accurate and follows a logical learning progression.
             ${customInstructions ? `The user also provided these specific instructions: ${customInstructions}` : ''}`,
             prompt: `Topic: ${topic}`,

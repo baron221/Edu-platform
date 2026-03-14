@@ -15,10 +15,12 @@ export const authOptions: NextAuthOptions = {
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID ?? '',
             clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+            allowDangerousEmailAccountLinking: true,
         }),
         GitHubProvider({
             clientId: process.env.GITHUB_CLIENT_ID ?? '',
             clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
+            allowDangerousEmailAccountLinking: true,
         }),
         CredentialsProvider({
             name: 'Email',
@@ -138,12 +140,23 @@ export const authOptions: NextAuthOptions = {
                 const userId = (token.id ?? token.sub) as string;
                 const dbUser = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { role: true, points: true, isExpert: true, currentStreak: true },
+                    select: { 
+                        name: true,
+                        image: true,
+                        role: true, 
+                        points: true, 
+                        isExpert: true, 
+                        currentStreak: true 
+                    },
                 });
-                token.role = dbUser?.role ?? 'student';
-                token.points = dbUser?.points ?? 0;
-                token.currentStreak = dbUser?.currentStreak ?? 0;
-                token.isExpert = dbUser?.isExpert ?? false;
+                if (dbUser) {
+                    token.name = dbUser.name;
+                    token.picture = dbUser.image;
+                    token.role = dbUser.role ?? 'student';
+                    token.points = dbUser.points ?? 0;
+                    token.currentStreak = dbUser.currentStreak ?? 0;
+                    token.isExpert = dbUser.isExpert ?? false;
+                }
             }
             return token;
         },
@@ -152,6 +165,8 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 if (token) {
                     (session.user as any).id = token.sub;
+                    (session.user as any).name = token.name;
+                    (session.user as any).image = token.picture;
                     (session.user as any).role = token.role as string;
                     (session.user as any).points = token.points as number;
                     (session.user as any).currentStreak = token.currentStreak as number;
