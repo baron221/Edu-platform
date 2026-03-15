@@ -18,7 +18,8 @@ export default function SettingsPage() {
     const [profile, setProfile] = useState({
         name: '',
         email: '',
-        image: ''
+        image: '',
+        telegramId: ''
     });
 
     // Password State
@@ -33,7 +34,8 @@ export default function SettingsPage() {
             setProfile({
                 name: session.user.name || '',
                 email: session.user.email || '',
-                image: session.user.image || ''
+                image: session.user.image || '',
+                telegramId: (session.user as any).telegramId || ''
             });
         }
     }, [session]);
@@ -112,6 +114,46 @@ export default function SettingsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleConnectTelegram = () => {
+        const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? '8657675755';
+        const origin = window.location.origin;
+        const returnTo = `${origin}/api/user/connect-telegram`;
+
+        const popup = window.open(
+            `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(origin)}&return_to=${encodeURIComponent(returnTo)}&request_access=write`,
+            'telegram_connect',
+            'width=550,height=470,top=200,left=200'
+        );
+
+        const onMessage = async (event: MessageEvent) => {
+            if (event.origin !== origin) return;
+            if (event.data?.type !== 'telegram_connect') return;
+
+            window.removeEventListener('message', onMessage);
+            clearInterval(closedTimer);
+
+            if (event.data.error) {
+                toast.error(event.data.error === 'telegram_already_linked' ? 'This Telegram account is already linked to another user.' : 'Telegram connection failed.');
+                return;
+            }
+
+            if (event.data.success) {
+                setProfile(p => ({ ...p, telegramId: event.data.telegramId }));
+                toast.success('Telegram connected successfully!');
+                await update({ ...session, user: { ...session?.user, telegramId: event.data.telegramId } });
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+
+        const closedTimer = setInterval(() => {
+            if (popup?.closed) {
+                clearInterval(closedTimer);
+                window.removeEventListener('message', onMessage);
+            }
+        }, 500);
     };
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
@@ -244,6 +286,40 @@ export default function SettingsPage() {
                                     disabled // Recommended to disable email change unless verified
                                 />
                                 <p className={styles.hint}>Email cannot be changed directly for security.</p>
+                            </div>
+
+                            <div className={styles.field}>
+                                <label className={styles.label}>Telegram Connection</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                                    {profile.telegramId ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontWeight: 500 }}>
+                                            ✅ Connected (ID: {profile.telegramId})
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            type="button" 
+                                            onClick={handleConnectTelegram}
+                                            style={{
+                                                backgroundColor: '#2AABEE',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '0.5rem 1rem',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                fontWeight: 600,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                                <path fill="white" d="M17.76 7.28L15.4 17.6c-.17.76-.63.95-1.27.59l-3.5-2.58-1.69 1.63c-.19.18-.34.34-.7.34l.25-3.54 6.4-5.78c.28-.25-.06-.38-.43-.14L6.2 13.15 2.76 12.1c-.74-.23-.75-.74.15-1.1L16.71 6.18c.62-.23 1.16.14.96 1.1" />
+                                            </svg>
+                                            Connect Telegram
+                                        </button>
+                                    )}
+                                </div>
+                                <p className={styles.hint}>Receive instant notifications directly via @edunationbot</p>
                             </div>
 
                             <button type="submit" className={styles.submitBtn} disabled={loading}>

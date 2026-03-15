@@ -295,6 +295,7 @@ export default function LoginPage() {
                                     onChange={e => setPassword(e.target.value)}
                                     autoComplete="new-password"
                                     required
+                                    suppressHydrationWarning
                                 />
                             </div>
 

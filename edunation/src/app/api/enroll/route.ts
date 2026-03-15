@@ -70,7 +70,7 @@ export async function POST(request: Request) {
             }
         });
 
-        // Notify user
+        // Notify student
         await createNotification(
             userId,
             'ENROLLMENT',
@@ -78,6 +78,18 @@ export async function POST(request: Request) {
             `You have successfully enrolled in "${course.title}". Happy learning!`,
             `/dashboard`
         );
+
+        // Notify instructor
+        if (course.instructorId) {
+            const studentName = session?.user?.name || 'A student';
+            await createNotification(
+                course.instructorId,
+                'ENROLLMENT',
+                'New Course Enrollment',
+                `Student "${studentName}" has just enrolled in your course "${course.title}".`,
+                `/instructor/courses`
+            );
+        }
 
         return NextResponse.json(enrollment);
     } catch (error) {

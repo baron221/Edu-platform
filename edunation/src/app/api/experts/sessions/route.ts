@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import { notifyNewExpertSession } from '@/lib/telegram';
+import { createNotification } from '@/lib/notify';
 
 // POST /api/experts/sessions
 export async function POST(req: NextRequest) {
@@ -61,6 +62,15 @@ export async function POST(req: NextRequest) {
         totalPrice,
         expertTelegramId: expert.telegramId,
     }).catch(() => { });
+
+    // 🔔 Notify expert (In-app Bell)
+    await createNotification(
+        expert.id,
+        'SESSION_REQUEST',
+        'New Session Request',
+        `Student "${student.name}" has requested an expert session on "${topic}".`,
+        `/instructor/sessions`
+    );
 
     return NextResponse.json({ ok: true, session: expertSession });
 }

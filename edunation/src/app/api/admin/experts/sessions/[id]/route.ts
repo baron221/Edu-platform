@@ -39,6 +39,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             `/dashboard/sessions`
         );
 
+        // 🔔 Notify expert
+        await createNotification(
+            expertSession.expertId,
+            'SESSION_UPDATE',
+            'Session Cancelled',
+            `Your scheduled expert session with ${expertSession.student.name} has been cancelled by the administrator.`,
+            `/instructor/sessions`
+        );
+
         return NextResponse.json({ ok: true, status: 'cancelled' });
     }
 
@@ -57,6 +66,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             'Session Confirmed',
             `Your expert session with ${expertSession.expert.name} is confirmed! Check your sessions page for the meet link soon.`,
             `/dashboard/sessions`
+        );
+
+        // 🔔 Notify expert
+        await createNotification(
+            expertSession.expertId,
+            'SESSION_UPDATE',
+            'Session Confirmed',
+            `An administrator has confirmed your session with student ${expertSession.student.name}. Please prepare for the meeting!`,
+            `/instructor/sessions`
         );
 
         // Fire Make/n8n webhook (blocking for debug)
