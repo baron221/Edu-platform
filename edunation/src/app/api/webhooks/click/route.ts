@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '@/lib/prisma';
+import { createNotification } from '@/lib/notify';
 
 export async function POST(req: Request) {
     try {
@@ -125,6 +126,15 @@ export async function POST(req: Request) {
                     update: {},
                     create: { userId: order.userId, slug, tagline: 'Passionate educator on EduNationUz' },
                 });
+
+                // 🔔 Notify user
+                await createNotification(
+                    order.userId,
+                    'SUBSCRIPTION_UPDATE',
+                    'Subscription Successful!',
+                    `You are now an active "${order.plan.toUpperCase()}" Instructor on EduNationUz. You can now start creating courses!`,
+                    '/instructor/courses'
+                );
             } else {
                 // Mark purchase as completed
                 await prisma.purchase.update({
@@ -150,6 +160,32 @@ export async function POST(req: Request) {
                         completed: false,
                     }
                 });
+
+                // 🔔 Notify student
+                const course = await prisma.course.findUnique({
+                    where: { id: order.courseId },
+                    select: { title: true, instructorId: true }
+                });
+
+                await createNotification(
+                    order.userId,
+                    'PURCHASE_COMPLETE',
+                    'Payment Successful',
+                    `You have successfully enrolled in "${course?.title}". Happy learning!`,
+                    `/dashboard`
+                );
+
+                // 🔔 Notify instructor
+                if (course?.instructorId) {
+                    const student = await prisma.user.findUnique({ where: { id: order.userId } });
+                    await createNotification(
+                        course.instructorId,
+                        'NEW_SALE',
+                        'New Course Sale!',
+                        `Student "${student?.name || 'Someone'}" has just purchased your course "${course.title}" via Click.`,
+                        `/instructor/analytics`
+                    );
+                }
             }
 
             return NextResponse.json({
