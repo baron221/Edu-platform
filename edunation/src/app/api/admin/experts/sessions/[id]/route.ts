@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { createNotification } from '@/lib/notify';
 
 // PATCH /api/admin/experts/sessions/[id] — confirm session + fire Make/n8n webhook
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -28,6 +29,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             where: { id },
             data: { status: 'cancelled' },
         });
+
+        // Notify student
+        await createNotification(
+            expertSession.studentId,
+            'SESSION_UPDATE',
+            'Session Cancelled',
+            `Your expert session with ${expertSession.expert.name} has been cancelled.`,
+            `/dashboard/sessions`
+        );
+
         return NextResponse.json({ ok: true, status: 'cancelled' });
     }
 
@@ -38,6 +49,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             data: { status: 'confirmed' },
         });
         console.log('[SESSION_PATCH] Status updated to confirmed');
+
+        // Notify student
+        await createNotification(
+            expertSession.studentId,
+            'SESSION_UPDATE',
+            'Session Confirmed',
+            `Your expert session with ${expertSession.expert.name} is confirmed! Check your sessions page for the meet link soon.`,
+            `/dashboard/sessions`
+        );
 
         // Fire Make/n8n webhook (blocking for debug)
         const webhookUrl = process.env.AUTOMATION_WEBHOOK_URL;

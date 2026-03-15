@@ -94,6 +94,9 @@ model User {
   expertSessions     ExpertSession[]      @relation("ExpertSessions")
   studentSessions    ExpertSession[]      @relation("StudentSessions")
 
+  // Notifications
+  notifications       Notification[]
+
   // Gamification
   points              Int                   @default(0)
   currentStreak       Int                   @default(0)
@@ -561,3 +564,23 @@ model ExpertSession {
   @@index([studentId])
   @@index([status])
 }
+
+// =====================================================================
+// NOTIFICATIONS
+// =====================================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String           // recipient
+  type      String           // ENROLLMENT | NEW_REVIEW | SESSION_UPDATE | COURSE_PUBLISHED | etc.
+  title     String
+  message   String
+  link      String?          // click-through URL
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, read])
+}
+

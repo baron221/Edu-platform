@@ -257,6 +257,24 @@ export const translations = {
             enterprise: 'Contact Sales',
         },
         // Dashboard
+        notifications: {
+            title: 'Notifications',
+            markAllRead: 'Mark all as read',
+            empty: 'No notifications yet.',
+            noNew: 'You\'re all caught up!',
+        },
+        notifications: {
+            title: 'Bildirishnomalar',
+            markAllRead: 'Barchasini o\'qilgan deb belgilash',
+            empty: 'Hozircha bildirishnomalar yo\'q.',
+            noNew: 'Hamma xabarlar o\'qilgan!',
+        },
+        notifications: {
+            title: 'Уведомления',
+            markAllRead: 'Отметить все как прочитанные',
+            empty: 'Пока нет уведомлений.',
+            noNew: 'У вас нет новых уведомлений!',
+        },
         dashboard: {
             title: 'My Learning',
             subtitle: 'Welcome back',
