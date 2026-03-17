@@ -102,6 +102,10 @@ model User {
   currentStreak       Int                   @default(0)
   lastActivityDate    DateTime?
   subscriptionPayments SubscriptionPayment[]
+
+  // Free Trial tracking
+  studentTrialUsed    Boolean               @default(false)
+  instructorTrialUsed Boolean               @default(false)
 }
 
 // =====================================================================

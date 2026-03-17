@@ -16,6 +16,8 @@ interface DashboardData {
     activeStreak: number;
     totalLessonsDone: number;
     totalCompleted: number;
+    studentTrialUsed: boolean;
+    instructorTrialUsed: boolean;
 }
 
 export default function DashboardPage() {
@@ -76,6 +78,22 @@ export default function DashboardPage() {
                         </div>
                         <div className={styles.streakBadge}>🔥 {activeStreak} {t.dashboard.streak}</div>
                     </div>
+
+                    {/* Free Trial Promotion Banner */}
+                    {!data.studentTrialUsed && (
+                        <div className={styles.trialBanner}>
+                            <div className={styles.trialBannerContent}>
+                                <span className={styles.trialBadge}>PROMO</span>
+                                <div>
+                                    <h3 className={styles.trialBannerTitle}>Unlock 1 Month of Pro for Free! 🚀</h3>
+                                    <p className={styles.trialBannerDesc}>Get unlimited access to all courses, HD quality, and certificates. No credit card required.</p>
+                                </div>
+                            </div>
+                            <Link href="/pricing" className="btn btn-primary btn-sm">
+                                {t.trial.startStudent}
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Stats Row */}
                     <div className={styles.statsRow}>

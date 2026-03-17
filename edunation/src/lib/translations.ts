@@ -256,24 +256,21 @@ export const translations = {
             pro: 'Start Pro Trial',
             enterprise: 'Contact Sales',
         },
+        trial: {
+            startStudent: 'Start 1-Month Free Trial',
+            startInstructor: 'Start 1-Month Instructor Trial',
+            activating: 'Activating...',
+            success: 'Trial Activated! Enjoy your learning.',
+            error: 'Failed to activate trial.',
+            alreadyUsed: 'You have already used your free trial.',
+        },
+
         // Dashboard
         notifications: {
             title: 'Notifications',
             markAllRead: 'Mark all as read',
             empty: 'No notifications yet.',
             noNew: 'You\'re all caught up!',
-        },
-        notifications: {
-            title: 'Bildirishnomalar',
-            markAllRead: 'Barchasini o\'qilgan deb belgilash',
-            empty: 'Hozircha bildirishnomalar yo\'q.',
-            noNew: 'Hamma xabarlar o\'qilgan!',
-        },
-        notifications: {
-            title: 'Уведомления',
-            markAllRead: 'Отметить все как прочитанные',
-            empty: 'Пока нет уведомлений.',
-            noNew: 'У вас нет новых уведомлений!',
         },
         dashboard: {
             title: 'My Learning',
@@ -875,6 +872,15 @@ export const translations = {
             pro: 'Pro sinovini boshlash',
             enterprise: 'Savdo bo\'limi bilan bog\'lanish',
         },
+        trial: {
+            startStudent: '1 oylik bepul sinovni boshlash',
+            startInstructor: '1 oylik instruktor sinovini boshlash',
+            activating: 'Faollashtirilmoqda...',
+            success: 'Sinov muddati faollashtirildi! Ta\'limdan zavqlaning.',
+            error: 'Sinov muddatini faollashtirishda xatolik yuz berdi.',
+            alreadyUsed: 'Siz bepul sinov muddatidan allaqachon foydalangansiz.',
+        },
+
         // Dashboard
         dashboard: {
             title: 'Mening ta\'limim',
@@ -1474,6 +1480,14 @@ export const translations = {
             free: 'Начать бесплатно',
             pro: 'Начать пробный период Pro',
             enterprise: 'Связаться с отделом продаж',
+        trial: {
+            startStudent: 'Начать 1-месячный пробный период',
+            startInstructor: 'Начать 1-месячный период инструктора',
+            activating: 'Активация...',
+            success: 'Пробный период активирован! Приятного обучения.',
+            error: 'Не удалось активировать пробный период.',
+            alreadyUsed: 'Вы уже использовали свой пробный период.',
+        },
         },
         // Dashboard
         dashboard: {

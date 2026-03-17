@@ -115,7 +115,7 @@ export default function NotificationBell() {
                 className={styles.bellButton} 
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Notifications"
-            >
+            > Notifications
                 🔔
                 {unreadCount > 0 && (
                     <span className={styles.badge}>

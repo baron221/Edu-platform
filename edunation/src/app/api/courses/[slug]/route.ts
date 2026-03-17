@@ -59,10 +59,9 @@ export async function GET(
             });
             isEnrolled = !!enrollment;
 
-            const subscription = await prisma.subscription.findUnique({
-                where: { userId: userId }
-            });
-            isSubscribed = subscription?.status === 'active' && subscription.plan !== 'free';
+            isSubscribed = subscription?.status === 'active' && 
+                           subscription.plan !== 'free' && 
+                           (!subscription.endDate || new Date(subscription.endDate) > new Date());
 
             progress = await prisma.progress.findMany({
                 where: {
