@@ -42,6 +42,8 @@ export default function CourseDetailPage() {
     const [showCert, setShowCert] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [processingPayment, setProcessingPayment] = useState(false);
+    const [uploadingReceipt, setUploadingReceipt] = useState(false);
+    const [receiptSubmitted, setReceiptSubmitted] = useState(false);
     const { data: session } = useSession();
 
     useEffect(() => {
@@ -116,6 +118,48 @@ export default function CourseDetailPage() {
             alert('Payment error occurred.');
         } finally {
             setProcessingPayment(false);
+        }
+    };
+
+    const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !session?.user) return;
+
+        setUploadingReceipt(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const uploadData = await uploadRes.json();
+
+            if (!uploadRes.ok || !uploadData.url) {
+                alert(uploadData.error || 'Failed to upload receipt image.');
+                setUploadingReceipt(false);
+                return;
+            }
+
+            const submitRes = await fetch('/api/manual-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: course.id, receiptUrl: uploadData.url })
+            });
+
+            if (submitRes.ok) {
+                setReceiptSubmitted(true);
+                toast.success('Receipt submitted successfully. Admin will review it shortly.');
+            } else {
+                const submitData = await submitRes.json();
+                alert(submitData.error || 'Failed to submit receipt.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred while submitting your receipt.');
+        } finally {
+            setUploadingReceipt(false);
         }
     };
 
@@ -599,7 +643,8 @@ export default function CourseDetailPage() {
                             <p>Choose how you would like to secure your access to <strong>{course.title}</strong>.</p>
                         </div>
 
-                        <div className={styles.paymentOptions}>
+                        <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
+                            {/* === PRESERVED FOR PRODUCTION ===
                             <button
                                 className={`${styles.payBtn} ${styles.paymeBtn}`}
                                 onClick={() => handlePaymentClick('payme')}
@@ -626,6 +671,48 @@ export default function CourseDetailPage() {
                                 <div className={styles.payIcon}>💳</div>
                                 <span>Visa / Mastercard</span>
                             </button>
+                            */}
+
+                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%' }}>
+                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>Manual Bank Transfer</h3>
+                                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
+                                    To purchase access to this course, please transfer the amount to:
+                                </p>
+                                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace' }}>
+                                    9860 0104 0801 2010
+                                </div>
+                                <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
+                                    Tulkinov Bakhromjon
+                                </div>
+                                
+                                {receiptSubmitted ? (
+                                    <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
+                                        ✅ Receipt submitted! Please wait for our Admin to approve your access.
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                                        <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
+                                            Already transferred? Upload your receipt screen shot:
+                                        </p>
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <input
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={handleReceiptUpload}
+                                                style={{ display: 'none' }}
+                                                id="receipt-upload"
+                                            />
+                                            <label
+                                                htmlFor="receipt-upload"
+                                                className="btn btn-primary"
+                                                style={{ cursor: 'pointer', background: '#2563eb', borderColor: '#2563eb', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto' }}
+                                            >
+                                                {uploadingReceipt ? '⏳ Uploading & Submitting...' : '📁 Upload Receipt Image'}
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>

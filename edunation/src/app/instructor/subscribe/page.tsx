@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -40,6 +41,7 @@ const PLANS = [
 ];
 
 export default function InstructorSubscribePage() {
+    const { data: session } = useSession();
     const [current, setCurrent] = useState<CurrentSub | null>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -47,6 +49,8 @@ export default function InstructorSubscribePage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [processingPayment, setProcessingPayment] = useState(false);
+    const [uploadingReceipt, setUploadingReceipt] = useState(false);
+    const [receiptSubmitted, setReceiptSubmitted] = useState(false);
 
     useEffect(() => {
         fetch('/api/instructor/subscribe')
@@ -108,6 +112,47 @@ export default function InstructorSubscribePage() {
             setShowPaymentModal(false);
         } finally {
             setProcessingPayment(false);
+        }
+    };
+
+    const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !session?.user || !selectedPlan) return;
+
+        setUploadingReceipt(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const uploadData = await uploadRes.json();
+
+            if (!uploadRes.ok || !uploadData.url) {
+                alert(uploadData.error || 'Failed to upload receipt.');
+                setUploadingReceipt(false);
+                return;
+            }
+
+            const submitRes = await fetch('/api/manual-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ planId: selectedPlan, receiptUrl: uploadData.url })
+            });
+
+            if (submitRes.ok) {
+                setReceiptSubmitted(true);
+            } else {
+                const submitData = await submitRes.json();
+                alert(submitData.error || 'Failed to submit receipt.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error submitting receipt.');
+        } finally {
+            setUploadingReceipt(false);
         }
     };
 
@@ -215,7 +260,9 @@ export default function InstructorSubscribePage() {
                             <p>Choose how you would like to pay for the <strong>{PLANS.find(p => p.id === selectedPlan)?.name}</strong> plan.</p>
                         </div>
 
-                        <div className={styles.paymentOptions}>
+                        <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
+                            {/* === PRESERVED FOR PRODUCTION === */}
+                            {/*
                             <button
                                 className={`${styles.payBtn} ${styles.paymeBtn}`}
                                 onClick={() => handlePaymentClick('payme')}
@@ -242,6 +289,48 @@ export default function InstructorSubscribePage() {
                                 <div className={styles.payIcon} style={{ fontSize: '14px', color: '#6366f1' }}>Stripe</div>
                                 <span>Pay with Stripe (Card)</span>
                             </button>
+                            */}
+
+                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%' }}>
+                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>Manual Bank Transfer</h3>
+                                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
+                                    To activate your Pro Instructor plan, please transfer the subscription amount to:
+                                </p>
+                                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace' }}>
+                                    9860 0104 0801 2010
+                                </div>
+                                <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
+                                    Tulkinov Bakhromjon
+                                </div>
+                                
+                                {receiptSubmitted ? (
+                                    <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
+                                        ✅ Receipt submitted! Admin will activate your Pro status after verification.
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+                                        <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
+                                            Already transferred? Upload your receipt:
+                                        </p>
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <input
+                                                type="file"
+                                                accept="image/*,.pdf"
+                                                onChange={handleReceiptUpload}
+                                                style={{ display: 'none' }}
+                                                id="instructor-receipt-upload"
+                                            />
+                                            <label
+                                                htmlFor="instructor-receipt-upload"
+                                                className={styles.saveBtn}
+                                                style={{ cursor: 'pointer', background: '#2563eb', color: 'white', border: 'none', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto' }}
+                                            >
+                                                {uploadingReceipt ? '⏳ Submitting...' : '📁 Upload Receipt'}
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <button

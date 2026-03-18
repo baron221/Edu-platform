@@ -3,10 +3,11 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        const [totalCourses, totalUsers, totalEnrollments, recentUsers, enrollments] = await Promise.all([
+        const [totalCourses, totalUsers, totalEnrollments, pendingPayments, recentUsers, enrollments] = await Promise.all([
             prisma.course.count(),
             prisma.user.count(),
             prisma.enrollment.count(),
+            prisma.manualPayment.count({ where: { status: 'pending' } }),
             prisma.user.findMany({
                 take: 5,
                 orderBy: { createdAt: 'desc' },
@@ -66,13 +67,14 @@ export async function GET() {
         // Finalize average progress
         const courseDropoffs = Object.values(courseStats).map(stat => ({
             ...stat,
-            avgProgress: stat.enrollments > 0 ? Array.from(stat.avgProgress.toString()).reduce((a, b) => a + Number(b), 0) / stat.enrollments : 0
+            avgProgress: stat.enrollments > 0 ? stat.avgProgress / stat.enrollments : 0
         })).sort((a, b) => b.enrollments - a.enrollments).slice(0, 5); // Top 5
 
         return NextResponse.json({
             totalCourses,
             totalUsers,
             totalEnrollments,
+            pendingPayments,
             recentUsers,
             totalRevenue,
             courseDropoffs
