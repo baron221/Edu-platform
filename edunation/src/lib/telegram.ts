@@ -27,6 +27,25 @@ export async function notifyAdmin(message: string): Promise<void> {
     }
 }
 
+export async function notifyAdminWithPhoto(photoUrl: string, caption: string): Promise<void> {
+    if (!BOT_TOKEN || !ADMIN_CHAT) return;
+
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: ADMIN_CHAT,
+                photo: photoUrl,
+                caption: caption,
+                parse_mode: 'HTML',
+            }),
+        });
+    } catch (err) {
+        console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR]', err);
+    }
+}
+
 export async function sendTelegramDM(chatId: string, message: string): Promise<void> {
     if (!BOT_TOKEN || !chatId) return;
     try {

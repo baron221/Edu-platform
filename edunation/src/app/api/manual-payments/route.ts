@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
-import { notifyAdmin } from '@/lib/telegram';
+import { notifyAdmin, notifyAdminWithPhoto } from '@/lib/telegram';
 
 export async function POST(req: Request) {
     try {
@@ -38,15 +38,21 @@ export async function POST(req: Request) {
         });
 
         // Format message for Admin Bot
-        const typeStr = courseId ? `Course: ${manualPayment.course?.title}` : `Subscription Plan: ${planId}`;
+        const typeStr = courseId ? `📚 <b>Course:</b> ${manualPayment.course?.title}` : `⭐ <b>Plan:</b> ${planId}`;
         const userName = manualPayment.user.name || manualPayment.user.email || 'Unknown User';
-        const msg = `🧾 *New Manual Payment Receipt*\\n\\n` +
-                    `👤 *User:* ${userName}\\n` +
-                    `🛍 *Item:* ${typeStr}\\n` +
-                    `🔗 *Receipt:* [View Receipt](${receiptUrl})\\n\\n` +
+        const msg = `🧾 <b>New Manual Payment Receipt</b>\n\n` +
+                    `👤 <b>User:</b> ${userName}\n` +
+                    `${typeStr}\n\n` +
                     `Please check the Admin Dashboard to approve or reject this payment.`;
 
-        await notifyAdmin(msg);
+        // If it's an image, send as photo, otherwise fallback to message
+        const isImage = receiptUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) || receiptUrl.includes('image');
+        
+        if (isImage) {
+            await notifyAdminWithPhoto(receiptUrl, msg);
+        } else {
+            await notifyAdmin(`${msg}\n\n🔗 <b>Receipt:</b> <a href="${receiptUrl}">View File</a>`);
+        }
 
         return NextResponse.json({ success: true, payment: manualPayment });
     } catch (error) {
