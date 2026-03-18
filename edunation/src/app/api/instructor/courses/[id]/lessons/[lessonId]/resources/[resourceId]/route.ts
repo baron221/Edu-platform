@@ -22,25 +22,18 @@ async function verifyAccess(courseId: string) {
     return { ok: true };
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; lessonId: string }> }) {
-    const { id, lessonId } = await params;
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, resourceId: string }> }) {
+    const { id, resourceId } = await params;
     const access = await verifyAccess(id);
     if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
 
-    const body = await req.json();
-    const lesson = await prisma.lesson.update({
-        where: { id: lessonId },
-        data: body,
-        include: { resources: true }
-    });
-    return NextResponse.json(lesson);
-}
-
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string; lessonId: string }> }) {
-    const { id, lessonId } = await params;
-    const access = await verifyAccess(id);
-    if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
-
-    await prisma.lesson.delete({ where: { id: lessonId } });
-    return NextResponse.json({ ok: true });
+    try {
+        await prisma.resource.delete({
+            where: { id: resourceId }
+        });
+        return NextResponse.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting resource:', err);
+        return NextResponse.json({ error: 'Failed to delete resource' }, { status: 500 });
+    }
 }
