@@ -18,19 +18,21 @@ const LanguageContext = createContext<LanguageContextType>({
     t: translations.en,
 });
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguageState] = useState<Language>('en');
+export function LanguageProvider({ children, initialLanguage = 'en' }: { children: ReactNode; initialLanguage?: Language }) {
+    const [language, setLanguageState] = useState<Language>(initialLanguage);
 
     useEffect(() => {
-        const saved = localStorage.getItem('edunation-lang') as Language | null;
-        if (saved && ['en', 'uz', 'ru'].includes(saved)) {
-            setLanguageState(saved);
+        // Synchronize state if the server-provided initialLanguage changed (rare)
+        if (initialLanguage !== language) {
+            setLanguageState(initialLanguage);
         }
-    }, []);
+    }, [initialLanguage]);
 
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem('edunation-lang', lang);
+        // Set cookie for server-side detection (1 year)
+        document.cookie = `edunation-lang=${lang}; path=/; max-age=${60 * 60 * 24 * 365}`;
     };
 
     return (

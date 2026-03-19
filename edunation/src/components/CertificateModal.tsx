@@ -52,31 +52,56 @@ export default function CertificateModal({ courseName, studentName, instructorNa
 
                 {/* The Certificate Preview that will be screenshotted */}
                 <div className={styles.certWrapper}>
-                    <div className={styles.certificate} ref={certRef}>
-                        <div className={styles.certBorder}>
-                            <div className={styles.certHeader}>
-                                <h1>Certificate of Completion</h1>
-                                <p>This certifies that</p>
-                            </div>
+                    <div className={styles.certFrame}>
+                        <div className={styles.certificate} ref={certRef}>
+                            <div className={styles.watermark}>EduNation</div>
+                            {/* Decorative Corners */}
+                            <div className={`${styles.corner} ${styles.topL}`} />
+                            <div className={`${styles.corner} ${styles.topR}`} />
+                            <div className={`${styles.corner} ${styles.botL}`} />
+                            <div className={`${styles.corner} ${styles.botR}`} />
 
-                            <div className={styles.studentName}>
-                                {studentName}
-                            </div>
-
-                            <div className={styles.certBody}>
-                                <p>has successfully completed the course</p>
-                                <h2>{courseName}</h2>
-                            </div>
-
-                            <div className={styles.certFooter}>
-                                <div className={styles.signatureBlock}>
-                                    <div className={styles.signatureLine}></div>
-                                    <span>{instructorName}</span>
-                                    <span className={styles.signatureTitle}>Instructor</span>
+                            <div className={styles.innerBorder}>
+                                <div className={styles.certHeader}>
+                                    <span className={styles.certLabel}>Certificate of Completion</span>
+                                    <p className={styles.thisCertifies}>This certifies that</p>
                                 </div>
-                                <div className={styles.logoBlock}>
-                                    <span className={styles.logo}>🎓 EduNation</span>
-                                    <span className={styles.dateText}>Issued on: {new Date(date).toLocaleDateString()}</span>
+
+                                <div className={styles.studentName}>
+                                    {studentName}
+                                </div>
+
+                                <div className={styles.certBody}>
+                                    <p className={styles.hasCompleted}>has successfully completed the course</p>
+                                    <h2 className={styles.courseTitle}>{courseName}</h2>
+                                </div>
+
+                                <div className={styles.certFooter}>
+                                    <div className={styles.signatureBlock}>
+                                        <div className={styles.signatureText}>{instructorName}</div>
+                                        <span className={styles.footerLabel}>Instructor</span>
+                                    </div>
+
+                                    <div className={styles.sealContainer}>
+                                        <div className={styles.goldenSeal}>
+                                            <div className={styles.sealInner}>
+                                                <span className={styles.sealLogo}>🎓</span>
+                                                <span className={styles.sealText}>Official Seal</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.signatureBlock}>
+                                        <div className={styles.signatureText}>
+                                            {new Date(date).toLocaleDateString()}
+                                        </div>
+                                        <span className={styles.footerLabel}>Date Issued</span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.bottomMeta}>
+                                    <div className={styles.certId}>ID: EDU-{Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                                    <div className={styles.verifyText}>Verify at: edunation.uz/verify</div>
                                 </div>
                             </div>
                         </div>

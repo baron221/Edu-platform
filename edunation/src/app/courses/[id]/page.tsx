@@ -417,8 +417,8 @@ export default function CourseDetailPage() {
                                     ) : (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.lockedIcon}>⏳</div>
-                                            <h3 className={styles.lockedTitle}>Not Uploaded</h3>
-                                            <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
+                                            <h3 className={styles.lockedTitle}>{t.courseDetail.notUploaded}</h3>
+                                            <p className={styles.lockedDesc}>{t.courseDetail.notUploadedDesc}</p>
                                         </div>
                                     )
                                 ) : activeLesson ? (

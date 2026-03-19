@@ -134,6 +134,8 @@ export const translations = {
             lesson: 'lesson',
             yourProgress: 'Your Progress',
             lessonsCompleted: (completed: number, total: number) => `${completed} of ${total} lessons completed`,
+            notUploaded: 'Not Uploaded',
+            notUploadedDesc: 'The video for this lesson has not been uploaded yet.',
         },
         // Pricing
         pricing: {
@@ -768,6 +770,8 @@ export const translations = {
             lesson: 'dars',
             yourProgress: 'Sizning natijangiz',
             lessonsCompleted: (completed: number, total: number) => `${total} darsdan ${completed} tasi yakunlandi`,
+            notUploaded: 'Yuklanmagan',
+            notUploadedDesc: 'Ushbu dars uchun video hali yuklanmagan.',
         },
         pricing: {
             label: '💎 Narxlar',
@@ -1389,6 +1393,8 @@ export const translations = {
             lesson: 'урок',
             yourProgress: 'Ваш прогресс',
             lessonsCompleted: (completed: number, total: number) => `Завершено ${completed} из ${total} уроков`,
+            notUploaded: 'Не загружено',
+            notUploadedDesc: 'Видео для этого урока еще не загружено.',
         },
         pricing: {
             label: '💎 Цены',

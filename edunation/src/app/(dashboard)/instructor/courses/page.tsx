@@ -36,7 +36,7 @@ export default function AdminCoursesPage() {
         'Software Development', 'Web Development', 'Mobile Apps', 
         'Data Science & AI', 'Cyber Security', 'UI/UX Design', 
         'Digital Marketing', 'Business & Entrepreneurship',
-        'Math', 'English', 'SAT / IELTS / Multilevel',
+        'Math', 'English', 'SAT', 'IELTS', 'Multilevel',
         'Personal Development', 'Photography & Video', 'Music & Arts', 'Health & Fitness'
     ];
 

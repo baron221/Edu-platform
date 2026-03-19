@@ -49,9 +49,15 @@ export const viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { cookies as nextCookies } from 'next/headers';
+import { Language } from '@/lib/translations';
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await nextCookies();
+  const lang = (cookieStore.get('edunation-lang')?.value as Language) || 'en';
+
   return (
-    <html lang="en">
+    <html lang={lang}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -71,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AuthProvider>
-          <LanguageProvider>
+          <LanguageProvider initialLanguage={lang}>
             <ConditionalLayout>
               {children}
             </ConditionalLayout>
