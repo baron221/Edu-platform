@@ -48,10 +48,13 @@ export async function POST(req: Request) {
         // If it's an image, send as photo, otherwise fallback to message
         const isImage = receiptUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) || receiptUrl.includes('image');
         
+        // Telegram needs absolute URL
         if (isImage) {
             await notifyAdminWithPhoto(receiptUrl, msg);
         } else {
-            await notifyAdmin(`${msg}\n\n🔗 <b>Receipt:</b> <a href="${receiptUrl}">View File</a>`);
+            const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+            const absoluteReceiptUrl = receiptUrl.startsWith('http') ? receiptUrl : `${baseUrl}${receiptUrl}`;
+            await notifyAdmin(`${msg}\n\n🔗 <b>Receipt:</b> <a href="${absoluteReceiptUrl}">View File</a>`);
         }
 
         return NextResponse.json({ success: true, payment: manualPayment });

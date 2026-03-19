@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 import styles from './page.module.css';
 
 interface CurrentSub { plan: string; status: string; endDate: string | null; }
@@ -42,6 +44,7 @@ const PLANS = [
 
 export default function InstructorSubscribePage() {
     const { data: session } = useSession();
+    const { t } = useLanguage();
     const [current, setCurrent] = useState<CurrentSub | null>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -131,7 +134,7 @@ export default function InstructorSubscribePage() {
             const uploadData = await uploadRes.json();
 
             if (!uploadRes.ok || !uploadData.url) {
-                alert(uploadData.error || 'Failed to upload receipt.');
+                toast.error(uploadData.error || t.manualPay.error);
                 setUploadingReceipt(false);
                 return;
             }
@@ -143,14 +146,15 @@ export default function InstructorSubscribePage() {
             });
 
             if (submitRes.ok) {
+                toast.success(t.manualPay.success);
                 setReceiptSubmitted(true);
             } else {
                 const submitData = await submitRes.json();
-                alert(submitData.error || 'Failed to submit receipt.');
+                toast.error(submitData.error || t.manualPay.error);
             }
         } catch (err) {
             console.error(err);
-            alert('Error submitting receipt.');
+            toast.error(t.manualPay.error);
         } finally {
             setUploadingReceipt(false);
         }
@@ -251,52 +255,21 @@ export default function InstructorSubscribePage() {
                 </div>
             </section>
 
-            {/* Payment Modal */}
             {showPaymentModal && (
                 <div className={styles.modalOverlay} onClick={() => !processingPayment && setShowPaymentModal(false)}>
                     <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
                         <div className={styles.paymentHeader}>
-                            <h2>Select Payment Method</h2>
-                            <p>Choose how you would like to pay for the <strong>{PLANS.find(p => p.id === selectedPlan)?.name}</strong> plan.</p>
+                            <h2>{t.manualPay.title}</h2>
+                            <p>{t.manualPay.instructions}</p>
                         </div>
 
                         <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
-                            {/* === PRESERVED FOR PRODUCTION === */}
-                            {/*
-                            <button
-                                className={`${styles.payBtn} ${styles.paymeBtn}`}
-                                onClick={() => handlePaymentClick('payme')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon}>Payme</div>
-                                <span>Pay with Payme</span>
-                            </button>
-
-                            <button
-                                className={`${styles.payBtn} ${styles.clickBtn}`}
-                                onClick={() => handlePaymentClick('click')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon}>CLICK</div>
-                                <span>Pay with Click</span>
-                            </button>
-
-                            <button
-                                className={`${styles.payBtn} ${styles.stripeBtn}`}
-                                onClick={() => handlePaymentClick('stripe')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon} style={{ fontSize: '14px', color: '#6366f1' }}>Stripe</div>
-                                <span>Pay with Stripe (Card)</span>
-                            </button>
-                            */}
-
-                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%' }}>
-                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>Manual Bank Transfer</h3>
+                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>{t.manualPay.title}</h3>
                                 <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
-                                    To activate your Pro Instructor plan, please transfer the subscription amount to:
+                                    {t.manualPay.instructions}
                                 </p>
-                                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                                     9860 0104 0801 2010
                                 </div>
                                 <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
@@ -305,12 +278,12 @@ export default function InstructorSubscribePage() {
                                 
                                 {receiptSubmitted ? (
                                     <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
-                                        ✅ Receipt submitted! Admin will activate your Pro status after verification.
+                                        ✅ {t.manualPay.success}
                                     </div>
                                 ) : (
                                     <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
                                         <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
-                                            Already transferred? Upload your receipt:
+                                            {t.manualPay.alreadyTransferred}
                                         </p>
                                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                                             <input
@@ -323,9 +296,9 @@ export default function InstructorSubscribePage() {
                                             <label
                                                 htmlFor="instructor-receipt-upload"
                                                 className={styles.saveBtn}
-                                                style={{ cursor: 'pointer', background: '#2563eb', color: 'white', border: 'none', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto' }}
+                                                style={{ cursor: 'pointer', background: '#2563eb', color: 'white', border: 'none', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto', width: '100%', textAlign: 'center' }}
                                             >
-                                                {uploadingReceipt ? '⏳ Submitting...' : '📁 Upload Receipt'}
+                                                {uploadingReceipt ? `⏳ ${t.manualPay.submitting}` : `📁 ${t.manualPay.uploadBtn}`}
                                             </label>
                                         </div>
                                     </div>
@@ -337,8 +310,9 @@ export default function InstructorSubscribePage() {
                             className={styles.closeModalBtn}
                             onClick={() => setShowPaymentModal(false)}
                             disabled={processingPayment}
+                            style={{ width: '100%', marginTop: '10px' }}
                         >
-                            Cancel
+                            {t.manualPay.cancel}
                         </button>
                     </div>
                 </div>

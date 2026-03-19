@@ -108,14 +108,12 @@ export default function CourseDetailPage() {
             const data = await res.json();
             if (data.url) {
                 window.location.href = data.url;
-            } else if (res.status === 401) {
-                router.push('/login');
             } else {
-                alert(data.error || 'Payment initialization failed.');
+                toast.error(data.error || 'Payment initialization failed.');
             }
         } catch (err) {
             console.error(err);
-            alert('Payment error occurred.');
+            toast.error('Payment error occurred.');
         } finally {
             setProcessingPayment(false);
         }
@@ -137,7 +135,7 @@ export default function CourseDetailPage() {
             const uploadData = await uploadRes.json();
 
             if (!uploadRes.ok || !uploadData.url) {
-                alert(uploadData.error || 'Failed to upload receipt image.');
+                toast.error(uploadData.error || t.manualPay.error);
                 setUploadingReceipt(false);
                 return;
             }
@@ -150,14 +148,14 @@ export default function CourseDetailPage() {
 
             if (submitRes.ok) {
                 setReceiptSubmitted(true);
-                toast.success('Receipt submitted successfully. Admin will review it shortly.');
+                toast.success(t.manualPay.success);
             } else {
                 const submitData = await submitRes.json();
-                alert(submitData.error || 'Failed to submit receipt.');
+                toast.error(submitData.error || t.manualPay.error);
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred while submitting your receipt.');
+            toast.error(t.manualPay.error);
         } finally {
             setUploadingReceipt(false);
         }
@@ -213,7 +211,7 @@ export default function CourseDetailPage() {
             console.error('Error updating progress:', err);
             // --- ROLLBACK ON ERROR ---
             setProgress(previousProgress);
-            alert('Failed to update progress. Reverting changes.');
+            toast.error('Failed to update progress. Reverting changes.');
         } finally {
             setUpdatingProgress(false);
         }
@@ -639,46 +637,17 @@ export default function CourseDetailPage() {
                 <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
                     <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
                         <div className={styles.paymentHeader}>
-                            <h2>Select Payment Method</h2>
-                            <p>Choose how you would like to secure your access to <strong>{course.title}</strong>.</p>
+                            <h2>{t.manualPay.title}</h2>
+                            <p>{t.manualPay.instructions}</p>
                         </div>
 
                         <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
-                            {/* === PRESERVED FOR PRODUCTION ===
-                            <button
-                                className={`${styles.payBtn} ${styles.paymeBtn}`}
-                                onClick={() => handlePaymentClick('payme')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon}>Payme</div>
-                                <span>Pay with Payme</span>
-                            </button>
-
-                            <button
-                                className={`${styles.payBtn} ${styles.clickBtn}`}
-                                onClick={() => handlePaymentClick('click')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon}>CLICK</div>
-                                <span>Pay with Click</span>
-                            </button>
-
-                            <button
-                                className={`${styles.payBtn} ${styles.stripeBtn}`}
-                                onClick={() => handlePaymentClick('stripe')}
-                                disabled={processingPayment}
-                            >
-                                <div className={styles.payIcon}>💳</div>
-                                <span>Visa / Mastercard</span>
-                            </button>
-                            */}
-
-                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%' }}>
-                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>Manual Bank Transfer</h3>
+                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>{t.manualPay.title}</h3>
                                 <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
-                                    To purchase access to this course, please transfer the amount to:
+                                    {t.manualPay.instructions}
                                 </p>
-                                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace' }}>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                                     9860 0104 0801 2010
                                 </div>
                                 <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
@@ -687,12 +656,12 @@ export default function CourseDetailPage() {
                                 
                                 {receiptSubmitted ? (
                                     <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
-                                        ✅ Receipt submitted! Please wait for our Admin to approve your access.
+                                        ✅ {t.manualPay.success}
                                     </div>
                                 ) : (
                                     <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
                                         <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
-                                            Already transferred? Upload your receipt screen shot:
+                                            {t.manualPay.alreadyTransferred}
                                         </p>
                                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                                             <input
@@ -705,9 +674,9 @@ export default function CourseDetailPage() {
                                             <label
                                                 htmlFor="receipt-upload"
                                                 className="btn btn-primary"
-                                                style={{ cursor: 'pointer', background: '#2563eb', borderColor: '#2563eb', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto' }}
+                                                style={{ cursor: 'pointer', background: '#2563eb', borderColor: '#2563eb', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto', width: '100%', textAlign: 'center' }}
                                             >
-                                                {uploadingReceipt ? '⏳ Uploading & Submitting...' : '📁 Upload Receipt Image'}
+                                                {uploadingReceipt ? `⏳ ${t.manualPay.submitting}` : `📁 ${t.manualPay.uploadBtn}`}
                                             </label>
                                         </div>
                                     </div>
@@ -715,8 +684,8 @@ export default function CourseDetailPage() {
                             </div>
                         </div>
 
-                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>
-                            Cancel
+                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)} style={{ width: '100%', marginTop: '10px' }}>
+                            {t.manualPay.cancel}
                         </button>
                     </div>
                 </div>

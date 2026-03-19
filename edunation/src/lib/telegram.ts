@@ -4,6 +4,9 @@
  * Works on localhost — no domain/webhook setup needed.
  */
 
+import fs from 'fs';
+import path from 'path';
+
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_CHAT = process.env.TELEGRAM_ADMIN_CHAT_ID;
 const EXPERT_CHAT = process.env.TELEGRAM_EXPERT_CHAT_ID;
@@ -27,19 +30,39 @@ export async function notifyAdmin(message: string): Promise<void> {
     }
 }
 
-export async function notifyAdminWithPhoto(photoUrl: string, caption: string): Promise<void> {
+export async function notifyAdminWithPhoto(photo: string, caption: string): Promise<void> {
     if (!BOT_TOKEN || !ADMIN_CHAT) return;
 
     try {
+        const formData = new FormData();
+        formData.append('chat_id', ADMIN_CHAT);
+        formData.append('caption', caption);
+        formData.append('parse_mode', 'HTML');
+
+        if (photo.startsWith('http')) {
+            // It's a URL
+            formData.append('photo', photo);
+        } else {
+            // It's a local path
+            const filePath = photo.startsWith('/') 
+                ? path.join(process.cwd(), 'public', photo)
+                : photo;
+            
+            if (fs.existsSync(filePath)) {
+                const fileBuffer = fs.readFileSync(filePath);
+                const blob = new Blob([fileBuffer]);
+                formData.append('photo', blob, path.basename(filePath));
+            } else {
+                console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR] File not found:', filePath);
+                // Fallback to text message if photo missing
+                await notifyAdmin(`${caption}\n\n⚠️ <i>(Photo file not found on server)</i>`);
+                return;
+            }
+        }
+
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: ADMIN_CHAT,
-                photo: photoUrl,
-                caption: caption,
-                parse_mode: 'HTML',
-            }),
+            body: formData,
         });
     } catch (err) {
         console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR]', err);

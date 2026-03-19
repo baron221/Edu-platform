@@ -30,7 +30,14 @@ interface Course {
     lessons: Lesson[];
 }
 
-const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business'];
+const CATEGORIES = [
+    'Software Development', 'Web Development', 'Mobile Apps', 
+    'Data Science & AI', 'Cyber Security', 'UI/UX Design', 
+    'Digital Marketing', 'Business & Entrepreneurship',
+    'Math', 'English', 'SAT / IELTS / Multilevel',
+    'Personal Development', 'Photography & Video', 'Music & Arts', 'Health & Fitness'
+];
+const QUICK_PRICES = [99000, 199000, 499000, 999000];
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
 export default function CourseEditorPage() {
@@ -309,14 +316,30 @@ export default function CourseEditorPage() {
 
                         <div className={styles.field}>
                             <label className={styles.label}>Price (UZS)</label>
-                            <input
-                                className={styles.input}
-                                type="number"
-                                value={course.price}
-                                onChange={e => handleChange('price', e.target.value)}
-                                disabled={course.isFree}
-                                placeholder="0"
-                            />
+                            <div className={styles.priceContainer}>
+                                <input
+                                    className={styles.input}
+                                    type="number"
+                                    value={course.price}
+                                    onChange={e => handleChange('price', e.target.value)}
+                                    disabled={course.isFree}
+                                    placeholder="0"
+                                />
+                                {!course.isFree && (
+                                    <div className={styles.quickPrices}>
+                                        {QUICK_PRICES.map(p => (
+                                            <button 
+                                                key={p} 
+                                                type="button" 
+                                                className={styles.priceChip}
+                                                onClick={() => handleChange('price', p)}
+                                            >
+                                                {p.toLocaleString()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className={styles.field}>

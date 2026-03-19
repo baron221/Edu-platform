@@ -32,6 +32,16 @@ export default function AdminCoursesPage() {
     const [generating, setGenerating] = useState(false);
     const router = useRouter();
 
+    const CATEGORIES = [
+        'Software Development', 'Web Development', 'Mobile Apps', 
+        'Data Science & AI', 'Cyber Security', 'UI/UX Design', 
+        'Digital Marketing', 'Business & Entrepreneurship',
+        'Math', 'English', 'SAT / IELTS / Multilevel',
+        'Personal Development', 'Photography & Video', 'Music & Arts', 'Health & Fitness'
+    ];
+
+    const QUICK_PRICES = [99000, 199000, 499000, 999000];
+
     const load = () =>
         fetch('/api/instructor/courses').then(r => r.json()).then(data => {
             if (data.courses) {
@@ -217,7 +227,16 @@ export default function AdminCoursesPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div className={styles.field}>
                                     <label>{t.instructor.categoryLabel}</label>
-                                    <input required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input" />
+                                    <select 
+                                        required 
+                                        value={formData.category} 
+                                        onChange={e => setFormData({ ...formData, category: e.target.value })} 
+                                        className="input"
+                                    >
+                                        {CATEGORIES.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className={styles.field}>
                                     <label>{t.instructor.levelLabel}</label>
@@ -237,7 +256,28 @@ export default function AdminCoursesPage() {
                             {!formData.isFree && (
                                 <div className={styles.field}>
                                     <label>Price (UZS)</label>
-                                    <input type="number" required={!formData.isFree} value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} placeholder="e.g. 500000" className="input" />
+                                    <div className={styles.priceContainer}>
+                                        <input 
+                                            type="number" 
+                                            required={!formData.isFree} 
+                                            value={formData.price} 
+                                            onChange={e => setFormData({ ...formData, price: e.target.value })} 
+                                            placeholder="e.g. 500000" 
+                                            className="input" 
+                                        />
+                                        <div className={styles.quickPrices}>
+                                            {QUICK_PRICES.map(p => (
+                                                <button 
+                                                    key={p} 
+                                                    type="button" 
+                                                    className={styles.priceChip}
+                                                    onClick={() => setFormData({ ...formData, price: p.toString() })}
+                                                >
+                                                    {p.toLocaleString()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                             <div className={styles.field}>

@@ -354,3 +354,37 @@
         padding: 20px;
     }
 }
+
+.priceContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quickPrices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.priceChip {
+    padding: 6px 12px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.priceChip:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.priceChip:active {
+    transform: scale(0.95);
+}
