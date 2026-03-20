@@ -3,7 +3,7 @@ import withPWAInit from "@ducanh2912/next-pwa";
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: false,
+  disable: process.env.NODE_ENV === 'development',
   register: true,
 });
 const nextConfig: NextConfig = {
@@ -34,7 +34,6 @@ const nextConfig: NextConfig = {
     'sharita-blanketless-commiseratively.ngrok-free.dev',
     'localhost:3000'
   ],
-  turbopack: {},
 };
 
 export default withPWA(nextConfig);
