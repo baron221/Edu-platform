@@ -337,8 +337,10 @@ model Purchase {
   courseId      String
   provider      String // "payme" | "click" | "stripe"
   transactionId String   @unique // ID from the payment provider
-  amount        Int
-  currency      String   @default("UZS") // UZS | USD
+  amount         Int
+  discountAmount Int?     @default(0)
+  promoCodeId    String?
+  currency       String   @default("UZS") // UZS | USD
   status        String   @default("pending") // pending | completed | failed | refunded
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -355,8 +357,10 @@ model ManualPayment {
   userId      String
   courseId    String?  // Optional: If paying for a course
   planId      String?  // Optional: If paying for a subscription
-  receiptUrl  String   // URL of the uploaded receipt
-  status      String   @default("pending") // "pending", "approved", "rejected"
+  receiptUrl    String   // URL of the uploaded receipt
+  promoCodeId   String?
+  discountAmount Int?     @default(0)
+  status        String   @default("pending") // "pending", "approved", "rejected"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -607,3 +611,22 @@ model Notification {
   @@index([userId, read])
 }
 
+
+// =====================================================================
+// PROMO CODES
+// =====================================================================
+
+model PromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  discountType String    // "PERCENTAGE" | "FIXED"
+  discountValue Int
+  expiresAt    DateTime?
+  usageLimit   Int?      // Null means unlimited
+  usageCount   Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([code])
+}

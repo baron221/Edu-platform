@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { courseId, planId, receiptUrl } = body;
+        const { courseId, planId, receiptUrl, promoCode } = body;
 
         if (!receiptUrl) {
             return NextResponse.json({ error: 'Receipt URL is required' }, { status: 400 });
@@ -22,6 +22,29 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Either courseId or planId is required' }, { status: 400 });
         }
 
+        // Validate Promo Code if provided
+        let promoCodeId = null;
+        let discountAmount = 0;
+
+        if (promoCode && courseId) {
+            const promo = await prisma.promoCode.findUnique({
+                where: { code: promoCode.toUpperCase() }
+            });
+
+            if (promo && promo.isActive && (!promo.expiresAt || new Date(promo.expiresAt) > new Date()) && (!promo.usageLimit || promo.usageCount < promo.usageLimit)) {
+                // Find course price
+                const course = await prisma.course.findUnique({ where: { id: courseId }, select: { price: true } });
+                if (course) {
+                    promoCodeId = promo.id;
+                    if (promo.discountType === 'PERCENTAGE') {
+                        discountAmount = Math.round(course.price * (promo.discountValue / 100));
+                    } else {
+                        discountAmount = Math.min(course.price, promo.discountValue);
+                    }
+                }
+            }
+        }
+
         // Create the manual payment entry
         const manualPayment = await prisma.manualPayment.create({
             data: {
@@ -29,6 +52,8 @@ export async function POST(req: Request) {
                 courseId: courseId || null,
                 planId: planId || null,
                 receiptUrl,
+                promoCodeId,
+                discountAmount,
                 status: 'pending'
             },
             include: {
@@ -39,10 +64,12 @@ export async function POST(req: Request) {
 
         // Format message for Admin Bot
         const typeStr = courseId ? `📚 <b>Course:</b> ${manualPayment.course?.title}` : `⭐ <b>Plan:</b> ${planId}`;
+        const discountStr = manualPayment.discountAmount && manualPayment.discountAmount > 0 
+            ? `\n🎟️ <b>Discount:</b> -${manualPayment.discountAmount.toLocaleString()} UZS` : '';
         const userName = manualPayment.user.name || manualPayment.user.email || 'Unknown User';
         const msg = `🧾 <b>New Manual Payment Receipt</b>\n\n` +
                     `👤 <b>User:</b> ${userName}\n` +
-                    `${typeStr}\n\n` +
+                    `${typeStr}${discountStr}\n\n` +
                     `Please check the Admin Dashboard to approve or reject this payment.`;
 
         // If it's an image, send as photo, otherwise fallback to message

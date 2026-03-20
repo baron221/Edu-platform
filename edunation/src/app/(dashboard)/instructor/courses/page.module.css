@@ -49,10 +49,9 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     gap: 16px;
     flex-wrap: wrap;
-    padding-top: 24px;
 }
 
 .title {

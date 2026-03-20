@@ -34,6 +34,7 @@ export default function AdminDashboard() {
         { label: t.admin.totalUsers, value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
         { label: t.admin.enrollments, value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
         { label: "Pending Payments", value: "?", icon: '⏳', color: '#f59e0b', href: '/admin/payments' },
+        { label: t.adminPromo.title, value: "Manage", icon: '🎟️', color: '#a78bfa', href: '/admin/promo-codes' },
     ];
 
     const fetchAnalytics = async () => {

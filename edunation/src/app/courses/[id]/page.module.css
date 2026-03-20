@@ -573,6 +573,91 @@
     margin-bottom: 24px;
 }
 
+.promoContainer {
+    margin: 20px 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.promoInputWrapper {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.promoInput {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-family: monospace;
+}
+
+.promoInput:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.promoApplyBtn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.promoApplyBtn:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.promoApplyBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.promoMsg {
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.promoSuccess {
+    color: #10b981;
+}
+
+.promoError {
+    color: #ef4444;
+}
+
+.discountInfo {
+    margin-top: 12px;
+    background: rgba(16, 185, 129, 0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px dashed #10b981;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.discountText {
+    color: #059669;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.discountValue {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    color: #059669;
+}
+
 .payBtn {
     display: flex;
     align-items: center;

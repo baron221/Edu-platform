@@ -224,7 +224,7 @@
 /* AI Button */
 .aiBtn {
     background: linear-gradient(135deg, #7c3aed, #db2777);
-    color: #0f172a;
+    color: white;
     border: none;
     padding: 8px 16px;
     border-radius: 8px;

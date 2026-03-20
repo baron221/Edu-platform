@@ -346,7 +346,7 @@ export default function LessonEditorPage() {
                                 className={styles.aiBtn}
                                 onClick={handleGenerateSummary}
                                 disabled={generatingSummary}
-                                style={{ flex: 1, minWidth: '200px', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+                                style={{ flex: 1, minWidth: '200px', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', border: '1px solid rgba(37, 99, 235, 0.2)' }}
                             >
                                 {generatingSummary ? '✨ Generating Summary...' : '✨ Generate AI Summary'}
                             </button>

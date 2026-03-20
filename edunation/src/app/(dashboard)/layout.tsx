@@ -95,6 +95,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 { href: '/admin/courses/all', label: t.sidebar.allCourses, icon: '🌍' },
                                 { href: '/admin/purchases', label: 'Ledger', icon: '💸' },
                                 { href: '/admin/users', label: t.sidebar.users, icon: '👥' },
+                                { href: '/admin/promo-codes', label: t.adminPromo.title, icon: '🎟️' },
                                 { href: '/admin/experts', label: t.sidebar.experts, icon: '⭐' },
                                 { href: '/instructor/courses', label: t.sidebar.teachingConsole, icon: '🛠️' },
                                 { href: '/instructor/analytics', label: t.sidebar.instructorAnalytics, icon: '📈' },
@@ -131,57 +132,78 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
 
                 <div className={styles.sidebarFooter}>
-                    {/* Language Switcher */}
-                    <div className={styles.langSwitcher}>
-                        {LANGS.map(l => (
-                            <button
-                                key={l.code}
-                                className={`${styles.langBtn} ${language === l.code ? styles.langBtnActive : ''}`}
-                                onClick={() => setLanguage(l.code)}
-                                title={l.code.toUpperCase()}
-                            >
-                                {l.label}
-                            </button>
-                        ))}
-                    </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-                        <NotificationBell />
-                    </div>
-
-                    <div className={styles.userInfo}>
-                        <div className={styles.userAvatar}>
-                            {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
-                        </div>
-                        <div>
-                            <div className={styles.userName}>{session?.user?.name ?? 'User'}</div>
-                            <div className={styles.userRole}>
-                                {(() => {
-                                    const u = session?.user as any;
-                                    if (u?.role === 'admin') return 'Administrator';
-                                    if (u?.role === 'instructor') return 'Instructor';
-                                    if (u?.isExpert) return 'Expert';
-                                    return 'Student';
-                                })()}
-                            </div>
-                        </div>
-                    </div>
+                    <Link href="/" className={styles.viewSiteBtn}>
+                        {t.sidebar.viewSite}
+                    </Link>
                     <button
                         className={styles.signOutBtn}
                         onClick={() => signOut({ callbackUrl: '/' })}
                     >
                         {t.sidebar.signOut}
                     </button>
-                    <Link href="/" className={styles.viewSiteBtn}>
-                        {t.sidebar.viewSite}
-                    </Link>
                 </div>
             </aside>
 
-            {/* Main */}
-            <main className={styles.main}>
-                {children}
-            </main>
+            {/* Content Area */}
+            <div className={styles.contentWrapper}>
+                {/* Top Navigation */}
+                <header className={styles.topNav}>
+                    <div className={styles.topNavLeft}>
+                        {/* Placeholder for Breadcrumbs or Title */}
+                        <h2 className={styles.pageTitleHeader}>
+                            {(() => {
+                                if (pathname === '/admin') return t.sidebar.adminDashboard;
+                                if (pathname === '/instructor/courses') return t.sidebar.teachingConsole;
+                                if (pathname === '/dashboard') return t.sidebar.myLearning;
+                                return '';
+                            })()}
+                        </h2>
+                    </div>
+
+                    <div className={styles.topNavRight}>
+                        {/* Language Switcher */}
+                        <div className={styles.langSwitcher}>
+                            {LANGS.map(l => (
+                                <button
+                                    key={l.code}
+                                    className={`${styles.langBtn} ${language === l.code ? styles.langBtnActive : ''}`}
+                                    onClick={() => setLanguage(l.code)}
+                                >
+                                    {l.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className={styles.divider} />
+
+                        <NotificationBell />
+
+                        <div className={styles.divider} />
+
+                        <div className={styles.userProfile}>
+                            <div className={styles.userAvatar}>
+                                {session?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
+                            </div>
+                            <div className={styles.userMeta}>
+                                <div className={styles.userNameHeader}>{session?.user?.name ?? 'User'}</div>
+                                <div className={styles.userRoleHeader}>
+                                    {(() => {
+                                        const u = session?.user as any;
+                                        if (u?.role === 'admin') return 'Administrator';
+                                        if (u?.role === 'instructor') return 'Instructor';
+                                        if (u?.isExpert) return 'Expert';
+                                        return 'Student';
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <main className={styles.main}>
+                    {children}
+                </main>
+            </div>
 
             {/* Global AI Assistant for Instructors/Admins */}
             <AIAssistant />

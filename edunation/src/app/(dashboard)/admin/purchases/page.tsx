@@ -70,10 +70,10 @@ export default function AdminPurchasesPage() {
                                         <div style={{ fontWeight: 600 }}>{p.user?.name || 'Unknown User'}</div>
                                         <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{p.user?.email}</div>
                                     </span>
-                                    <span style={{ fontWeight: 600, color: '#f1f5f9' }}>{p.course?.title}</span>
+                                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{p.course?.title}</span>
                                     <span style={{ color: '#10b981', fontWeight: 600 }}>{(p.amount / 100).toLocaleString()} UZS</span>
                                     <span>
-                                        <span className={styles.badge} style={{ textTransform: 'uppercase', background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>
+                                        <span className={styles.badge} style={{ textTransform: 'uppercase', background: '#f1f5f9', color: '#64748b' }}>
                                             {p.provider}
                                         </span>
                                     </span>
@@ -117,7 +117,7 @@ export default function AdminPurchasesPage() {
                                         <div style={{ fontWeight: 600 }}>{s.user?.name || 'Unknown User'}</div>
                                         <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{s.user?.email}</div>
                                     </span>
-                                    <span style={{ textTransform: 'capitalize', fontWeight: 600, color: s.plan === 'studio' ? '#a78bfa' : s.plan === 'pro' ? '#f59e0b' : '#10b981' }}>
+                                    <span style={{ textTransform: 'capitalize', fontWeight: 600, color: s.plan === 'studio' ? '#7c3aed' : s.plan === 'pro' ? '#d97706' : '#059669' }}>
                                         {s.plan}
                                     </span>
                                     <span>
@@ -126,7 +126,7 @@ export default function AdminPurchasesPage() {
                                         </span>
                                     </span>
                                     <span>
-                                        <span className={styles.badge} style={{ textTransform: 'uppercase', background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>
+                                        <span className={styles.badge} style={{ textTransform: 'uppercase', background: '#f1f5f9', color: '#64748b' }}>
                                             {s.provider}
                                         </span>
                                     </span>

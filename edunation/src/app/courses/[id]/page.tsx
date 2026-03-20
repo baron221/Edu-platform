@@ -44,6 +44,10 @@ export default function CourseDetailPage() {
     const [processingPayment, setProcessingPayment] = useState(false);
     const [uploadingReceipt, setUploadingReceipt] = useState(false);
     const [receiptSubmitted, setReceiptSubmitted] = useState(false);
+    const [promoCode, setPromoCode] = useState('');
+    const [promoDiscount, setPromoDiscount] = useState<{ type: string, value: number, id: string } | null>(null);
+    const [promoError, setPromoError] = useState('');
+    const [isValidatingPromo, setIsValidatingPromo] = useState(false);
     const { data: session } = useSession();
 
     useEffect(() => {
@@ -103,7 +107,11 @@ export default function CourseDetailPage() {
             const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courseId: course.id, provider })
+                body: JSON.stringify({ 
+                    courseId: course.id, 
+                    provider,
+                    promoCode: promoDiscount?.code 
+                })
             });
             const data = await res.json();
             if (data.url) {
@@ -116,6 +124,37 @@ export default function CourseDetailPage() {
             toast.error('Payment error occurred.');
         } finally {
             setProcessingPayment(false);
+        }
+    };
+
+    const handleApplyPromo = async () => {
+        if (!promoCode.trim()) return;
+        setIsValidatingPromo(true);
+        setPromoError('');
+        try {
+            const res = await fetch(`/api/promo-codes/validate?code=${promoCode.toUpperCase()}`);
+            const data = await res.json();
+            if (res.ok) {
+                setPromoDiscount({ type: data.discountType, value: data.discountValue, id: data.id });
+                toast.success(t.courseDetail.discountApplied);
+            } else {
+                setPromoError(t.courseDetail.invalidCode);
+                setPromoDiscount(null);
+            }
+        } catch (err) {
+            console.error(err);
+            setPromoError('Error validating code');
+        } finally {
+            setIsValidatingPromo(false);
+        }
+    };
+
+    const calculateDiscountedPrice = () => {
+        if (!course || !promoDiscount) return course?.price || 0;
+        if (promoDiscount.type === 'PERCENTAGE') {
+            return course.price * (1 - promoDiscount.value / 100);
+        } else {
+            return Math.max(0, course.price - promoDiscount.value);
         }
     };
 
@@ -143,7 +182,11 @@ export default function CourseDetailPage() {
             const submitRes = await fetch('/api/manual-payments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ courseId: course.id, receiptUrl: uploadData.url })
+                body: JSON.stringify({ 
+                    courseId: course.id, 
+                    receiptUrl: uploadData.url,
+                    promoCode: promoDiscount?.code 
+                })
             });
 
             if (submitRes.ok) {
@@ -652,6 +695,54 @@ export default function CourseDetailPage() {
                                 </div>
                                 <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
                                     Tulkinov Bakhromjon
+                                </div>
+
+                                {/* Promo Code Section */}
+                                <div className={styles.promoContainer}>
+                                    <label style={{ fontSize: '14px', fontWeight: 600, color: '#334155', display: 'block', textAlign: 'left' }}>
+                                        {t.courseDetail.promoCodeLabel}
+                                    </label>
+                                    <div className={styles.promoInputWrapper}>
+                                        <input
+                                            type="text"
+                                            className={styles.promoInput}
+                                            value={promoCode}
+                                            onChange={(e) => setPromoCode(e.target.value)}
+                                            placeholder="CODE"
+                                            disabled={!!promoDiscount || isValidatingPromo}
+                                        />
+                                        <button
+                                            className={styles.promoApplyBtn}
+                                            onClick={handleApplyPromo}
+                                            disabled={!promoCode || !!promoDiscount || isValidatingPromo}
+                                        >
+                                            {isValidatingPromo ? '...' : t.courseDetail.apply}
+                                        </button>
+                                    </div>
+                                    {promoError && <p className={`${styles.promoMsg} ${styles.promoError}`}>{promoError}</p>}
+                                    {promoDiscount && (
+                                        <div className={styles.discountInfo}>
+                                            <span className={styles.discountText}>✨ {t.courseDetail.discountApplied}</span>
+                                            <span className={styles.discountValue}>
+                                                -{promoDiscount.type === 'PERCENTAGE' ? `${promoDiscount.value}%` : `${promoDiscount.value.toLocaleString()} ${t.shared.currency}`}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div style={{ marginTop: '20px', padding: '12px', background: '#f1f5f9', borderRadius: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                        <span>Total:</span>
+                                        <span style={{ textDecoration: promoDiscount ? 'line-through' : 'none', opacity: promoDiscount ? 0.6 : 1 }}>
+                                            {formatUZS(course.price, t.shared.currency)}
+                                        </span>
+                                    </div>
+                                    {promoDiscount && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
+                                            <span>Discounted:</span>
+                                            <span>{formatUZS(calculateDiscountedPrice(), t.shared.currency)}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 {receiptSubmitted ? (
