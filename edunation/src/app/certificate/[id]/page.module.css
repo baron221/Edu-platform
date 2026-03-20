@@ -314,7 +314,7 @@
 
 /* Print Overrides */
 @media print {
-    body, .page {
+    :global(body), .page {
         background: white !important;
         padding: 0 !important;
         margin: 0 !important;
