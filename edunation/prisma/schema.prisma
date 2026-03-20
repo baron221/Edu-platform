@@ -6,10 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "sqlite"
-  url          = env("DATABASE_URL")
-  // Enable foreign key enforcement in SQLite (required for cascade deletes)
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // =====================================================================
