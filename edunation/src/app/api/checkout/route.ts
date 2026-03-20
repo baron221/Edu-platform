@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { courseId, provider, promoCode } = await req.json();
+        const { courseId, provider } = await req.json();
 
         if (!courseId || !provider) {
             return NextResponse.json({ error: 'Missing courseId or provider' }, { status: 400 });
@@ -27,27 +27,6 @@ export async function POST(req: Request) {
 
         if (course.isFree || course.price === 0) {
             return NextResponse.json({ error: 'Course is free, no payment needed' }, { status: 400 });
-        }
-
-        // Validate Promo Code if provided
-        let promoCodeId = null;
-        let discountAmount = 0;
-        let finalPrice = course.price;
-
-        if (promoCode) {
-            const promo = await prisma.promoCode.findUnique({
-                where: { code: promoCode.toUpperCase() }
-            });
-
-            if (promo && promo.isActive && (!promo.expiresAt || new Date(promo.expiresAt) > new Date()) && (!promo.usageLimit || promo.usageCount < promo.usageLimit)) {
-                promoCodeId = promo.id;
-                if (promo.discountType === 'PERCENTAGE') {
-                    discountAmount = Math.round(course.price * (promo.discountValue / 100));
-                } else {
-                    discountAmount = Math.min(course.price, promo.discountValue);
-                }
-                finalPrice = Math.max(0, course.price - discountAmount);
-            }
         }
 
         // Check if the user is already enrolled
@@ -67,15 +46,14 @@ export async function POST(req: Request) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
         // 1. Create a "Pending" Purchase record in our database
+        // This Purchase ID acts as the unique reference for our local payment gateways
         const purchase = await prisma.purchase.create({
             data: {
                 userId: (session!.user as any).id,
                 courseId: course.id,
                 provider: provider,
-                transactionId: `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`, 
-                amount: finalPrice,
-                discountAmount,
-                promoCodeId,
+                transactionId: `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`, // Temporary, will be updated by webhook
+                amount: course.price,
                 currency: provider === 'stripe' ? 'USD' : 'UZS',
                 status: 'pending',
             }
@@ -88,7 +66,7 @@ export async function POST(req: Request) {
                 // Normally you'd convert UZS -> USD, or just set it statically for simplicity here 
                 // We'll set a basic $19.99 for all paid courses via Stripe if not defined otherwise, 
                 // or safely divide UZS by 12000 roughly as an example fallback
-                const stripePriceInCents = finalPrice > 1000 ? Math.round(finalPrice / 12500 * 100) : finalPrice * 100;
+                const stripePriceInCents = course.price > 1000 ? Math.round(course.price / 12500 * 100) : course.price * 100;
 
                 const stripeSession = await stripe.checkout.sessions.create({
                     payment_method_types: ['card'],
@@ -128,7 +106,7 @@ export async function POST(req: Request) {
 
             case 'payme': {
                 // Payme accepts amount in Tiyin (UZS * 100)
-                const amountInTiyin = finalPrice * 100;
+                const amountInTiyin = course.price * 100;
                 const paymeMerchantId = process.env.PAYME_MERCHANT_ID || 'dummy_merchant_id';
 
                 // Format: m=MERCHANT_ID;ac.purchase_id=PURCHASE_ID;a=AMOUNT
@@ -146,7 +124,7 @@ export async function POST(req: Request) {
                 const clickReturnUrl = `${baseUrl}/courses/${course.slug}`;
 
                 // Click Evolution format
-                const clickUrl = `https://my.click.uz/services/pay?service_id=${clickServiceId}&merchant_id=${clickMerchantId}&amount=${finalPrice}&transaction_param=${purchase.id}&return_url=${encodeURIComponent(clickReturnUrl)}`;
+                const clickUrl = `https://my.click.uz/services/pay?service_id=${clickServiceId}&merchant_id=${clickMerchantId}&amount=${course.price}&transaction_param=${purchase.id}&return_url=${encodeURIComponent(clickReturnUrl)}`;
 
                 return NextResponse.json({ url: clickUrl });
             }

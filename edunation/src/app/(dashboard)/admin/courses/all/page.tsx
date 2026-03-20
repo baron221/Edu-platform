@@ -33,8 +33,8 @@ export default function AdminGlobalCoursesPage() {
         <div style={{ padding: '24px', animation: 'fadeIn 0.3s ease' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px', fontFamily: '"Outfit", sans-serif' }}>Global Course Directory</h1>
-                    <p style={{ color: '#64748b', margin: 0 }}>{courses.length} courses across the platform</p>
+                    <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#f1f5f9', margin: '0 0 8px', fontFamily: '"Outfit", sans-serif' }}>Global Course Directory</h1>
+                    <p style={{ color: '#94a3b8', margin: 0 }}>{courses.length} courses across the platform</p>
                 </div>
             </div>
 
@@ -50,9 +50,9 @@ export default function AdminGlobalCoursesPage() {
                         gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr auto',
                         gap: '16px',
                         padding: '16px 24px',
-                        background: 'white',
-                        borderBottom: '1px solid #e2e8f0',
-                        color: '#64748b',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        borderBottom: '1px solid var(--border)',
+                        color: '#94a3b8',
                         fontWeight: 600,
                         fontSize: '13px',
                         textTransform: 'uppercase',
@@ -72,12 +72,11 @@ export default function AdminGlobalCoursesPage() {
                             gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr auto',
                             gap: '16px',
                             padding: '16px 24px',
-                            borderBottom: '1px solid #f1f5f9',
-                            alignItems: 'center',
-                            background: 'white'
+                            borderBottom: '1px solid var(--border)',
+                            alignItems: 'center'
                         }}>
                             <div>
-                                <div style={{ color: '#0f172a', fontWeight: 600, marginBottom: '4px' }}>{course.title}</div>
+                                <div style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: '4px' }}>{course.title}</div>
                                 <div style={{ color: '#64748b', fontSize: '13px' }}>{course.category} · {course.level}</div>
                             </div>
 
@@ -89,7 +88,7 @@ export default function AdminGlobalCoursesPage() {
                                 {course.isFree ? 'Free' : `${course.price.toLocaleString()} UZS`}
                             </div>
 
-                            <div style={{ color: '#64748b', fontSize: '13px' }}>
+                            <div style={{ color: '#94a3b8', fontSize: '13px' }}>
                                 {course._count.enrollments} users · {course._count.lessons} lessons
                             </div>
 
@@ -116,8 +115,8 @@ export default function AdminGlobalCoursesPage() {
                                     href={`/courses/${course.slug}`}
                                     target="_blank"
                                     style={{
-                                        background: '#f1f5f9',
-                                        color: '#0f172a',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        color: '#f1f5f9',
                                         border: 'none',
                                         padding: '8px',
                                         borderRadius: '8px',

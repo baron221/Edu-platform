@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { createNotification } from '@/lib/notify';
 
 export async function POST(request: Request) {
     try {
@@ -69,27 +68,6 @@ export async function POST(request: Request) {
                 courseId
             }
         });
-
-        // Notify student
-        await createNotification(
-            userId,
-            'ENROLLMENT',
-            'Course Enrollment Successful',
-            `You have successfully enrolled in "${course.title}". Happy learning!`,
-            `/dashboard`
-        );
-
-        // Notify instructor
-        if (course.instructorId) {
-            const studentName = session?.user?.name || 'A student';
-            await createNotification(
-                course.instructorId,
-                'ENROLLMENT',
-                'New Course Enrollment',
-                `Student "${studentName}" has just enrolled in your course "${course.title}".`,
-                `/instructor/courses`
-            );
-        }
 
         return NextResponse.json(enrollment);
     } catch (error) {

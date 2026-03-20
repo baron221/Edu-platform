@@ -130,7 +130,7 @@ export default function LoginPage() {
         setLoading('telegram');
         setError('');
 
-        const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? '8663512128';
+        const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? '8657675755';
         const origin = window.location.origin;
         const returnTo = `${origin}/api/auth/telegram/callback`;
 
@@ -295,7 +295,6 @@ export default function LoginPage() {
                                     onChange={e => setPassword(e.target.value)}
                                     autoComplete="new-password"
                                     required
-                                    suppressHydrationWarning
                                 />
                             </div>
 

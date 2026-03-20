@@ -4,7 +4,6 @@ import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import Stripe from 'stripe';
 import { sendPurchaseReceiptEmail } from '@/lib/email';
-import { createNotification } from '@/lib/notify';
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -60,30 +59,6 @@ export async function POST(req: Request) {
                 );
             }
 
-            // 🔔 Notify student
-            await createNotification(
-                userId,
-                'PURCHASE_COMPLETE',
-                'Payment Successful',
-                `You are now enrolled in "${purchase.course.title}". Happy learning!`,
-                `/dashboard`
-            );
-
-            // 🔔 Notify instructor
-            const courseData = await prisma.course.findUnique({
-                where: { id: courseId },
-                select: { instructorId: true }
-            });
-            if (courseData?.instructorId) {
-                await createNotification(
-                    courseData.instructorId,
-                    'NEW_SALE',
-                    'New Course Sale!',
-                    `Student "${purchase.user.name || 'Someone'}" has just purchased your course "${purchase.course.title}" via Stripe.`,
-                    `/instructor/analytics`
-                );
-            }
-
             console.log(`Successfully enrolled user ${userId} in course ${courseId} via Stripe`);
         } else if (session.metadata?.subscriptionPaymentId && session.metadata?.plan && session.metadata?.userId) {
             const subId = session.metadata.subscriptionPaymentId;
@@ -123,15 +98,6 @@ export async function POST(req: Request) {
                 update: {},
                 create: { userId: subUserId, slug, tagline: 'Passionate educator on EduNationUz' },
             });
-
-            // 🔔 Notify user
-            await createNotification(
-                subUserId,
-                'SUBSCRIPTION_UPDATE',
-                'Subscription Successful!',
-                `You are now an active "${plan.toUpperCase()}" Instructor on EduNationUz. You can now start creating courses!`,
-                '/instructor/courses'
-            );
 
             console.log(`Successfully upgraded user ${subUserId} to instructor plan ${plan} via Stripe`);
         }

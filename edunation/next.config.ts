@@ -5,6 +5,7 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: false,
   register: true,
+  skipWaiting: true,
 });
 const nextConfig: NextConfig = {
   images: {

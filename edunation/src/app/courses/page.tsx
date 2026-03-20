@@ -7,16 +7,13 @@ import styles from './page.module.css';
 const CATEGORIES = [
     { name: 'All', icon: '🌟' },
     { name: 'Web Development', icon: '💻' },
-    { name: 'Math', icon: '📐' },
-    { name: 'English', icon: '🇬🇧' },
-    { name: 'SAT', icon: '📝' },
-    { name: 'IELTS', icon: '🎓' },
-    { name: 'Multilevel', icon: '📊' },
     { name: 'Data Science', icon: '🤖' },
     { name: 'Design', icon: '🎨' },
     { name: 'Marketing', icon: '📢' },
     { name: 'Mobile Development', icon: '📱' },
     { name: 'Business', icon: '💼' },
+    { name: 'Mathematics', icon: '📐' },
+    { name: 'English Language', icon: '🇬🇧' },
     { name: 'Video Editing', icon: '🎬' },
 ];
 

@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
                                     className={styles.roleSelect}
                                     value={u.role}
                                     onChange={(e) => changeRole(u.id, e.target.value)}
-                                    style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#f8fafc', color: '#0f172a' }}
+                                    style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'white' }}
                                 >
                                     <option value="student">Student</option>
                                     <option value="instructor">Instructor</option>
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
                                         borderRadius: '4px',
                                         border: '1px solid #7c3aed',
                                         background: 'rgba(124, 58, 237, 0.1)',
-                                        color: '#7c3aed',
+                                        color: '#a78bfa',
                                         cursor: 'pointer',
                                     }}
                                     title="Override Subscription"
@@ -185,21 +185,21 @@ export default function AdminUsersPage() {
                         background: 'var(--bg-card)', width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '24px',
                         border: '1px solid var(--border)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)'
                     }} onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: '20px', marginBottom: '16px', fontWeight: 600, color: '#0f172a' }}>Subscription Override</h2>
-                        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
+                        <h2 style={{ fontSize: '20px', marginBottom: '16px', fontWeight: 600 }}>Subscription Override</h2>
+                        <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '24px' }}>
                             Manually override the instructor plan for <strong>{editingSub.name || editingSub.email}</strong>.
                         </p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '4px' }}>Plan Tier</label>
+                                <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '4px' }}>Plan Tier</label>
                                 <select
                                     value={subPlan}
                                     onChange={e => {
                                         setSubPlan(e.target.value);
                                         setSubMaxCourses(e.target.value === 'studio' ? 999 : e.target.value === 'pro' ? 20 : 3);
                                     }}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#0f172a' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
                                 >
                                     <option value="starter">Starter</option>
                                     <option value="pro">Pro</option>
@@ -208,22 +208,22 @@ export default function AdminUsersPage() {
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '4px' }}>End Date / Expiration</label>
+                                <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '4px' }}>End Date / Expiration</label>
                                 <input
                                     type="date"
                                     value={subEndDate}
                                     onChange={e => setSubEndDate(e.target.value)}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#0f172a' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', color: '#64748b', marginBottom: '4px' }}>Max Course Quota</label>
+                                <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '4px' }}>Max Course Quota</label>
                                 <input
                                     type="number"
                                     value={subMaxCourses}
                                     onChange={e => setSubMaxCourses(parseInt(e.target.value))}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#0f172a' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
                                 />
                             </div>
                         </div>
@@ -231,7 +231,7 @@ export default function AdminUsersPage() {
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button
                                 onClick={() => setEditingSub(null)}
-                                style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#64748b', cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>

@@ -25,13 +25,7 @@ export async function GET() {
         prisma.progress.findMany({ where: { userId, completed: true } }),
         prisma.user.findUnique({
             where: { id: userId },
-            select: { 
-                currentStreak: true, 
-                lastActivityDate: true, 
-                points: true,
-                studentTrialUsed: true,
-                instructorTrialUsed: true
-            }
+            select: { currentStreak: true, lastActivityDate: true, points: true }
         }),
         prisma.certificate.findMany({
             where: { userId },
@@ -87,7 +81,5 @@ export async function GET() {
         activeStreak,
         totalLessonsDone: allProgress.length,
         totalCompleted: enrollments.filter(e => e.completed).length,
-        studentTrialUsed: user?.studentTrialUsed || false,
-        instructorTrialUsed: user?.instructorTrialUsed || false,
     });
 }

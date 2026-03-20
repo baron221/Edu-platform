@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { notifyNewPurchase, notifyNewSubscription } from '@/lib/telegram';
-import { createNotification } from '@/lib/notify';
 
 // Helper to send Payme JSON-RPC responses
 const respond = (result: any = null, error: any = null, id: string | number | null = null) => {
@@ -166,15 +165,6 @@ export async function POST(req: Request) {
                         provider: 'payme',
                     });
 
-                    // 🔔 Notify user
-                    await createNotification(
-                        order.userId,
-                        'SUBSCRIPTION_UPDATE',
-                        'Subscription Successful!',
-                        `You are now an active "${order.plan.toUpperCase()}" Instructor on EduNationUz. You can now start creating courses!`,
-                        '/instructor/courses'
-                    );
-
                     return respond({
                         transaction: order.id,
                         perform_time: updatedOrder.updatedAt.getTime(),
@@ -205,11 +195,7 @@ export async function POST(req: Request) {
 
                     // 🔔 Notify admin
                     const buyer = await prisma.user.findUnique({ where: { id: order.userId } });
-                    const course = await prisma.course.findUnique({ 
-                        where: { id: order.courseId }, 
-                        select: { title: true, instructorId: true } 
-                    });
-                    
+                    const course = await prisma.course.findUnique({ where: { id: order.courseId }, select: { title: true } });
                     notifyNewPurchase({
                         userName: buyer?.name ?? null,
                         userEmail: buyer?.email ?? null,
@@ -218,26 +204,6 @@ export async function POST(req: Request) {
                         currency: order.currency ?? 'UZS',
                         provider: 'payme',
                     });
-
-                    // 🔔 Notify student
-                    await createNotification(
-                        order.userId,
-                        'PURCHASE_COMPLETE',
-                        'Payment Successful',
-                        `You are now enrolled in "${course?.title}". Happy learning!`,
-                        `/dashboard`
-                    );
-
-                    // 🔔 Notify instructor
-                    if (course?.instructorId) {
-                        await createNotification(
-                            course.instructorId,
-                            'NEW_SALE',
-                            'New Course Sale!',
-                            `Student "${buyer?.name || 'Someone'}" has just purchased your course "${course.title}".`,
-                            `/instructor/analytics`
-                        );
-                    }
 
                     return respond({
                         transaction: order.id,

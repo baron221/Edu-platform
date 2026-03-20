@@ -1,8 +1,6 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { plans } from '@/lib/data';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
@@ -14,42 +12,8 @@ function formatUZS(price: number, currLabel: string) {
 
 export default function PricingPage() {
     const { t } = useLanguage();
-    const router = useRouter();
-    const { data: session } = useSession();
     const [isYearly, setIsYearly] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
-    const [activating, setActivating] = useState<'student' | 'instructor' | null>(null);
-    const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-
-    const handleTrial = async (type: 'student' | 'instructor') => {
-        if (!session) {
-            router.push('/signup');
-            return;
-        }
-
-        setActivating(type);
-        setFeedback(null);
-
-        try {
-            const endpoint = type === 'student' ? '/api/subscription/trial' : '/api/instructor/trial';
-            const res = await fetch(endpoint, { method: 'POST' });
-            const data = await res.json();
-
-            if (res.ok) {
-                setFeedback({ type: 'success', message: t.trial.success });
-                setTimeout(() => router.push(type === 'student' ? '/courses' : '/sidebar/instructor'), 2000);
-            } else {
-                setFeedback({ 
-                    type: 'error', 
-                    message: data.error === 'Trial already used' ? t.trial.alreadyUsed : t.trial.error 
-                });
-            }
-        } catch (err) {
-            setFeedback({ type: 'error', message: t.trial.error });
-        } finally {
-            setActivating(null);
-        }
-    };
 
     return (
         <div className={styles.page}>
@@ -79,54 +43,6 @@ export default function PricingPage() {
                             {t.pricing.yearly}
                             <span className={styles.saveBadge}>{t.pricing.save}</span>
                         </span>
-                    </div>
-                </div>
-            </section>
-
-            {/* Free Trial Banner/Section */}
-            <section className={styles.trialSection}>
-                <div className="container">
-                    <div className={styles.trialBox}>
-                        <div className="section-label" style={{ margin: '0 auto 20px' }}>FREE TRIAL</div>
-                        <h2 className={styles.title} style={{ fontSize: '32px' }}>
-                            {t.trial.startStudent.split(' ').slice(0, 2).join(' ')} <span className="gradient-text">1-Month Free</span>
-                        </h2>
-                        <p className={styles.subtitle} style={{ marginBottom: '0' }}>
-                           Try our premium features for 30 days. No credit card required.
-                        </p>
-
-                        <div className={styles.trialGrid}>
-                            <div className={styles.trialCard}>
-                                <div className={styles.trialBadge}>FOR STUDENTS</div>
-                                <h3>Student Free Trial</h3>
-                                <p>Get 30 days of "Pro" access. Watch all courses, download materials, and earn certificates.</p>
-                                <button 
-                                    className="btn btn-primary" 
-                                    onClick={() => handleTrial('student')}
-                                    disabled={!!activating}
-                                >
-                                    {activating === 'student' ? t.trial.activating : t.trial.startStudent}
-                                </button>
-                            </div>
-                            <div className={styles.trialCard}>
-                                <div className={styles.trialBadge}>FOR INSTRUCTORS</div>
-                                <h3>Instructor Free Trial</h3>
-                                <p>Become an instructor for 30 days. Create courses, manage students, and use AI features for free.</p>
-                                <button 
-                                    className="btn btn-secondary" 
-                                    onClick={() => handleTrial('instructor')}
-                                    disabled={!!activating}
-                                >
-                                    {activating === 'instructor' ? t.trial.activating : t.trial.startInstructor}
-                                </button>
-                            </div>
-                        </div>
-
-                        {feedback && (
-                            <div className={`${styles.feedback} ${styles[feedback.type]}`}>
-                                {feedback.message}
-                            </div>
-                        )}
                     </div>
                 </div>
             </section>

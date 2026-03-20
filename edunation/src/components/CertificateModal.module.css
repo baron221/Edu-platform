@@ -1,31 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@400;500;600;700;800&family=Pinyon+Script&display=swap');
-
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: 2rem;
 }
 
 .modal {
     background: #0f172a;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 32px;
+    border-radius: 24px;
     width: 100%;
-    max-width: 950px;
-    max-height: 95vh;
+    max-width: 1000px;
+    max-height: 90vh;
     overflow-y: auto;
-    padding: 3rem 2rem;
+    padding: 2rem;
     position: relative;
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,180 +33,123 @@
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
     color: white;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     font-size: 1.2rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: background 0.2s;
 }
 
 .closeBtn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .modalTitle {
-    background: linear-gradient(to right, #60a5fa, #f59e0b);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.5rem;
-    font-weight: 800;
+    color: white;
+    font-size: 2rem;
     margin-bottom: 0.5rem;
     text-align: center;
-    font-family: 'Montserrat', sans-serif;
 }
 
 .modalText {
-    color: #94a3b8;
+    color: #cbd5e1;
     font-size: 1.1rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     text-align: center;
-    max-width: 600px;
 }
 
 .certWrapper {
     width: 100%;
+    overflow-x: auto;
     display: flex;
     justify-content: center;
-    margin-bottom: 2.5rem;
-    perspective: 1000px;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
 }
 
-/* Premium Certificate Styling */
-.certFrame {
-    padding: 16px;
-    background: linear-gradient(135deg, #d4af37, #f9f295, #b8860b, #f9f295, #d4af37);
-    border-radius: 4px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-    width: 800px;
-    aspect-ratio: 1.414/1;
-}
-
+/* Certificate Styling */
 .certificate {
-    position: relative;
-    background: #fff;
-    background-image: 
-        radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.04) 0%, transparent 70%),
-        url("https://www.transparenttextures.com/patterns/linen.png");
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 25px solid transparent;
-    border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 0 L100 0 L100 100 L0 100 Z' fill='none' stroke='%23d4af37' stroke-width='2'/%3E%3C/svg%3E") 30 stretch;
-    padding: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-30deg);
-    font-size: 8rem;
-    color: rgba(184, 134, 11, 0.03);
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    pointer-events: none;
-    white-space: nowrap;
-    z-index: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-}
-
-.innerBorder {
-    border: 1px solid rgba(184, 134, 11, 0.3);
-    width: calc(100% - 20px);
-    height: calc(100% - 20px);
-    margin: 10px;
+    background: #ffffff;
+    width: 800px;
+    /* Exact width to match aspect ratio * /
+    height: 565px; /* A4 landscape proportions roughly */
+    min-width: 800px;
+    color: #1e293b;
     padding: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     position: relative;
-    box-sizing: border-box;
+    font-family: 'Times New Roman', serif;
 }
 
-/* Decorative Corners */
-.corner {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border: 1.5px solid #d4af37;
-    z-index: 2;
-}
-
-.topL { top: 5px; left: 5px; border-right: none; border-bottom: none; }
-.topR { top: 5px; right: 5px; border-left: none; border-bottom: none; }
-.botL { bottom: 5px; left: 5px; border-right: none; border-top: none; }
-.botR { bottom: 5px; right: 5px; border-left: none; border-top: none; }
-
-.certHeader {
+.certBorder {
+    border: 10px solid #cbd5e1;
+    height: 100%;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    justify-content: center;
+    text-align: center;
 }
 
-.certLabel {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 12px;
-    font-weight: 800;
-    color: #b8860b;
+.certBorder::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    left: -5px;
+    right: -5px;
+    border: 2px solid #94a3b8;
+}
+
+.certHeader h1 {
+    font-size: 3rem;
+    color: #0f172a;
     text-transform: uppercase;
-    letter-spacing: 0.4em;
-    margin-bottom: 20px;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+    font-family: 'Georgia', serif;
 }
 
-.thisCertifies {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-style: italic;
+.certHeader p {
+    font-size: 1.2rem;
     color: #64748b;
-    margin-bottom: 8px;
+    font-style: italic;
+    margin-bottom: 3rem;
 }
 
 .studentName {
-    font-family: 'Playfair Display', serif;
-    font-size: 52px;
-    font-weight: 900;
-    color: #1e293b;
-    margin: 15px 0;
-    text-align: center;
-    border-bottom: 1px solid rgba(184, 134, 11, 0.2);
-    padding-bottom: 5px;
-    min-width: 300px;
+    font-size: 4rem;
+    color: #3b82f6;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 10px;
+    margin-bottom: 2rem;
+    min-width: 400px;
+    font-family: 'Brush Script MT', 'Great Vibes', cursive, serif;
 }
 
-.certBody {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.hasCompleted {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 16px;
+.certBody p {
+    font-size: 1.2rem;
     color: #64748b;
-    margin-bottom: 8px;
+    font-style: italic;
+    margin-bottom: 1rem;
 }
 
-.courseTitle {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 700;
-    color: #b8860b;
-    max-width: 500px;
-    line-height: 1.2;
+.certBody h2 {
+    font-size: 2rem;
+    color: #1e293b;
+    font-family: 'Georgia', serif;
+    font-weight: 500;
 }
 
 .certFooter {
@@ -217,85 +158,56 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-bottom: 10px;
+    padding-top: 2rem;
 }
 
 .signatureBlock {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 160px;
+    width: 200px;
 }
 
-.signatureText {
-    font-family: 'Pinyon Script', cursive;
-    font-size: 28px;
-    color: #1e293b;
-    margin-bottom: 4px;
-    border-bottom: 1px solid #d4af37;
+.signatureLine {
     width: 100%;
-    text-align: center;
+    height: 2px;
+    background: #0f172a;
+    margin-bottom: 10px;
 }
 
-.footerLabel {
-    font-size: 9px;
-    font-weight: 800;
-    color: #94a3b8;
+.signatureBlock span {
+    font-size: 1.2rem;
+    color: #0f172a;
+    font-family: 'Brush Script MT', cursive;
+}
+
+.signatureTitle {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-family: sans-serif !important;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 1px;
+    margin-top: 4px;
 }
 
-.sealContainer {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.goldenSeal {
-    width: 90px;
-    height: 90px;
-    background: radial-gradient(circle, #f9f295, #d4af37, #b8860b);
-    border-radius: 50%;
-    padding: 3px;
-    box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sealInner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.logoBlock {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
 }
 
-.sealLogo { font-size: 28px; }
-.sealText {
-    font-size: 6px;
-    font-weight: 900;
-    color: #78350f;
-    text-transform: uppercase;
+.logo {
+    font-size: 2rem;
+    font-family: sans-serif;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
 }
 
-.bottomMeta {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding-top: 15px;
-    border-top: 1px solid rgba(0,0,0,0.05);
-}
-
-.certId, .verifyText {
-    font-size: 8px;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.dateText {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-family: sans-serif;
 }
 
 .actions {
@@ -305,45 +217,28 @@
 }
 
 .downloadBtn {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
     border: none;
-    padding: 1.25rem 2.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border-radius: 16px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.4);
-    transition: all 0.3s;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .downloadBtn:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px -5px rgba(245, 158, 11, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px -3px rgba(37, 99, 235, 0.5);
 }
 
 .downloadBtn:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
     transform: none;
 }
-
-@media (max-width: 850px) {
-    .certWrapper {
-        overflow-x: auto;
-        justify-content: flex-start;
-        padding-bottom: 1rem;
-    }
-    .certFrame {
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 640px) {
-    .modal { padding: 2rem 1rem; }
-    .modalTitle { font-size: 1.8rem; }
-    .modalText { font-size: 1rem; }
-}

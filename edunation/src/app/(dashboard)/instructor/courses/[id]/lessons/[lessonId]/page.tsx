@@ -5,14 +5,6 @@ import { useParams } from 'next/navigation';
 import styles from './page.module.css';
 import * as Upchunk from '@mux/upchunk';
 
-interface Resource {
-    id: string;
-    title: string;
-    description: string | null;
-    url: string | null;
-    type: string;
-}
-
 interface Lesson {
     id: string;
     title: string;
@@ -26,7 +18,6 @@ interface Lesson {
     liveAt: string | null;
     isLiveEnabled: boolean;
     subtitleUrl: string | null;
-    resources?: Resource[];
 }
 
 const QUALITY_OPTIONS = ['auto', '1080p', '720p', '480p', '360p'];
@@ -42,10 +33,6 @@ export default function LessonEditorPage() {
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [generatingContent, setGeneratingContent] = useState(false);
-    const [generatingQuiz, setGeneratingQuiz] = useState(false);
-    const [generatingSummary, setGeneratingSummary] = useState(false);
-    const [uploadingResource, setUploadingResource] = useState(false);
-    const [newResource, setNewResource] = useState({ title: '', url: '' });
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -100,114 +87,6 @@ export default function LessonEditorPage() {
             alert('An error occurred during generation');
         } finally {
             setGeneratingContent(false);
-        }
-    };
-
-    const handleAddResource = async (type: string, url: string, title: string) => {
-        if (!lesson) return;
-        try {
-            const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, url, type })
-            });
-            const newRes = await res.json();
-            if (res.ok) {
-                setLesson({ ...lesson, resources: [...(lesson.resources || []), newRes] });
-                setNewResource({ title: '', url: '' });
-            } else {
-                alert(newRes.error || 'Failed to add resource');
-            }
-        } catch (err) {
-            alert('Error adding resource');
-        }
-    };
-
-    const handleDeleteResource = async (resourceId: string) => {
-        if (!lesson) return;
-        if (!confirm('Are you sure you want to delete this resource?')) return;
-        try {
-            const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources/${resourceId}`, {
-                method: 'DELETE'
-            });
-            if (res.ok) {
-                setLesson({ ...lesson, resources: (lesson.resources || []).filter(r => r.id !== resourceId) });
-            } else {
-                alert('Failed to delete resource');
-            }
-        } catch (err) {
-            alert('Error deleting resource');
-        }
-    };
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !lesson) return;
-        
-        // Ensure they typed a title first if we want, or just use filename
-        const title = newResource.title || file.name;
-
-        setUploadingResource(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const data = await res.json();
-            if (res.ok && data.url) {
-                await handleAddResource(file.name.endsWith('.pdf') ? 'pdf' : 'document', data.url, title);
-            } else {
-                alert(data.error || 'Upload failed');
-            }
-        } catch (err) {
-            alert('An error occurred during upload');
-        } finally {
-            setUploadingResource(false);
-        }
-    };
-
-    const handleGenerateQuiz = async () => {
-        if (!lesson) return;
-        setGeneratingQuiz(true);
-        try {
-            const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/generate-quiz`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                alert('Quiz generated successfully! Check the course preview to see it in action.');
-            } else {
-                alert(data.error || 'Failed to generate Quiz');
-            }
-        } catch (err) {
-            alert('An error occurred during generation');
-        } finally {
-            setGeneratingQuiz(false);
-        }
-    };
-
-    const handleGenerateSummary = async () => {
-        if (!lesson) return;
-        setGeneratingSummary(true);
-        try {
-            const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/generate-summary`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                alert('Summary generated successfully! It has been attached as a new Resource.');
-            } else {
-                alert(data.error || 'Failed to generate Summary');
-            }
-        } catch (err) {
-            alert('An error occurred during generation');
-        } finally {
-            setGeneratingSummary(false);
         }
     };
 
@@ -324,35 +203,6 @@ export default function LessonEditorPage() {
                         </div>
                     </div>
 
-                    {/* AI Assessments Generator */}
-                    <div className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>🤖 AI Assessments</h2>
-                        </div>
-                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', lineHeight: '1.5' }}>
-                            Automatically generate a structured Quiz or Markdown Cheat-Sheet Summary based on the Lesson Content above. 
-                            These will be permanently saved to the database.
-                        </p>
-                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                            <button
-                                className={styles.aiBtn}
-                                onClick={handleGenerateQuiz}
-                                disabled={generatingQuiz}
-                                style={{ flex: 1, minWidth: '200px', justifyContent: 'center' }}
-                            >
-                                {generatingQuiz ? '✨ Generating Quiz...' : '✨ Generate AI Quiz'}
-                            </button>
-                            <button
-                                className={styles.aiBtn}
-                                onClick={handleGenerateSummary}
-                                disabled={generatingSummary}
-                                style={{ flex: 1, minWidth: '200px', justifyContent: 'center', background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', border: '1px solid rgba(37, 99, 235, 0.2)' }}
-                            >
-                                {generatingSummary ? '✨ Generating Summary...' : '✨ Generate AI Summary'}
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Video Upload */}
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
@@ -451,94 +301,6 @@ export default function LessonEditorPage() {
                                 }}
                             />
                         </div>
-                    </div>
-
-                    {/* Attachable Materials */}
-                    <div className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>📎 Attachable Materials</h2>
-                        </div>
-                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', lineHeight: '1.5' }}>
-                            Upload PDFs, Word documents, or provide external links for students to download or read.
-                        </p>
-
-                        <div className={styles.fieldRow} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginBottom: '16px', flexWrap: 'wrap' }}>
-                            <div className={styles.field} style={{ flex: 1, minWidth: '200px', marginBottom: 0 }}>
-                                <label className={styles.label}>Material Title</label>
-                                <input
-                                    className={styles.input}
-                                    value={newResource.title}
-                                    onChange={e => setNewResource({ ...newResource, title: e.target.value })}
-                                    placeholder="e.g. Chapter 1 Slides (PDF)"
-                                />
-                            </div>
-                            
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                {/* File Upload Button */}
-                                <div style={{ position: 'relative' }}>
-                                    <button
-                                        type="button"
-                                        className={styles.saveBtn}
-                                        style={{ background: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1' }}
-                                        disabled={uploadingResource || !newResource.title}
-                                        onClick={() => document.getElementById('resourceUpload')?.click()}
-                                    >
-                                        {uploadingResource ? 'Uploading...' : '📁 Upload File'}
-                                    </button>
-                                    <input
-                                        id="resourceUpload"
-                                        type="file"
-                                        onChange={handleFileUpload}
-                                        style={{ display: 'none' }}
-                                    />
-                                </div>
-
-                                {/* Add Link Button */}
-                                <button
-                                    type="button"
-                                    className={styles.saveBtn}
-                                    style={{ background: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1' }}
-                                    disabled={!newResource.title || uploadingResource}
-                                    onClick={() => {
-                                        const url = prompt('Enter the link URL (e.g. Google Drive link):');
-                                        if (url) {
-                                            handleAddResource('link', url, newResource.title);
-                                        }
-                                    }}
-                                >
-                                    🔗 Add Link
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Resource List */}
-                        {lesson.resources && lesson.resources.length > 0 && (
-                            <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
-                                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#334155', marginBottom: '12px' }}>Attached Files & Links</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {lesson.resources.map(res => (
-                                        <div key={res.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
-                                                <div style={{ fontSize: '20px' }}>
-                                                    {res.type === 'pdf' ? '📄' : res.type === 'summary' ? '📋' : res.type === 'link' ? '🔗' : '📁'}
-                                                </div>
-                                                <div style={{ overflow: 'hidden' }}>
-                                                    <div style={{ fontWeight: 500, color: '#0f172a', fontSize: '14px' }}>{res.title}</div>
-                                                    {res.url && <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>{res.url}</div>}
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteResource(res.id)}
-                                                style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', fontWeight: 500 }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 

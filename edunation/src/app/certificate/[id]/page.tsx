@@ -54,7 +54,6 @@ export default function CertificatePage() {
 
             <div className={styles.certFrame}>
                 <div className={styles.cert} id="certificate">
-                    <div className={styles.watermark}>EduNation</div>
                     {/* Decorative Corner Ornaments */}
                     <div className={`${styles.corner} ${styles.topL}`} />
                     <div className={`${styles.corner} ${styles.topR}`} />

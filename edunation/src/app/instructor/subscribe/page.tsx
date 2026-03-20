@@ -1,9 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
 import styles from './page.module.css';
 
 interface CurrentSub { plan: string; status: string; endDate: string | null; }
@@ -43,8 +40,6 @@ const PLANS = [
 ];
 
 export default function InstructorSubscribePage() {
-    const { data: session } = useSession();
-    const { t } = useLanguage();
     const [current, setCurrent] = useState<CurrentSub | null>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -52,8 +47,6 @@ export default function InstructorSubscribePage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [processingPayment, setProcessingPayment] = useState(false);
-    const [uploadingReceipt, setUploadingReceipt] = useState(false);
-    const [receiptSubmitted, setReceiptSubmitted] = useState(false);
 
     useEffect(() => {
         fetch('/api/instructor/subscribe')
@@ -115,48 +108,6 @@ export default function InstructorSubscribePage() {
             setShowPaymentModal(false);
         } finally {
             setProcessingPayment(false);
-        }
-    };
-
-    const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !session?.user || !selectedPlan) return;
-
-        setUploadingReceipt(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const uploadRes = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const uploadData = await uploadRes.json();
-
-            if (!uploadRes.ok || !uploadData.url) {
-                toast.error(uploadData.error || t.manualPay.error);
-                setUploadingReceipt(false);
-                return;
-            }
-
-            const submitRes = await fetch('/api/manual-payments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planId: selectedPlan, receiptUrl: uploadData.url })
-            });
-
-            if (submitRes.ok) {
-                toast.success(t.manualPay.success);
-                setReceiptSubmitted(true);
-            } else {
-                const submitData = await submitRes.json();
-                toast.error(submitData.error || t.manualPay.error);
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error(t.manualPay.error);
-        } finally {
-            setUploadingReceipt(false);
         }
     };
 
@@ -255,64 +206,50 @@ export default function InstructorSubscribePage() {
                 </div>
             </section>
 
+            {/* Payment Modal */}
             {showPaymentModal && (
                 <div className={styles.modalOverlay} onClick={() => !processingPayment && setShowPaymentModal(false)}>
                     <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
                         <div className={styles.paymentHeader}>
-                            <h2>{t.manualPay.title}</h2>
-                            <p>{t.manualPay.instructions}</p>
+                            <h2>Select Payment Method</h2>
+                            <p>Choose how you would like to pay for the <strong>{PLANS.find(p => p.id === selectedPlan)?.name}</strong> plan.</p>
                         </div>
 
-                        <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
-                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>{t.manualPay.title}</h3>
-                                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
-                                    {t.manualPay.instructions}
-                                </p>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                                    9860 0104 0801 2010
-                                </div>
-                                <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
-                                    Tulkinov Bakhromjon
-                                </div>
-                                
-                                {receiptSubmitted ? (
-                                    <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
-                                        ✅ {t.manualPay.success}
-                                    </div>
-                                ) : (
-                                    <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-                                        <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
-                                            {t.manualPay.alreadyTransferred}
-                                        </p>
-                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <input
-                                                type="file"
-                                                accept="image/*,.pdf"
-                                                onChange={handleReceiptUpload}
-                                                style={{ display: 'none' }}
-                                                id="instructor-receipt-upload"
-                                            />
-                                            <label
-                                                htmlFor="instructor-receipt-upload"
-                                                className={styles.saveBtn}
-                                                style={{ cursor: 'pointer', background: '#2563eb', color: 'white', border: 'none', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto', width: '100%', textAlign: 'center' }}
-                                            >
-                                                {uploadingReceipt ? `⏳ ${t.manualPay.submitting}` : `📁 ${t.manualPay.uploadBtn}`}
-                                            </label>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                        <div className={styles.paymentOptions}>
+                            <button
+                                className={`${styles.payBtn} ${styles.paymeBtn}`}
+                                onClick={() => handlePaymentClick('payme')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>Payme</div>
+                                <span>Pay with Payme</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.clickBtn}`}
+                                onClick={() => handlePaymentClick('click')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>CLICK</div>
+                                <span>Pay with Click</span>
+                            </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.stripeBtn}`}
+                                onClick={() => handlePaymentClick('stripe')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon} style={{ fontSize: '14px', color: '#6366f1' }}>Stripe</div>
+                                <span>Pay with Stripe (Card)</span>
+                            </button>
                         </div>
 
                         <button
                             className={styles.closeModalBtn}
                             onClick={() => setShowPaymentModal(false)}
                             disabled={processingPayment}
-                            style={{ width: '100%', marginTop: '10px' }}
                         >
-                            {t.manualPay.cancel}
+                            Cancel
                         </button>
                     </div>
                 </div>

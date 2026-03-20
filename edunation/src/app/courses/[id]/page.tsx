@@ -42,12 +42,6 @@ export default function CourseDetailPage() {
     const [showCert, setShowCert] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [processingPayment, setProcessingPayment] = useState(false);
-    const [uploadingReceipt, setUploadingReceipt] = useState(false);
-    const [receiptSubmitted, setReceiptSubmitted] = useState(false);
-    const [promoCode, setPromoCode] = useState('');
-    const [promoDiscount, setPromoDiscount] = useState<{ type: string, value: number, id: string } | null>(null);
-    const [promoError, setPromoError] = useState('');
-    const [isValidatingPromo, setIsValidatingPromo] = useState(false);
     const { data: session } = useSession();
 
     useEffect(() => {
@@ -107,100 +101,21 @@ export default function CourseDetailPage() {
             const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    courseId: course.id, 
-                    provider,
-                    promoCode: promoDiscount?.code 
-                })
+                body: JSON.stringify({ courseId: course.id, provider })
             });
             const data = await res.json();
             if (data.url) {
                 window.location.href = data.url;
+            } else if (res.status === 401) {
+                router.push('/login');
             } else {
-                toast.error(data.error || 'Payment initialization failed.');
+                alert(data.error || 'Payment initialization failed.');
             }
         } catch (err) {
             console.error(err);
-            toast.error('Payment error occurred.');
+            alert('Payment error occurred.');
         } finally {
             setProcessingPayment(false);
-        }
-    };
-
-    const handleApplyPromo = async () => {
-        if (!promoCode.trim()) return;
-        setIsValidatingPromo(true);
-        setPromoError('');
-        try {
-            const res = await fetch(`/api/promo-codes/validate?code=${promoCode.toUpperCase()}`);
-            const data = await res.json();
-            if (res.ok) {
-                setPromoDiscount({ type: data.discountType, value: data.discountValue, id: data.id });
-                toast.success(t.courseDetail.discountApplied);
-            } else {
-                setPromoError(t.courseDetail.invalidCode);
-                setPromoDiscount(null);
-            }
-        } catch (err) {
-            console.error(err);
-            setPromoError('Error validating code');
-        } finally {
-            setIsValidatingPromo(false);
-        }
-    };
-
-    const calculateDiscountedPrice = () => {
-        if (!course || !promoDiscount) return course?.price || 0;
-        if (promoDiscount.type === 'PERCENTAGE') {
-            return course.price * (1 - promoDiscount.value / 100);
-        } else {
-            return Math.max(0, course.price - promoDiscount.value);
-        }
-    };
-
-    const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !session?.user) return;
-
-        setUploadingReceipt(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const uploadRes = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const uploadData = await uploadRes.json();
-
-            if (!uploadRes.ok || !uploadData.url) {
-                toast.error(uploadData.error || t.manualPay.error);
-                setUploadingReceipt(false);
-                return;
-            }
-
-            const submitRes = await fetch('/api/manual-payments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    courseId: course.id, 
-                    receiptUrl: uploadData.url,
-                    promoCode: promoDiscount?.code 
-                })
-            });
-
-            if (submitRes.ok) {
-                setReceiptSubmitted(true);
-                toast.success(t.manualPay.success);
-            } else {
-                const submitData = await submitRes.json();
-                toast.error(submitData.error || t.manualPay.error);
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error(t.manualPay.error);
-        } finally {
-            setUploadingReceipt(false);
         }
     };
 
@@ -254,7 +169,7 @@ export default function CourseDetailPage() {
             console.error('Error updating progress:', err);
             // --- ROLLBACK ON ERROR ---
             setProgress(previousProgress);
-            toast.error('Failed to update progress. Reverting changes.');
+            alert('Failed to update progress. Reverting changes.');
         } finally {
             setUpdatingProgress(false);
         }
@@ -460,8 +375,8 @@ export default function CourseDetailPage() {
                                     ) : (
                                         <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
                                             <div className={styles.lockedIcon}>⏳</div>
-                                            <h3 className={styles.lockedTitle}>{t.courseDetail.notUploaded}</h3>
-                                            <p className={styles.lockedDesc}>{t.courseDetail.notUploadedDesc}</p>
+                                            <h3 className={styles.lockedTitle}>Not Uploaded</h3>
+                                            <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
                                         </div>
                                     )
                                 ) : activeLesson ? (
@@ -680,103 +595,41 @@ export default function CourseDetailPage() {
                 <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
                     <div className={styles.paymentModal} onClick={e => e.stopPropagation()}>
                         <div className={styles.paymentHeader}>
-                            <h2>{t.manualPay.title}</h2>
-                            <p>{t.manualPay.instructions}</p>
+                            <h2>Select Payment Method</h2>
+                            <p>Choose how you would like to secure your access to <strong>{course.title}</strong>.</p>
                         </div>
 
-                        <div className={styles.paymentOptions} style={{ flexDirection: 'column' }}>
-                            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-                                <h3 style={{ fontSize: '18px', marginBottom: '12px', color: '#0f172a' }}>{t.manualPay.title}</h3>
-                                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
-                                    {t.manualPay.instructions}
-                                </p>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2563eb', padding: '16px', background: '#eff6ff', borderRadius: '8px', letterSpacing: '1px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                                    9860 0104 0801 2010
-                                </div>
-                                <div style={{ fontSize: '16px', fontWeight: 600, color: '#334155', marginTop: '16px' }}>
-                                    Tulkinov Bakhromjon
-                                </div>
+                        <div className={styles.paymentOptions}>
+                            <button
+                                className={`${styles.payBtn} ${styles.paymeBtn}`}
+                                onClick={() => handlePaymentClick('payme')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>Payme</div>
+                                <span>Pay with Payme</span>
+                            </button>
 
-                                {/* Promo Code Section */}
-                                <div className={styles.promoContainer}>
-                                    <label style={{ fontSize: '14px', fontWeight: 600, color: '#334155', display: 'block', textAlign: 'left' }}>
-                                        {t.courseDetail.promoCodeLabel}
-                                    </label>
-                                    <div className={styles.promoInputWrapper}>
-                                        <input
-                                            type="text"
-                                            className={styles.promoInput}
-                                            value={promoCode}
-                                            onChange={(e) => setPromoCode(e.target.value)}
-                                            placeholder="CODE"
-                                            disabled={!!promoDiscount || isValidatingPromo}
-                                        />
-                                        <button
-                                            className={styles.promoApplyBtn}
-                                            onClick={handleApplyPromo}
-                                            disabled={!promoCode || !!promoDiscount || isValidatingPromo}
-                                        >
-                                            {isValidatingPromo ? '...' : t.courseDetail.apply}
-                                        </button>
-                                    </div>
-                                    {promoError && <p className={`${styles.promoMsg} ${styles.promoError}`}>{promoError}</p>}
-                                    {promoDiscount && (
-                                        <div className={styles.discountInfo}>
-                                            <span className={styles.discountText}>✨ {t.courseDetail.discountApplied}</span>
-                                            <span className={styles.discountValue}>
-                                                -{promoDiscount.type === 'PERCENTAGE' ? `${promoDiscount.value}%` : `${promoDiscount.value.toLocaleString()} ${t.shared.currency}`}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                            <button
+                                className={`${styles.payBtn} ${styles.clickBtn}`}
+                                onClick={() => handlePaymentClick('click')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>CLICK</div>
+                                <span>Pay with Click</span>
+                            </button>
 
-                                <div style={{ marginTop: '20px', padding: '12px', background: '#f1f5f9', borderRadius: '8px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                                        <span>Total:</span>
-                                        <span style={{ textDecoration: promoDiscount ? 'line-through' : 'none', opacity: promoDiscount ? 0.6 : 1 }}>
-                                            {formatUZS(course.price, t.shared.currency)}
-                                        </span>
-                                    </div>
-                                    {promoDiscount && (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>
-                                            <span>Discounted:</span>
-                                            <span>{formatUZS(calculateDiscountedPrice(), t.shared.currency)}</span>
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                {receiptSubmitted ? (
-                                    <div style={{ marginTop: '24px', padding: '16px', background: '#ecfdf5', borderRadius: '8px', color: '#059669', fontWeight: 500 }}>
-                                        ✅ {t.manualPay.success}
-                                    </div>
-                                ) : (
-                                    <div style={{ marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-                                        <p style={{ fontSize: '14px', color: '#475569', marginBottom: '12px', fontWeight: 500 }}>
-                                            {t.manualPay.alreadyTransferred}
-                                        </p>
-                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <input
-                                                type="file"
-                                                accept="image/*,.pdf"
-                                                onChange={handleReceiptUpload}
-                                                style={{ display: 'none' }}
-                                                id="receipt-upload"
-                                            />
-                                            <label
-                                                htmlFor="receipt-upload"
-                                                className="btn btn-primary"
-                                                style={{ cursor: 'pointer', background: '#2563eb', borderColor: '#2563eb', opacity: uploadingReceipt ? 0.7 : 1, pointerEvents: uploadingReceipt ? 'none' : 'auto', width: '100%', textAlign: 'center' }}
-                                            >
-                                                {uploadingReceipt ? `⏳ ${t.manualPay.submitting}` : `📁 ${t.manualPay.uploadBtn}`}
-                                            </label>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            <button
+                                className={`${styles.payBtn} ${styles.stripeBtn}`}
+                                onClick={() => handlePaymentClick('stripe')}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon}>💳</div>
+                                <span>Visa / Mastercard</span>
+                            </button>
                         </div>
 
-                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)} style={{ width: '100%', marginTop: '10px' }}>
-                            {t.manualPay.cancel}
+                        <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>
+                            Cancel
                         </button>
                     </div>
                 </div>

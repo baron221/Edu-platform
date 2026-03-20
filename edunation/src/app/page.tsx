@@ -69,7 +69,7 @@ export default function HomePage() {
 
   // Fetch courses once
   useEffect(() => {
-    fetch('/api/courses')
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/courses`)
       .then(r => r.json())
       .then((data: CourseDB[]) => {
         setFeaturedCourses(data.slice(0, 3));
@@ -79,7 +79,7 @@ export default function HomePage() {
 
   // Fetch stats + poll every 30s for realtime
   const fetchStats = () => {
-    fetch('/api/stats')
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/stats`)
       .then(r => r.json())
       .then((d: SiteStats) => { setStats(d); setLastUpdated(new Date()); })
       .catch(() => { });

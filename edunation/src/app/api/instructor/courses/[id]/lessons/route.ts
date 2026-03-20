@@ -31,7 +31,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     const lessons = await prisma.lesson.findMany({
         where: { courseId: id },
         orderBy: { order: 'asc' },
-        include: { resources: true }
     });
     return NextResponse.json(lessons);
 }
@@ -61,7 +60,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             isLiveEnabled: body.isLiveEnabled ?? false,
             subtitleUrl: body.subtitleUrl ?? '',
         },
-        include: { resources: true }
     });
     return NextResponse.json(lesson, { status: 201 });
 }

@@ -6,7 +6,7 @@
 }
 
 .page {
-    padding: 0 40px 40px;
+    padding: 32px 40px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -568,39 +568,4 @@
     color: #64748b;
     margin-top: 8px;
     line-height: 1.5;
-}
-
-.priceContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.quickPrices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-}
-
-.priceChip {
-    padding: 6px 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.priceChip:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-    border-color: #cbd5e1;
-}
-
-.priceChip:active {
-    transform: scale(0.95);
 }

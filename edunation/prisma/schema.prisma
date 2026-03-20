@@ -94,19 +94,11 @@ model User {
   expertSessions     ExpertSession[]      @relation("ExpertSessions")
   studentSessions    ExpertSession[]      @relation("StudentSessions")
 
-  // Notifications
-  notifications       Notification[]
-
   // Gamification
   points              Int                   @default(0)
   currentStreak       Int                   @default(0)
   lastActivityDate    DateTime?
   subscriptionPayments SubscriptionPayment[]
-  manualPayments      ManualPayment[]
-
-  // Free Trial tracking
-  studentTrialUsed    Boolean               @default(false)
-  instructorTrialUsed Boolean               @default(false)
 }
 
 // =====================================================================
@@ -224,7 +216,6 @@ model Course {
   reviews     Review[]
   Certificate Certificate[]
   purchases   Purchase[]
-  manualPayments ManualPayment[]
   community   Community?
   courseAds   CourseAd[]
 }
@@ -337,35 +328,14 @@ model Purchase {
   courseId      String
   provider      String // "payme" | "click" | "stripe"
   transactionId String   @unique // ID from the payment provider
-  amount         Int
-  discountAmount Int?     @default(0)
-  promoCodeId    String?
-  currency       String   @default("UZS") // UZS | USD
+  amount        Int
+  currency      String   @default("UZS") // UZS | USD
   status        String   @default("pending") // pending | completed | failed | refunded
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([courseId])
-}
-
-model ManualPayment {
-  id          String   @id @default(cuid())
-  userId      String
-  courseId    String?  // Optional: If paying for a course
-  planId      String?  // Optional: If paying for a subscription
-  receiptUrl    String   // URL of the uploaded receipt
-  promoCodeId   String?
-  discountAmount Int?     @default(0)
-  status        String   @default("pending") // "pending", "approved", "rejected"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([courseId])
@@ -590,43 +560,4 @@ model ExpertSession {
   @@index([expertId])
   @@index([studentId])
   @@index([status])
-}
-
-// =====================================================================
-// NOTIFICATIONS
-// =====================================================================
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String           // recipient
-  type      String           // ENROLLMENT | NEW_REVIEW | SESSION_UPDATE | COURSE_PUBLISHED | etc.
-  title     String
-  message   String
-  link      String?          // click-through URL
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId, read])
-}
-
-
-// =====================================================================
-// PROMO CODES
-// =====================================================================
-
-model PromoCode {
-  id           String    @id @default(cuid())
-  code         String    @unique
-  discountType String    // "PERCENTAGE" | "FIXED"
-  discountValue Int
-  expiresAt    DateTime?
-  usageLimit   Int?      // Null means unlimited
-  usageCount   Int       @default(0)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([code])
 }

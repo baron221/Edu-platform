@@ -20,8 +20,8 @@ interface Session {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    pending: '#d97706', approved: '#10b981', rejected: '#ef4444',
-    receipt_uploaded: '#2563eb', confirmed: '#10b981', cancelled: '#ef4444', completed: '#7c3aed',
+    pending: '#fbbf24', approved: '#10b981', rejected: '#ef4444',
+    receipt_uploaded: '#60a5fa', confirmed: '#10b981', cancelled: '#ef4444', completed: '#a78bfa',
 };
 
 // Simple SVG Icons to replace emojis

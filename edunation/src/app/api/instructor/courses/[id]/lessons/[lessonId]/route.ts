@@ -31,7 +31,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const lesson = await prisma.lesson.update({
         where: { id: lessonId },
         data: body,
-        include: { resources: true }
     });
     return NextResponse.json(lesson);
 }

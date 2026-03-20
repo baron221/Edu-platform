@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { createNotification } from '@/lib/notify';
 
 // GET /api/reviews?courseId=xxx — get all reviews for a course
 export async function GET(req: Request) {
@@ -70,22 +69,6 @@ export async function POST(req: Request) {
                 user: { select: { name: true, image: true } }
             }
         });
-
-        // Notify instructor
-        const course = await prisma.course.findUnique({
-            where: { id: courseId },
-            select: { instructorId: true, title: true }
-        });
-
-        if (course?.instructorId && course.instructorId !== userId) {
-            await createNotification(
-                course.instructorId,
-                'NEW_REVIEW',
-                'New Course Review',
-                `A student left a ${rating}-star review on "${course.title}".`,
-                `/instructor/courses/${courseId}`
-            );
-        }
 
         return NextResponse.json(review);
     } catch (error) {
