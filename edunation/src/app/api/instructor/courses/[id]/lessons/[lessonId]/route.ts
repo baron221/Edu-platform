@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 async function verifyAccess(courseId: string) {
     const session = await getServerSession(authOptions);
@@ -43,3 +43,4 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     await prisma.lesson.delete({ where: { id: lessonId } });
     return NextResponse.json({ ok: true });
 }
+

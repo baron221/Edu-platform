@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { createReadStream, statSync } from 'fs';
 import { join } from 'path';
@@ -161,3 +161,4 @@ export async function GET(
         });
     }
 }
+

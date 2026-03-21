@@ -463,3 +463,11 @@ img {
     font-size: 15px;
   }
 }
+
+@media print {
+  body {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

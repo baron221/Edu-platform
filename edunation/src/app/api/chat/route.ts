@@ -2,7 +2,7 @@ import { streamText } from 'ai';
 import { google } from '@ai-sdk/google';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;

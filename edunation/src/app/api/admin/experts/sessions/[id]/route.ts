@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // PATCH /api/admin/experts/sessions/[id] — confirm session + fire Make/n8n webhook
@@ -74,3 +74,4 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 }
+
