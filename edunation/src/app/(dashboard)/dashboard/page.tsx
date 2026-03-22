@@ -80,22 +80,27 @@ export default function DashboardPage() {
                     {/* Stats Row */}
                     <div className={styles.statsRow}>
                         <div className={styles.statCard}>
+                            <div className={styles.statIcon}>📚</div>
                             <span className={styles.statNum}>{enrollments.length}</span>
                             <span className={styles.statLabel}>{t.dashboard.stats.enrolled}</span>
                         </div>
                         <div className={styles.statCard}>
+                            <div className={styles.statIcon}>📝</div>
                             <span className={styles.statNum}>{totalLessonsDone}</span>
                             <span className={styles.statLabel}>{t.dashboard.stats.lessonsCompleted}</span>
                         </div>
                         <div className={styles.statCard}>
+                            <div className={styles.statIcon}>✅</div>
                             <span className={styles.statNum}>{totalCompleted}</span>
                             <span className={styles.statLabel}>{t.dashboard.stats.coursesFinished}</span>
                         </div>
                         <div className={styles.statCard}>
+                            <div className={styles.statIcon}>🎓</div>
                             <span className={styles.statNum}>{certificates.length}</span>
                             <span className={styles.statLabel}>{t.dashboard.stats.certificates}</span>
                         </div>
                         <div className={styles.statCard}>
+                            <div className={styles.statIcon}>⭐</div>
                             <span className={styles.statNum}>{user?.points || 0}</span>
                             <span className={styles.statLabel}>{t.dashboard.stats.xp}</span>
                         </div>
