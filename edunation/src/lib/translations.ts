@@ -611,6 +611,8 @@ export const translations = {
             usersTitle: 'User Management',
             searchUsers: 'Search by name or email...',
             roleAll: 'All Roles',
+            deleteUser: 'Delete User',
+            deleteConfirm: 'Are you sure you want to delete user {name}? This action cannot be undone and will remove all their data (enrollments, purchases, etc).',
         },
         trial: {
             success: 'Trial activated successfully!',
@@ -1290,6 +1292,8 @@ export const translations = {
             usersTitle: 'Foydalanuvchilarni boshqarish',
             searchUsers: 'Ism yoki email bo\'yicha qidirish...',
             roleAll: 'Barcha rollar',
+            deleteUser: 'Foydalanuvchini o\'chirish',
+            deleteConfirm: 'Haqiqatan ham {name} foydalanuvchisini o\'chirib tashlamoqchimisiz? Bu amalni ortga qaytarib bo\'lmaydi va barcha ma\'lumotlar (to\'lovlar, kurslar va h.k.) o\'chib ketadi.',
         },
         trial: {
             success: 'Sinov muddati muvaffaqiyatli faollashtirildi!',
@@ -1971,6 +1975,8 @@ export const translations = {
             usersTitle: 'Управление пользователями',
             searchUsers: 'Поиск по имени или email...',
             roleAll: 'Все роли',
+            deleteUser: 'Удалить пользователя',
+            deleteConfirm: 'Вы уверены, что хотите удалить пользователя {name}? Это действие нельзя отменить, и все данные (записи, покупки и т.д.) будут удалены.',
         },
         trial: {
             success: 'Пробный период успешно активирован!',

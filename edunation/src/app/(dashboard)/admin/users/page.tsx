@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface User {
@@ -13,6 +14,7 @@ interface User {
 }
 
 export default function AdminUsersPage() {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -29,6 +31,19 @@ export default function AdminUsersPage() {
         fetch('/api/admin/users').then(r => r.json()).then(data => { setUsers(data); setLoading(false); });
 
     useEffect(() => { load(); }, []);
+
+    const handleDeleteUser = async (id: string, name: string | null, email: string | null) => {
+        if (!confirm(t.admin.deleteConfirm.replace('{name}', name || email || ''))) return;
+
+        try {
+            const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete user');
+            load();
+        } catch (e) {
+            console.error(e);
+            alert("Failed to delete user");
+        }
+    };
 
     const changeRole = async (id: string, role: string) => {
         await fetch('/api/admin/users', {
@@ -165,6 +180,20 @@ export default function AdminUsersPage() {
                                     title="Override Subscription"
                                 >
                                     💳
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteUser(u.id, u.name, u.email)}
+                                    style={{
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '4px',
+                                        border: '1px solid #ef4444',
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        color: '#f87171',
+                                        cursor: 'pointer',
+                                    }}
+                                    title={t.admin.deleteUser}
+                                >
+                                    🗑️
                                 </button>
                             </span>
                         </div>
