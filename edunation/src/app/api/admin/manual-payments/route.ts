@@ -101,6 +101,23 @@ export async function PATCH(req: Request) {
             }
         }
 
+        // --- Notify User ---
+        try {
+            await (prisma as any).notification.create({
+                data: {
+                    userId: payment.userId,
+                    type: status === 'approved' ? 'payment_success' : 'payment_error',
+                    title: status === 'approved' ? '✅ Payment Approved' : '❌ Payment Rejected',
+                    message: status === 'approved' 
+                        ? `Your payment for ${payment.courseId ? payment.course?.title : 'subscription'} was approved! 🎉`
+                        : `Your payment was rejected. Please contact support or check your receipt.`,
+                    link: payment.courseId ? `/courses/${payment.courseId}` : '/instructor/subscribe',
+                }
+            });
+        } catch (notifyErr) {
+            console.error('[NOTIFY_USER_ERROR]', notifyErr);
+        }
+
         return NextResponse.json(payment);
     } catch (error) {
         console.error('[ADMIN_MANUAL_PAYMENT_PATCH]', error);

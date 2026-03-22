@@ -84,6 +84,29 @@ export async function POST(req: Request) {
             await notifyAdmin(`${msg}\n\n🔗 <b>Receipt:</b> <a href="${absoluteReceiptUrl}">View File</a>`);
         }
 
+        // --- In-App Notifications for Admins ---
+        try {
+            const admins = await prisma.user.findMany({
+                where: { role: 'admin' },
+                select: { id: true }
+            });
+
+            if (admins.length > 0) {
+                await (prisma as any).notification.createMany({
+                    data: admins.map(admin => ({
+                        userId: admin.id,
+                        type: 'payment_receipt',
+                        title: '💳 New Manual Payment',
+                        message: `New receipt from ${userName} for ${courseId ? 'a course' : 'a plan'}.`,
+                        link: '/admin/payments',
+                    }))
+                });
+            }
+        } catch (notifyErr) {
+            console.error('[NOTIFY_ADMIN_ERROR]', notifyErr);
+            // Non-blocking
+        }
+
         return NextResponse.json({ success: true, payment: manualPayment });
     } catch (error) {
         console.error('[MANUAL_PAYMENT_POST]', error);

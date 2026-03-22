@@ -68,12 +68,21 @@ export async function notifyAdminWithPhoto(photo: string, caption: string): Prom
             }
         }
 
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        console.log(`[TELEGRAM] Sending photo notification. Chat: ${ADMIN_CHAT}, Photo length: ${photo.length}`);
+        
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
             method: 'POST',
             body: formData,
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR] API Response:', response.status, errorText);
+        } else {
+            console.log('[TELEGRAM] Photo notification sent successfully');
+        }
     } catch (err) {
-        console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR]', err);
+        console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR] Critical Error:', err);
     }
 }
 
