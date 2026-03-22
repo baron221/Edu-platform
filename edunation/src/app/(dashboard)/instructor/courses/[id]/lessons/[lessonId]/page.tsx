@@ -308,11 +308,14 @@ export default function LessonEditorPage() {
                                           resource.url?.toLowerCase().endsWith('.pdf') ? '📄' :
                                           resource.url?.toLowerCase().endsWith('.zip') || resource.url?.toLowerCase().endsWith('.rar') ? '📦' :
                                           resource.url?.toLowerCase().endsWith('.doc') || resource.url?.toLowerCase().endsWith('.docx') ? '📝' :
+                                          resource.url?.toLowerCase().includes('.ppt') || resource.url?.toLowerCase().includes('.pptx') ? '📊' :
                                           '📁'}
                                      </div>
                                     <div className={styles.resourceInfo}>
                                         <div className={styles.resourceTitle}>{resource.title}</div>
-                                        <div className={styles.resourceUrl}>{resource.url}</div>
+                                        <div className={styles.resourceUrl} style={{ opacity: 0.5, fontSize: '11px' }}>
+                                            {resource.type === 'file' ? 'Uploaded File' : resource.url}
+                                        </div>
                                     </div>
                                     <button 
                                         className={styles.resourceDelete}

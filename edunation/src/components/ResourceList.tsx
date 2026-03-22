@@ -32,6 +32,7 @@ export default function ResourceList({ resources }: ResourceListProps) {
                              res.url?.toLowerCase().endsWith('.pdf') ? '📄' :
                              res.url?.toLowerCase().endsWith('.zip') || res.url?.toLowerCase().endsWith('.rar') ? '📦' :
                              res.url?.toLowerCase().endsWith('.doc') || res.url?.toLowerCase().endsWith('.docx') ? '📝' :
+                             res.url?.toLowerCase().includes('.ppt') || res.url?.toLowerCase().includes('.pptx') ? '📊' :
                              '📁'}
                         </div>
                         <div className={styles.info}>
