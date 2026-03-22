@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        const [totalCourses, totalUsers, totalEnrollments, recentUsers, enrollments] = await Promise.all([
+        const [totalCourses, totalUsers, totalEnrollments, recentUsers, enrollments, pendingPaymentsCount] = await Promise.all([
             prisma.course.count(),
             prisma.user.count(),
             prisma.enrollment.count(),
