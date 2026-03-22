@@ -28,7 +28,11 @@ export default function ResourceList({ resources }: ResourceListProps) {
                 {resources.map((res) => (
                     <div key={res.id} className={styles.resourceCard}>
                         <div className={styles.iconWrapper}>
-                            {res.type === 'pdf' ? '📄' : res.type === 'assignment' ? '📝' : '🔗'}
+                            {res.type === 'link' ? '🔗' : 
+                             res.url?.toLowerCase().endsWith('.pdf') ? '📄' :
+                             res.url?.toLowerCase().endsWith('.zip') || res.url?.toLowerCase().endsWith('.rar') ? '📦' :
+                             res.url?.toLowerCase().endsWith('.doc') || res.url?.toLowerCase().endsWith('.docx') ? '📝' :
+                             '📁'}
                         </div>
                         <div className={styles.info}>
                             <h4 className={styles.resourceTitle}>{res.title}</h4>

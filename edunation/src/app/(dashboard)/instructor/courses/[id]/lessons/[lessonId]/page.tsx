@@ -303,9 +303,13 @@ export default function LessonEditorPage() {
                         <div className={styles.resourceList}>
                             {lesson.resources?.map(resource => (
                                 <div key={resource.id} className={styles.resourceItem}>
-                                    <div className={styles.resourceIcon}>
-                                        {resource.type === 'file' ? '📄' : '🔗'}
-                                    </div>
+                                     <div className={styles.resourceIcon}>
+                                         {resource.type === 'link' ? '🔗' : 
+                                          resource.url?.toLowerCase().endsWith('.pdf') ? '📄' :
+                                          resource.url?.toLowerCase().endsWith('.zip') || resource.url?.toLowerCase().endsWith('.rar') ? '📦' :
+                                          resource.url?.toLowerCase().endsWith('.doc') || resource.url?.toLowerCase().endsWith('.docx') ? '📝' :
+                                          '📁'}
+                                     </div>
                                     <div className={styles.resourceInfo}>
                                         <div className={styles.resourceTitle}>{resource.title}</div>
                                         <div className={styles.resourceUrl}>{resource.url}</div>
