@@ -13,7 +13,7 @@ export async function GET() {
     }
 
     const [enrollments, allProgress, user, certificates] = await Promise.all([
-        prisma.enrollment.findMany({
+        (prisma as any).enrollment.findMany({
             where: { userId },
             include: {
                 course: {
@@ -22,12 +22,12 @@ export async function GET() {
             },
             orderBy: { enrolledAt: 'desc' }
         }),
-        prisma.progress.findMany({ where: { userId, completed: true } }),
-        prisma.user.findUnique({
+        (prisma as any).progress.findMany({ where: { userId, completed: true } }),
+        (prisma as any).user.findUnique({
             where: { id: userId },
             select: { currentStreak: true, lastActivityDate: true, points: true }
         }),
-        prisma.certificate.findMany({
+        (prisma as any).certificate.findMany({
             where: { userId },
             include: { course: { select: { title: true, slug: true, category: true } } },
             orderBy: { issuedAt: 'desc' }
@@ -44,25 +44,25 @@ export async function GET() {
     }
 
     // Continue Learning
-    const recentEnrollment = enrollments.find(e => !e.completed);
+    const recentEnrollment = enrollments.find((e: any) => !e.completed);
     let nextLesson = null;
     let recentEnrollmentSlug = null;
     let recentEnrollmentTitle = null;
 
     if (recentEnrollment) {
-        const completedIds = allProgress.filter(p => p.courseId === recentEnrollment.courseId).map(p => p.lessonId);
-        const allLessons = await prisma.lesson.findMany({
+        const completedIds = allProgress.filter((p: any) => p.courseId === recentEnrollment.courseId).map((p: any) => p.lessonId);
+        const allLessons = await (prisma as any).lesson.findMany({
             where: { courseId: recentEnrollment.courseId },
             orderBy: { order: 'asc' }
         });
-        nextLesson = allLessons.find(l => !completedIds.includes(l.id)) || null;
+        nextLesson = allLessons.find((l: any) => !completedIds.includes(l.id)) || null;
         recentEnrollmentSlug = recentEnrollment.course.slug;
         recentEnrollmentTitle = recentEnrollment.course.title;
     }
 
     // Recommendations
-    const enrolledIds = enrollments.map(e => e.courseId);
-    const recommendations = await prisma.course.findMany({
+    const enrolledIds = enrollments.map((e: any) => e.courseId);
+    const recommendations = await (prisma as any).course.findMany({
         where: { id: { notIn: enrolledIds }, published: true },
         take: 3,
         orderBy: { enrollments: { _count: 'desc' } },
@@ -80,6 +80,6 @@ export async function GET() {
         recentEnrollmentTitle,
         activeStreak,
         totalLessonsDone: allProgress.length,
-        totalCompleted: enrollments.filter(e => e.completed).length,
+        totalCompleted: enrollments.filter((e: any) => e.completed).length,
     });
 }
