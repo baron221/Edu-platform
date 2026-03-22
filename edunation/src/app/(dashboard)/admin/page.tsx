@@ -9,6 +9,7 @@ interface Stats {
     totalUsers: number;
     totalEnrollments: number;
     totalRevenue: number;
+    pendingPaymentsCount: number;
     recentUsers: { id: string; name: string | null; email: string | null; role: string; createdAt: string }[];
     courseDropoffs: { title: string; enrollments: number; completions: number; totalLessons: number; avgProgress: number }[];
 }
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
         { label: t.admin.totalRevenue, value: `${(stats?.totalRevenue ?? 0).toLocaleString('ru-RU')} UZS`, icon: '💰', color: '#fbbf24', href: '/admin/courses' },
         { label: t.admin.totalCourses, value: stats?.totalCourses ?? 0, icon: '📚', color: '#7c3aed', href: '/admin/courses' },
         { label: t.admin.totalUsers, value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
-        { label: t.admin.enrollments, value: stats?.totalEnrollments ?? 0, icon: '🎓', color: '#10b981', href: '/admin/users' },
+        { label: t.admin.pendingPayments, value: stats?.pendingPaymentsCount ?? 0, icon: '💳', color: (stats?.pendingPaymentsCount ?? 0) > 0 ? '#ef4444' : '#10b981', href: '/admin/payments' },
     ];
 
     const fetchAnalytics = async () => {

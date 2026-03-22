@@ -25,7 +25,8 @@ export async function GET() {
                         }
                     }
                 }
-            })
+            }),
+            (prisma as any).manualPayment.count({ where: { status: 'pending' } })
         ]);
 
         // Calculate Revenue from non-free courses
@@ -75,7 +76,8 @@ export async function GET() {
             totalEnrollments,
             recentUsers,
             totalRevenue,
-            courseDropoffs
+            courseDropoffs,
+            pendingPaymentsCount
         });
     } catch (e) {
         console.error('Error fetching admin stats:', e);
