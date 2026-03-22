@@ -58,5 +58,9 @@ export async function GET(req: Request) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const sub = await prisma.instructorSubscription.findUnique({ where: { userId } });
-    return NextResponse.json({ subscription: sub, plans: PLANS });
+    const pendingPayment = await (prisma as any).manualPayment.findFirst({
+        where: { userId, status: 'pending' },
+        orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json({ subscription: sub, pendingPayment, plans: PLANS });
 }

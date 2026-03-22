@@ -2,45 +2,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CurrentSub { plan: string; status: string; endDate: string | null; }
 
-const PLANS = [
-    {
-        id: 'starter',
-        name: '🟢 Starter',
-        price: '99,000 UZS',
-        priceNote: '/month',
-        color: '#10b981',
-        maxCourses: 3,
-        ads: false,
-        features: ['Up to 3 published courses', 'Full course community access', 'Student analytics', 'AI quiz for your courses', 'Standard support'],
-    },
-    {
-        id: 'pro',
-        name: '⭐ Pro',
-        price: '249,000 UZS',
-        priceNote: '/month',
-        color: '#f59e0b',
-        maxCourses: 20,
-        ads: true,
-        popular: true,
-        features: ['Up to 20 published courses', 'Full course community access', '1 advertisement slot (homepage)', 'Priority student analytics', 'Priority support', 'Pro badge on profile'],
-    },
-    {
-        id: 'studio',
-        name: '💎 Studio',
-        price: '499,000 UZS',
-        priceNote: '/month',
-        color: '#a78bfa',
-        maxCourses: 999,
-        ads: true,
-        features: ['Unlimited published courses', 'Full course community access', '3 advertisement slots (all placements)', 'Advanced analytics & revenue reports', 'Dedicated account manager', 'Studio badge on profile', 'Early access to new features'],
-    },
-];
-
 export default function InstructorSubscribePage() {
+    const { t } = useLanguage();
     const [current, setCurrent] = useState<CurrentSub | null>(null);
+    const [pendingPayment, setPendingPayment] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
@@ -52,10 +21,47 @@ export default function InstructorSubscribePage() {
     const [uploading, setUploading] = useState(false);
     const [manualSuccess, setManualSuccess] = useState(false);
 
+    const PLANS = [
+        {
+            id: 'starter',
+            name: `🟢 ${t.instructorSub.starter}`,
+            price: '99,000 UZS',
+            priceNote: t.instructorSub.perMonth,
+            color: '#10b981',
+            maxCourses: 3,
+            ads: false,
+            features: t.instructorSub.features.starter,
+        },
+        {
+            id: 'pro',
+            name: `⭐ ${t.instructorSub.pro}`,
+            price: '249,000 UZS',
+            priceNote: t.instructorSub.perMonth,
+            color: '#f59e0b',
+            maxCourses: 20,
+            ads: true,
+            popular: true,
+            features: t.instructorSub.features.pro,
+        },
+        {
+            id: 'studio',
+            name: `💎 ${t.instructorSub.studio}`,
+            price: '499,000 UZS',
+            priceNote: t.instructorSub.perMonth,
+            color: '#a78bfa',
+            maxCourses: 999,
+            ads: true,
+            features: t.instructorSub.features.studio,
+        },
+    ];
+
     useEffect(() => {
         fetch('/api/instructor/subscribe')
             .then(r => r.status === 401 ? null : r.json())
-            .then(d => d?.subscription && setCurrent(d.subscription))
+            .then(d => {
+                if (d?.subscription) setCurrent(d.subscription);
+                if (d?.pendingPayment) setPendingPayment(d.pendingPayment);
+            })
             .catch(() => { });
     }, []);
 
@@ -63,15 +69,15 @@ export default function InstructorSubscribePage() {
         // Check for success or cancel in URL from Stripe checkout
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('success')) {
-            setSuccess('Payment successful! Your instructor subscription will be activated momentarily. Please reload the page if it doesn’t update immediately.');
+            setSuccess(t.manualPay.success);
             // Clear URL params
             window.history.replaceState({}, document.title, window.location.pathname);
         }
         if (urlParams.get('canceled')) {
-            setError('Payment was canceled.');
+            setError(t.manualPay.error);
             window.history.replaceState({}, document.title, window.location.pathname);
         }
-    }, []);
+    }, [t]);
 
     const subscribe = (planId: string) => {
         setSelectedPlan(planId);
@@ -91,13 +97,8 @@ export default function InstructorSubscribePage() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.error || 'Checkout failed');
-                } catch {
-                    throw new Error(text || 'Checkout failed');
-                }
+                const data = await res.json();
+                throw new Error(data.error || 'Checkout failed');
             }
 
             const data = await res.json();
@@ -143,12 +144,13 @@ export default function InstructorSubscribePage() {
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error || 'Failed to submit manual payment');
+                throw new Error(data.error || t.manualPay.error);
             }
 
             setManualSuccess(true);
             setShowManualForm(false);
             setShowPaymentModal(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -161,12 +163,12 @@ export default function InstructorSubscribePage() {
             {/* Hero */}
             <section className={styles.hero}>
                 <div className="container" style={{ textAlign: 'center' }}>
-                    <div className="section-label" style={{ margin: '0 auto 16px' }}>For Educators</div>
+                    <div className="section-label" style={{ margin: '0 auto 16px' }}>{t.pricing.label}</div>
                     <h1 className={styles.title}>
-                        Teach on <span className="gradient-text">EduNationUz</span>
+                        {t.instructorSub.title} <span className="gradient-text">EduNationUz</span>
                     </h1>
                     <p className={styles.subtitle}>
-                        Choose your plan and start publishing courses today. All plans include full community access.
+                        {t.instructorSub.subtitle}
                     </p>
                 </div>
             </section>
@@ -175,9 +177,23 @@ export default function InstructorSubscribePage() {
             {current && (
                 <div className="container" style={{ marginBottom: 24 }}>
                     <div className={styles.currentBanner}>
-                        ✅ You are currently on the <strong>{current.plan.toUpperCase()}</strong> plan
-                        {current.endDate && ` · Renews ${new Date(current.endDate).toLocaleDateString()}`}
-                        <Link href="/instructor/courses" className={styles.dashLink}> → Go to Dashboard</Link>
+                        ✅ {t.instructorSub.currentPlan} <strong>{current.plan.toUpperCase()}</strong> {t.instructorSub.planSuffix}
+                        {current.endDate && ` · ${t.instructorSub.renews} ${new Date(current.endDate).toLocaleDateString()}`}
+                        <Link href="/instructor/courses" className={styles.dashLink}> → {t.instructorSub.goDash}</Link>
+                    </div>
+                </div>
+            )}
+
+            {pendingPayment && (
+                <div className="container" style={{ marginBottom: 24 }}>
+                    <div className={styles.pendingBanner}>
+                        <div className={styles.pendingIcon}>⏳</div>
+                        <div>
+                            <h4 style={{ margin: 0 }}>{t.instructorSub.pendingTitle}</h4>
+                            <p style={{ margin: '4px 0 0', fontSize: '14px', opacity: 0.9 }}>
+                                {t.instructorSub.pendingDesc}
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
@@ -190,7 +206,7 @@ export default function InstructorSubscribePage() {
             {manualSuccess && (
                 <div className="container" style={{ marginBottom: 24 }}>
                     <div className={styles.successBanner}>
-                        🎉 Receipt submitted successfully! Our admin team will verify your payment within 24 hours.
+                        🎉 {t.manualPay.success}
                     </div>
                 </div>
             )}
@@ -207,21 +223,21 @@ export default function InstructorSubscribePage() {
                         {PLANS.map(plan => (
                             <div
                                 key={plan.id}
-                                className={`${styles.card} ${plan.popular ? styles.popular : ''}`}
+                                className={`${styles.card} ${plan.popular ? styles.popular : ''} ${pendingPayment ? styles.disabledCard : ''}`}
                                 style={{ '--plan-color': plan.color } as React.CSSProperties}
                             >
-                                {plan.popular && <div className={styles.popularBadge}>Most Popular</div>}
+                                {plan.popular && <div className={styles.popularBadge}>{t.instructorSub.mostPopular}</div>}
                                 <div className={styles.planName} style={{ color: plan.color }}>{plan.name}</div>
                                 <div className={styles.planPrice}>
                                     <span className={styles.amount}>{plan.price}</span>
                                     <span className={styles.per}>{plan.priceNote}</span>
                                 </div>
                                 <div className={styles.planLimit}>
-                                    {plan.maxCourses < 100 ? `Up to ${plan.maxCourses} courses` : 'Unlimited courses'}
+                                    {plan.maxCourses < 100 ? `${t.instructorSub.upTo} ${plan.maxCourses} ${t.instructorSub.courses}` : t.instructorSub.unlimited}
                                 </div>
 
                                 <ul className={styles.featureList}>
-                                    {plan.features.map((f, i) => (
+                                    {plan.features.map((f: string, i: number) => (
                                         <li key={i}><span className={styles.check}>✓</span>{f}</li>
                                     ))}
                                 </ul>
@@ -229,10 +245,14 @@ export default function InstructorSubscribePage() {
                                 <button
                                     className={`btn ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
                                     style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}
-                                    onClick={() => subscribe(plan.id)}
-                                    disabled={loading}
+                                    onClick={() => !pendingPayment && subscribe(plan.id)}
+                                    disabled={loading || !!pendingPayment}
                                 >
-                                    {loading ? 'Processing...' : current?.plan === plan.id ? 'Renew Plan' : current ? `Switch to ${plan.name}` : `Start ${plan.name}`}
+                                    {loading ? t.shared.loading : 
+                                     pendingPayment ? t.manualPay.submitting.replace('...', '') :
+                                     current?.plan === plan.id ? t.instructorSub.renew : 
+                                     current ? t.instructorSub.switch(plan.name.split(' ').pop() || '') : 
+                                     t.instructorSub.start(plan.name.split(' ').pop() || '')}
                                 </button>
                             </div>
                         ))}
@@ -240,14 +260,9 @@ export default function InstructorSubscribePage() {
 
                     {/* FAQ */}
                     <div className={styles.faq}>
-                        <h2 style={{ textAlign: 'center', marginBottom: 40, color: '#0f172a' }}>Common Questions</h2>
+                        <h2 style={{ textAlign: 'center', marginBottom: 40, color: '#0f172a' }}>{t.instructorSub.faqTitle}</h2>
                         <div className={styles.faqGrid}>
-                            {[
-                                { q: 'Can I switch plans?', a: 'Yes, you can upgrade or downgrade at any time. Changes take effect immediately.' },
-                                { q: 'How do advertisements work?', a: 'You can feature your course on the homepage or category pages. Ads run for 30-day slots.' },
-                                { q: 'What is a Course Community?', a: 'Each course gets its own forum where enrolled students can ask questions and you can post announcements.' },
-                                { q: 'Do I keep revenue from courses?', a: 'Platform takes a 15% cut. You receive 85% of all course purchase revenue.' },
-                            ].map((item, i) => (
+                            {t.instructorSub.faq.map((item: { q: string; a: string }, i: number) => (
                                 <div key={i} className={styles.faqItem}>
                                     <h4>{item.q}</h4>
                                     <p>{item.a}</p>
@@ -308,10 +323,10 @@ export default function InstructorSubscribePage() {
                         {showManualForm && (
                             <form className={styles.manualForm} onSubmit={handleManualSubmit}>
                                 <div className={styles.manualFormHeader}>
-                                    <h3>Upload Payment Receipt</h3>
-                                    <p>Please transfer the amount to our card/bank and upload the screenshot here.</p>
+                                    <h3>{t.manualPay.title}</h3>
+                                    <p>{t.manualPay.instructions}</p>
                                     <div className={styles.bankDetails}>
-                                        <strong>Card:</strong> 8600 0000 0000 0000<br/>
+                                        <strong>{t.manualPay.beneficiary}:</strong> 8600 0000 0000 0000<br/>
                                         <strong>Name:</strong> EduNationUz LLC
                                     </div>
                                 </div>
@@ -330,7 +345,7 @@ export default function InstructorSubscribePage() {
                                     style={{ width: '100%', justifyContent: 'center' }}
                                     disabled={uploading || !receiptFile}
                                 >
-                                    {uploading ? 'Uploading...' : 'Submit Receipt'}
+                                    {uploading ? t.manualPay.submitting : t.manualPay.uploadBtn}
                                 </button>
                                 
                                 <button 
@@ -338,7 +353,7 @@ export default function InstructorSubscribePage() {
                                     className={styles.backBtn}
                                     onClick={() => setShowManualForm(false)}
                                 >
-                                    ← Back to methods
+                                    ← {t.manualPay.cancel}
                                 </button>
                             </form>
                         )}

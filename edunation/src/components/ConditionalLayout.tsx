@@ -7,7 +7,8 @@ import BottomNav from '@/components/BottomNav';
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isDashboardRoute = /^\/(admin|instructor|dashboard|sessions)(\/|$)/.test(pathname || '') &&
-        !pathname?.startsWith('/instructors');
+        !pathname?.startsWith('/instructors') &&
+        pathname !== '/instructor/subscribe';
 
     return (
         <>
