@@ -19,7 +19,7 @@ export default function LeaderboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/leaderboard`)
+        fetch('/api/leaderboard')
             .then(r => r.json())
             .then(data => {
                 setUsers(data || []);

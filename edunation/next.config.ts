@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
     'sharita-blanketless-commiseratively.ngrok-free.dev',
     'localhost:3000'
   ],
+  turbopack: {},
 };
 
 export default withPWA(nextConfig);
