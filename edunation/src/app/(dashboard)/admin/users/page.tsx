@@ -212,9 +212,10 @@ export default function AdminUsersPage() {
                 }} onClick={() => setEditingSub(null)}>
                     <div style={{
                         background: 'var(--bg-card)', width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '24px',
-                        border: '1px solid var(--border)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)'
+                        border: '1px solid var(--border)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+                        color: '#0f172a'
                     }} onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: '20px', marginBottom: '16px', fontWeight: 600 }}>Subscription Override</h2>
+                        <h2 style={{ fontSize: '20px', marginBottom: '16px', fontWeight: 600, color: '#0f172a' }}>Subscription Override</h2>
                         <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '24px' }}>
                             Manually override the instructor plan for <strong>{editingSub.name || editingSub.email}</strong>.
                         </p>
@@ -230,9 +231,9 @@ export default function AdminUsersPage() {
                                     }}
                                     style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
                                 >
-                                    <option value="starter">Starter</option>
-                                    <option value="pro">Pro</option>
-                                    <option value="studio">Studio</option>
+                                    <option value="starter" style={{ color: '#0f172a' }}>Starter</option>
+                                    <option value="pro" style={{ color: '#0f172a' }}>Pro</option>
+                                    <option value="studio" style={{ color: '#0f172a' }}>Studio</option>
                                 </select>
                             </div>
 
