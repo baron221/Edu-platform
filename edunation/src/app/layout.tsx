@@ -4,6 +4,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import AuthProvider from '@/components/AuthProvider';
 import ConditionalLayout from '@/components/ConditionalLayout';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://edunationuz.com'),
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             />
           </LanguageProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
