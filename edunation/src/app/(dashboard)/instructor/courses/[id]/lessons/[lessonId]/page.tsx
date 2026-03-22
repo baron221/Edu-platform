@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 import styles from './page.module.css';
 import * as Upchunk from '@mux/upchunk';
 
@@ -42,6 +43,8 @@ export default function LessonEditorPage() {
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [generatingContent, setGeneratingContent] = useState(false);
+    const [uploadingMaterial, setUploadingMaterial] = useState(false);
+    const [newMaterial, setNewMaterial] = useState({ title: '', url: '' });
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -331,20 +334,32 @@ export default function LessonEditorPage() {
                         <div className={styles.addResourceZone}>
                             <h4 style={{ marginBottom: '10px', fontSize: '14px', fontWeight: 600 }}>Add New Material</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px' }}>
-                                <input id="res-title" className={styles.input} placeholder="Title (e.g. Lesson Handbook)" />
-                                <input id="res-url" className={styles.input} placeholder="URL or select file →" />
+                                <input 
+                                    className={styles.input} 
+                                    placeholder="Title (e.g. Lesson Handbook)" 
+                                    value={newMaterial.title}
+                                    onChange={e => setNewMaterial(prev => ({ ...prev, title: e.target.value }))}
+                                />
+                                <input 
+                                    className={styles.input} 
+                                    placeholder="URL or select file →" 
+                                    value={newMaterial.url}
+                                    onChange={e => setNewMaterial(prev => ({ ...prev, url: e.target.value }))}
+                                />
                                 <button 
                                     className={styles.saveBtn} 
                                     style={{ padding: '8px 16px', fontSize: '12px' }}
                                     onClick={async () => {
-                                        const title = (document.getElementById('res-title') as HTMLInputElement).value;
-                                        const url = (document.getElementById('res-url') as HTMLInputElement).value;
-                                        if (!title || !url) { alert('Please provide title and URL'); return; }
+                                        if (!newMaterial.title || !newMaterial.url) { alert('Please provide title and URL'); return; }
                                         
                                         await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources`, {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ title, url, type: url.startsWith('http') ? 'link' : 'file' })
+                                            body: JSON.stringify({ 
+                                                title: newMaterial.title, 
+                                                url: newMaterial.url, 
+                                                type: newMaterial.url.startsWith('http') ? 'link' : 'file' 
+                                            })
                                         });
 
                                         // Refresh
@@ -353,38 +368,65 @@ export default function LessonEditorPage() {
                                         const found = lessons.find((l: any) => l.id === lessonId);
                                         if (found) setLesson(found);
                                         
-                                        (document.getElementById('res-title') as HTMLInputElement).value = '';
-                                        (document.getElementById('res-url') as HTMLInputElement).value = '';
+                                        setNewMaterial({ title: '', url: '' });
                                     }}
                                 >
                                     Save
                                 </button>
                             </div>
-                            <div style={{ marginTop: '10px' }}>
+                            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <label className={styles.fileUploadBtn}>
-                                    📁 Upload File
+                                    {uploadingMaterial ? '⏳ Uploading...' : '📁 Upload File'}
                                     <input 
                                         type="file" 
+                                        disabled={uploadingMaterial}
                                         style={{ display: 'none' }} 
                                         onChange={async (e) => {
                                             const file = e.target.files?.[0];
                                             if (!file) return;
                                             
+                                            setUploadingMaterial(true);
                                             const formData = new FormData();
                                             formData.append('file', file);
                                             
-                                            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
-                                            const data = await uploadRes.json();
-                                            
-                                            if (uploadRes.ok && data.url) {
-                                                (document.getElementById('res-url') as HTMLInputElement).value = data.url;
-                                                if (!(document.getElementById('res-title') as HTMLInputElement).value) {
-                                                    (document.getElementById('res-title') as HTMLInputElement).value = file.name;
+                                            try {
+                                                const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                                                const data = await uploadRes.json();
+                                                
+                                                if (!uploadRes.ok) throw new Error(data.error || 'Upload failed');
+
+                                                if (data.url) {
+                                                    // Auto-save the resource record
+                                                    const saveRes = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ 
+                                                            title: newMaterial.title || file.name, 
+                                                            url: data.url, 
+                                                            type: 'file' 
+                                                        })
+                                                    });
+
+                                                    if (saveRes.ok) {
+                                                        // Refresh lesson
+                                                        const res = await fetch(`/api/instructor/courses/${courseId}/lessons`);
+                                                        const lessons = await res.json();
+                                                        const found = lessons.find((l: any) => l.id === lessonId);
+                                                        if (found) setLesson(found);
+                                                        toast.success('Material uploaded and saved!');
+                                                    }
                                                 }
+                                            } catch (err: any) {
+                                                console.error('Material upload error:', err);
+                                                alert(`Failed to upload: ${err.message}`);
+                                            } finally {
+                                                setUploadingMaterial(false);
+                                                setNewMaterial({ title: '', url: '' });
                                             }
                                         }}
                                     />
                                 </label>
+                                {uploadingMaterial && <span style={{ fontSize: '13px', color: '#64748b' }}>Processing your file...</span>}
                             </div>
                         </div>
                     </div>
