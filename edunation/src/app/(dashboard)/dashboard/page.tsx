@@ -3,6 +3,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface DashboardData {
     enrollments: any[];
@@ -20,6 +21,7 @@ interface DashboardData {
 
 export default function DashboardPage() {
     const { t } = useLanguage();
+    const { data: session } = useSession();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -68,11 +70,15 @@ export default function DashboardPage() {
         <div className={styles.page}>
             {/* Hero Header */}
             <section className={styles.header}>
-                <div className="container">
+                <div className={styles.headerOrbs}>
+                    <div className={styles.headerOrb1} />
+                    <div className={styles.headerOrb2} />
+                </div>
+                <div className="container" style={{ position: 'relative', zIndex: 1 }}>
                     <div className={styles.headerFlex}>
                         <div>
                             <h1 className={styles.title}>{t.dashboard.title}</h1>
-                            <p className={styles.subtitle}>{t.dashboard.subtitle} 👋</p>
+                            <p className={styles.subtitle}>{t.dashboard.subtitle}, {(session?.user as any)?.name || 'Student'} 👋</p>
                         </div>
                         <div className={styles.streakBadge}>🔥 {activeStreak} {t.dashboard.streak}</div>
                     </div>
