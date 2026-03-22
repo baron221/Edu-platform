@@ -58,28 +58,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Sidebar */}
             <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.brand}>
-                    <div className={styles.brandLogo}>
+                    <Link href="/" className={styles.brandLogo}>
                         <span className={styles.brandIcon}>🎓</span>
                         <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
-                    </div>
-                    <div className={styles.sidebarActions}>
-                        <NotificationBell />
-                    </div>
+                    </Link>
                     <button
                         className={styles.closeSidebar}
                         onClick={() => setIsSidebarOpen(false)}
                     >
                         ✕
                     </button>
-                    <span className={styles.adminBadge}>
-                        {(() => {
-                            const u = session?.user as any;
-                            if (u?.role === 'admin') return 'ADMIN';
-                            if (u?.role === 'instructor') return 'INSTRUCTOR';
-                            if (u?.isExpert) return 'EXPERT';
-                            return 'STUDENT';
-                        })()}
-                    </span>
                 </div>
 
                 <nav className={styles.nav}>
@@ -130,37 +118,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
 
                 <div className={styles.sidebarFooter}>
-                    {/* Language Switcher */}
-                    <div className={styles.langSwitcher}>
-                        {LANGS.map(l => (
-                            <button
-                                key={l.code}
-                                className={`${styles.langBtn} ${language === l.code ? styles.langBtnActive : ''}`}
-                                onClick={() => setLanguage(l.code)}
-                                title={l.code.toUpperCase()}
-                            >
-                                {l.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className={styles.userInfo}>
-                        <div className={styles.userAvatar}>
-                            {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
-                        </div>
-                        <div>
-                            <div className={styles.userName}>{session?.user?.name ?? 'User'}</div>
-                            <div className={styles.userRole}>
-                                {(() => {
-                                    const u = session?.user as any;
-                                    if (u?.role === 'admin') return 'Administrator';
-                                    if (u?.role === 'instructor') return 'Instructor';
-                                    if (u?.isExpert) return 'Expert';
-                                    return 'Student';
-                                })()}
-                            </div>
-                        </div>
-                    </div>
                     <button
                         className={styles.signOutBtn}
                         onClick={() => signOut({ callbackUrl: '/' })}
@@ -175,7 +132,68 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Main */}
             <main className={styles.main}>
-                {children}
+                <header className={styles.topbar}>
+                    <div className={styles.topbarLeft}>
+                        <h2 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>
+                            {pathname === '/dashboard' ? t.sidebar.myLearning : 
+                             pathname === '/dashboard/sessions' ? t.sidebar.mySessions : 
+                             pathname.startsWith('/admin') ? t.sidebar.adminDashboard : 
+                             pathname.startsWith('/instructor') ? t.sidebar.teachingConsole : 
+                             'Dashboard'}
+                        </h2>
+                    </div>
+
+                    <div className={styles.topbarRight}>
+                        <div className={styles.topbarActions}>
+                            {/* Language Switcher */}
+                            <div className={styles.topbarLangSwitcher}>
+                                {LANGS.map(l => (
+                                    <button
+                                        key={l.code}
+                                        className={`${styles.topbarLangBtn} ${language === l.code ? styles.topbarLangBtnActive : ''}`}
+                                        onClick={() => setLanguage(l.code)}
+                                    >
+                                        {l.label}
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            <NotificationBell />
+                            
+                            <span className={styles.adminBadge}>
+                                {(() => {
+                                    const u = session?.user as any;
+                                    if (u?.role === 'admin') return 'ADMIN';
+                                    if (u?.role === 'instructor') return 'INSTRUCTOR';
+                                    if (u?.isExpert) return 'EXPERT';
+                                    return 'STUDENT';
+                                })()}
+                            </span>
+                        </div>
+
+                        <div className={styles.topbarUserInfo}>
+                            <div className={styles.userAvatar}>
+                                {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
+                            </div>
+                            <div>
+                                <div className={styles.userName}>{session?.user?.name ?? 'User'}</div>
+                                <div className={styles.userRole}>
+                                    {(() => {
+                                        const u = session?.user as any;
+                                        if (u?.role === 'admin') return 'Administrator';
+                                        if (u?.role === 'instructor') return 'Instructor';
+                                        if (u?.isExpert) return 'Expert';
+                                        return 'Student';
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <div style={{ padding: '32px' }}>
+                    {children}
+                </div>
             </main>
 
             {/* Global AI Assistant for Instructors/Admins */}

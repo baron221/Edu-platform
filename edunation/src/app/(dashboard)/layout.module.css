@@ -17,17 +17,15 @@
     left: 0;
     bottom: 0;
     z-index: 1000;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brand {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 24px 20px;
+    padding: 32px 20px;
     border-bottom: 1px solid #f1f5f9;
-    position: relative;
 }
 
 .sidebarActions {
@@ -111,11 +109,11 @@
 
 /* ===== SIDEBAR FOOTER ===== */
 .sidebarFooter {
-    padding: 16px 12px;
+    padding: 20px 12px;
     border-top: 1px solid #f1f5f9;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .userInfo {
@@ -198,9 +196,77 @@
     margin-left: 260px;
     flex: 1;
     min-height: 100vh;
-    background: #f1f5f9;
+    background: #f8fafc;
     width: 100%;
     transition: margin-left 0.3s ease;
+}
+
+.topbar {
+    height: 72px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 990;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.topbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.topbarUserInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 24px;
+    border-left: 1px solid #e2e8f0;
+}
+
+.topbarActions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbarLangSwitcher {
+    display: flex;
+    gap: 4px;
+}
+
+.topbarLangBtn {
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.topbarLangBtn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.topbarLangBtnActive {
+    background: #7c3aed;
+    color: white;
+    border-color: #7c3aed;
 }
 
 /* Mobile Header */
