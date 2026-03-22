@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import AIAssistant from '@/components/AIAssistant';
+import NotificationBell from '@/components/NotificationBell';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './layout.module.css';
 
@@ -41,11 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                     ☰
                 </button>
-                <div className={styles.mobileBrand}>
-                    <span className={styles.brandIcon}>🎓</span>
-                    <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
+                <div className={styles.mobileActions}>
+                    <NotificationBell />
                 </div>
-                <div style={{ width: 40 }} /> {/* Spacer */}
             </header>
 
             {/* Sidebar Overlay */}
@@ -62,6 +61,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className={styles.brandLogo}>
                         <span className={styles.brandIcon}>🎓</span>
                         <span className={styles.brandName}>EduNation<span className={styles.brandAccent}>Uz</span></span>
+                    </div>
+                    <div className={styles.sidebarActions}>
+                        <NotificationBell />
                     </div>
                     <button
                         className={styles.closeSidebar}

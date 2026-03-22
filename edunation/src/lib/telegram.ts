@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 /**
  * Telegram Admin Notification Utility
  * Sends messages to the admin's Telegram chat via Bot API.
@@ -24,6 +27,45 @@ export async function notifyAdmin(message: string): Promise<void> {
     } catch (err) {
         // Non-critical — never let notification failure break the main flow
         console.error('[TELEGRAM_NOTIFY_ERROR]', err);
+    }
+}
+
+export async function notifyAdminWithPhoto(photo: string, caption: string): Promise<void> {
+    if (!BOT_TOKEN || !ADMIN_CHAT) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('chat_id', ADMIN_CHAT);
+        formData.append('caption', caption);
+        formData.append('parse_mode', 'HTML');
+
+        if (photo.startsWith('http')) {
+            // It's a URL
+            formData.append('photo', photo);
+        } else {
+            // It's a local path
+            const filePath = photo.startsWith('/') 
+                ? path.join(process.cwd(), 'public', photo)
+                : photo;
+            
+            if (fs.existsSync(filePath)) {
+                const fileBuffer = fs.readFileSync(filePath);
+                const blob = new Blob([fileBuffer]);
+                formData.append('photo', blob, path.basename(filePath));
+            } else {
+                console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR] File not found:', filePath);
+                // Fallback to text message if photo missing
+                await notifyAdmin(`${caption}\n\n⚠️ <i>(Photo file not found on server)</i>`);
+                return;
+            }
+        }
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            body: formData,
+        });
+    } catch (err) {
+        console.error('[TELEGRAM_PHOTO_NOTIFY_ERROR]', err);
     }
 }
 
