@@ -42,6 +42,14 @@ export async function notifyAdminWithPhoto(photo: string, caption: string): Prom
         if (photo.startsWith('http')) {
             // It's a URL
             formData.append('photo', photo);
+        } else if (photo.startsWith('data:')) {
+            // It's a Base64 Data URI
+            const base64Data = photo.split(',')[1];
+            if (!base64Data) throw new Error('Invalid Base64 data');
+            
+            const buffer = Buffer.from(base64Data, 'base64');
+            const blob = new Blob([buffer]);
+            formData.append('photo', blob, 'receipt.jpg');
         } else {
             // It's a local path
             const filePath = photo.startsWith('/') 

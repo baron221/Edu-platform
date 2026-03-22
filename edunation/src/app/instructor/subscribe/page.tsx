@@ -123,36 +123,28 @@ export default function InstructorSubscribePage() {
         setError('');
 
         try {
-            // 1. Upload to a temp or permanent store (using a simple form data for the API)
-            // For now, let's assume we use a base64 or a direct upload if you have an upload route.
-            // If there's no dedicated upload route, we'll use a placeholder or check if there's one.
-            // Looking at the codebase, there's usually an /api/upload.
-            
-            const formData = new FormData();
-            formData.append('file', receiptFile);
-
-            const uploadRes = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
+            // Convert file to Base64
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(receiptFile);
             });
 
-            if (!uploadRes.ok) {
-                const errorData = await uploadRes.json();
-                throw new Error(errorData.details || errorData.error || 'Failed to upload receipt');
-            }
-            const { url } = await uploadRes.json();
-
-            // 2. Create manual payment entry
+            // Submit directly to manual-payments with Base64 as the URL
             const res = await fetch('/api/manual-payments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     planId: selectedPlan,
-                    receiptUrl: url
+                    receiptUrl: base64
                 })
             });
 
-            if (!res.ok) throw new Error('Failed to submit manual payment');
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to submit manual payment');
+            }
 
             setManualSuccess(true);
             setShowManualForm(false);
