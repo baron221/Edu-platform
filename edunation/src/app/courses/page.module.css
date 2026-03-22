@@ -183,80 +183,66 @@
 }
 
 @media (max-width: 768px) {
+    .page {
+        overflow-x: hidden;
+    }
+
     .header {
-        padding: 30px 0 20px;
+        padding: 24px 0 12px;
     }
 
     .title {
-        font-size: 28px;
-        margin: 8px 0 12px;
-        line-height: 1.2;
+        font-size: 24px;
+        margin: 4px 0 8px;
     }
 
     .subtitle {
-        display: none; /* Hide subtitle for maximum compactness */
+        display: none;
     }
 
     .searchBar {
-        max-width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .searchInput {
-        height: 48px;
+        height: 44px;
         font-size: 14px !important;
     }
 
     .filtersBar {
-        padding: 8px 0;
-        top: 0; /* Align to top if needed, or keep var(--nav-height) */
+        padding: 4px 0;
+        top: 0;
     }
 
     .filtersInner {
         flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
+        gap: 6px;
     }
 
-    .categories {
+    .categories, .typeFilter {
+        display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding: 4px 16px; /* Added horizontal padding for scroll edge */
-        margin: 0 -16px;   /* Negative margin to allows scroll to edge */
+        padding: 4px 0;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        gap: 6px;
     }
 
-    .categories::-webkit-scrollbar {
+    .categories::-webkit-scrollbar, .typeFilter::-webkit-scrollbar {
         display: none;
     }
 
-    .catBtn {
+    .catBtn, .filterBtn {
         flex-shrink: 0;
         white-space: nowrap;
-        padding: 6px 12px;
+        padding: 5px 12px;
         font-size: 11px;
-    }
-
-    .typeFilter {
-        width: 100%;
-        justify-content: flex-start;
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        padding: 0 16px;
-        margin: 0 -16px;
-        scrollbar-width: none;
-    }
-
-    .filterBtn {
-        flex-shrink: 0;
-        white-space: nowrap;
-        padding: 6px 12px;
-        font-size: 11px;
+        height: 32px;
     }
 
     .results {
-        padding-top: 16px;
+        padding-top: 12px;
     }
 }
 
