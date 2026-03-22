@@ -15,6 +15,7 @@ const CATEGORIES = [
     { name: 'Mathematics', icon: '📐' },
     { name: 'English Language', icon: '🇬🇧' },
     { name: 'Video Editing', icon: '🎬' },
+    { name: 'Technology', icon: '🚀' },
 ];
 
 export interface CourseDB {

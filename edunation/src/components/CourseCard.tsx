@@ -32,6 +32,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
     'Mobile Development': 'linear-gradient(135deg, #0d2137, #0c4a6e)',
     'Business': 'linear-gradient(135deg, #1c1009, #78350f)',
     'Marketing': 'linear-gradient(135deg, #1a2e05, #365314)',
+    'Technology': 'linear-gradient(135deg, #0f172a, #334155)',
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -41,6 +42,7 @@ const CATEGORY_ICONS: Record<string, string> = {
     'Mobile Development': '📱',
     'Business': '💼',
     'Marketing': '📢',
+    'Technology': '🚀',
 };
 
 function formatPrice(price: number, currLabel: string): string {

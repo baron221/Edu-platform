@@ -71,10 +71,10 @@ export async function POST(req: Request) {
             model: google('gemini-2.5-flash'),
             schema: courseSchema,
             system: `You are an expert curriculum designer and educator for EduNationUz.
-            IMPORTANT: Generate ALL content — including the course title, description, lesson titles, lesson descriptions, quiz questions, quiz answer options, quiz explanations, and resource titles/descriptions — entirely in ${targetLanguage}. Do not mix in any other language.
-            Create a highly structured, engaging, and comprehensive course outline about the requested topic.
-            Ensure the content is accurate and follows a logical learning progression.
-            ${customInstructions ? `The user also provided these specific instructions: ${customInstructions}` : ''}`,
+            IMPORTANT:
+            1. Generate ALL content entirely in ${targetLanguage}.
+            2. For the 'category' field, you MUST choose from this specific list only: 'Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business', 'Mathematics', 'English Language', 'Video Editing', 'Technology'.
+            3. Do not translate the category names themselves into ${targetLanguage}; use the English category names from the list above.`,
             prompt: `Topic: ${topic}`,
         });
 
