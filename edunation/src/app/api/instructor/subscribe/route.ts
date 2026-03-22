@@ -58,9 +58,18 @@ export async function GET(req: Request) {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const sub = await prisma.instructorSubscription.findUnique({ where: { userId } });
+    
+    // Check for pending
     const pendingPayment = await (prisma as any).manualPayment.findFirst({
-        where: { userId, status: 'pending' },
+        where: { userId, status: 'pending', planId: { not: null } },
         orderBy: { createdAt: 'desc' }
     });
-    return NextResponse.json({ subscription: sub, pendingPayment, plans: PLANS });
+
+    // Also check for recently rejected to show feedback
+    const rejectedPayment = !pendingPayment ? await (prisma as any).manualPayment.findFirst({
+        where: { userId, status: 'rejected', planId: { not: null } },
+        orderBy: { createdAt: 'desc' }
+    }) : null;
+
+    return NextResponse.json({ subscription: sub, pendingPayment, rejectedPayment, plans: PLANS });
 }

@@ -10,6 +10,7 @@ export default function InstructorSubscribePage() {
     const { t } = useLanguage();
     const [current, setCurrent] = useState<CurrentSub | null>(null);
     const [pendingPayment, setPendingPayment] = useState<any>(null);
+    const [rejectedPayment, setRejectedPayment] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
@@ -61,6 +62,7 @@ export default function InstructorSubscribePage() {
             .then(d => {
                 if (d?.subscription) setCurrent(d.subscription);
                 if (d?.pendingPayment) setPendingPayment(d.pendingPayment);
+                if (d?.rejectedPayment) setRejectedPayment(d.rejectedPayment);
             })
             .catch(() => { });
     }, []);
@@ -174,7 +176,7 @@ export default function InstructorSubscribePage() {
             </section>
 
             {/* Current subscription notice */}
-            {current && (
+            {current && current.status === 'active' && (
                 <div className="container" style={{ marginBottom: 24 }}>
                     <div className={styles.currentBanner}>
                         ✅ {t.instructorSub.currentPlan} <strong>{current.plan.toUpperCase()}</strong> {t.instructorSub.planSuffix}
@@ -192,6 +194,20 @@ export default function InstructorSubscribePage() {
                             <h4 style={{ margin: 0 }}>{t.instructorSub.pendingTitle}</h4>
                             <p style={{ margin: '4px 0 0', fontSize: '14px', opacity: 0.9 }}>
                                 {t.instructorSub.pendingDesc}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {rejectedPayment && !pendingPayment && (
+                <div className="container" style={{ marginBottom: 24 }}>
+                    <div className={styles.errorBanner} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        <div style={{ fontSize: '24px' }}>❌</div>
+                        <div>
+                            <h4 style={{ margin: 0 }}>{t.instructorSub.rejectedTitle}</h4>
+                            <p style={{ margin: '4px 0 0', fontSize: '14px', opacity: 0.9 }}>
+                                {t.instructorSub.rejectedDesc}
                             </p>
                         </div>
                     </div>

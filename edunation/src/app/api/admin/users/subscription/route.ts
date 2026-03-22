@@ -30,6 +30,12 @@ export async function PATCH(req: Request) {
             create: { userId, plan, status: 'active', startDate: new Date(), endDate: endDate ? new Date(endDate) : null, maxCourses: parseInt(maxCourses), ...cfg },
         });
 
+        // Also mark any pending manual payments as 'approved' since admin manually handled it
+        await (prisma as any).manualPayment.updateMany({
+            where: { userId, status: 'pending' },
+            data: { status: 'approved' }
+        });
+
         // Ensure the global user role is also set correctly
         await prisma.user.update({
             where: { id: userId },
