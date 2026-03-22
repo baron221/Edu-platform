@@ -714,7 +714,7 @@ export const translations = {
             freeSectionTitle1: 'O\'rganishni',
             freeSectionTitleGrad: 'Bepul boshlang',
             freeSectionSubtitle: 'Kredit kartasi talab qilinmaydi. Bu premium kurslarga to\'liq bepul kiring va bugundan o\'qishni boshlang.',
-            viewAllFree: 'Barcha beplatlarni ko\'rish →',
+            viewAllFree: 'Barcha betlarni ko\'rish →',
             whyLabel: '✨ Nima uchun EduNationUz',
             whyTitle1: 'Muvaffaqiyat uchun',
             whyTitleGrad: 'Hamma narsa',
