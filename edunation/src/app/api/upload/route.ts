@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session) {
+            console.error('[UPLOAD] Unauthorized access attempt');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -15,8 +16,11 @@ export async function POST(req: Request) {
         const file = formData.get('file') as File;
 
         if (!file) {
+            console.error('[UPLOAD] No file found in request');
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
+
+        console.log(`[UPLOAD] Received file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
@@ -36,12 +40,17 @@ export async function POST(req: Request) {
         const filename = `${Date.now()}-${safeName}`;
         const filepath = join(uploadDir, filename);
 
+        console.log(`[UPLOAD] Saving to: ${filepath}`);
         await writeFile(filepath, buffer);
+        console.log(`[UPLOAD] File saved successfully: ${filename}`);
 
         // Return the public URL path
         return NextResponse.json({ url: `/uploads/${filename}` });
-    } catch (e) {
-        console.error('Upload Error:', e);
-        return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+    } catch (e: any) {
+        console.error('[UPLOAD] Critical Error:', e);
+        return NextResponse.json({ 
+            error: 'Failed to upload file', 
+            details: e.message 
+        }, { status: 500 });
     }
 }

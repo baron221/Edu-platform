@@ -137,7 +137,10 @@ export default function CourseDetailPage() {
                 body: formData
             });
 
-            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+            if (!uploadRes.ok) {
+                const errorData = await uploadRes.json();
+                throw new Error(errorData.details || errorData.error || 'Failed to upload receipt');
+            }
             const { url } = await uploadRes.json();
 
             const res = await fetch('/api/manual-payments', {

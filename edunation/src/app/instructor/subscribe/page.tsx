@@ -136,7 +136,10 @@ export default function InstructorSubscribePage() {
                 body: formData
             });
 
-            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+            if (!uploadRes.ok) {
+                const errorData = await uploadRes.json();
+                throw new Error(errorData.details || errorData.error || 'Failed to upload receipt');
+            }
             const { url } = await uploadRes.json();
 
             // 2. Create manual payment entry
