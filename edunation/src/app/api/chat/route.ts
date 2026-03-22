@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         let currentChatId = chatId;
 
         if (!currentChatId) {
-            const newSession = await prisma.chatSession.create({
+            const newSession = await (prisma as any).chatSession.create({
                 data: {
                     userId: userId || null, // allow null for anonymous
                     title: 'Chat Session',
@@ -29,9 +29,9 @@ export async function POST(req: Request) {
             currentChatId = newSession.id;
         } else {
             // Ensure the session exists
-            const existingSession = await prisma.chatSession.findUnique({ where: { id: currentChatId } });
+            const existingSession = await (prisma as any).chatSession.findUnique({ where: { id: currentChatId } });
             if (!existingSession) {
-                await prisma.chatSession.create({
+                await (prisma as any).chatSession.create({
                     data: {
                         id: currentChatId,
                         userId: userId || null,
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         const lastUserMessage = messages[messages.length - 1];
         if (lastUserMessage && lastUserMessage.role === 'user') {
             const textContent = lastUserMessage.parts?.map((p: any) => p.text).join('') || lastUserMessage.content || '';
-            await prisma.chatMessage.create({
+            await (prisma as any).chatMessage.create({
                 data: {
                     chatSessionId: currentChatId,
                     role: 'user',
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         let systemPromptContext = context ? `\n\nCurrent Context: ${context}` : '';
 
         if (lessonId) {
-            const lesson = await prisma.lesson.findUnique({
+            const lesson = await (prisma as any).lesson.findUnique({
                 where: { id: lessonId },
                 select: { content: true }
             }) as any;
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
             onFinish: async ({ text }) => {
                 // Save the AI's response to the DB when it finishes streaming
                 if (text) {
-                    await prisma.chatMessage.create({
+                    await (prisma as any).chatMessage.create({
                         data: {
                             chatSessionId: currentChatId,
                             role: 'assistant',
@@ -145,7 +145,7 @@ export async function GET(req: Request) {
         return Response.json({ messages: [] });
     }
 
-    const dbMessages = await prisma.chatMessage.findMany({
+    const dbMessages = await (prisma as any).chatMessage.findMany({
         where: { chatSessionId: chatId },
         orderBy: { createdAt: 'asc' },
     });
