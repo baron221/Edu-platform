@@ -58,6 +58,14 @@ export async function POST(req: NextRequest) {
         }
     } catch (error: any) {
         console.error('Upload API Error:', error);
+        
+        if (error.message?.includes('private store') || error.message?.includes('public access')) {
+            return NextResponse.json({ 
+                error: 'Vercel Blob Store is set to PRIVATE. Please change it to PUBLIC in the Vercel Dashboard (Storage -> Settings) to allow student downloads.',
+                code: 'BLOB_PRIVATE_ERROR'
+            }, { status: 400 });
+        }
+
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }
