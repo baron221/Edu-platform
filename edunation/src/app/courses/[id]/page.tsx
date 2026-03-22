@@ -72,6 +72,37 @@ export default function CourseDetailPage() {
             });
     }, [id]);
 
+    // --- MUX POLLING LOGIC ---
+    useEffect(() => {
+        if (!activeLesson?.videoUrl?.startsWith('mux-upload:') || !course?.id) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/instructor/courses/${course.id}/lessons/${activeLesson.id}/mux-status`);
+                const data = await res.json();
+                
+                if (data.status === 'ready' && data.playbackId) {
+                    // Update the active lesson and the course lessons list
+                    const updatedLesson = { 
+                        ...activeLesson, 
+                        muxPlaybackId: data.playbackId, 
+                        videoUrl: `mux:${data.playbackId}` 
+                    };
+                    setActiveLesson(updatedLesson);
+                    setCourse((prev: any) => ({
+                        ...prev,
+                        lessons: prev.lessons.map((l: any) => l.id === activeLesson.id ? updatedLesson : l)
+                    }));
+                    clearInterval(interval);
+                }
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        }, 8000); // Check every 8 seconds
+
+        return () => clearInterval(interval);
+    }, [activeLesson, course?.id]);
+
     const handleEnroll = async () => {
         setEnrolling(true);
         try {

@@ -70,6 +70,32 @@ export default function CourseEditorPage() {
             });
     }, [id]);
 
+    // --- MUX POLLING LOGIC ---
+    useEffect(() => {
+        const stuckLessons = course?.lessons?.filter(l => l.videoUrl?.startsWith('mux-upload:')) || [];
+        if (stuckLessons.length === 0) return;
+
+        const interval = setInterval(async () => {
+            let foundAny = false;
+            for (const lesson of stuckLessons) {
+                try {
+                    const res = await fetch(`/api/instructor/courses/${id}/lessons/${lesson.id}/mux-status`);
+                    const data = await res.json();
+                    if (data.status === 'ready') {
+                        foundAny = true;
+                        break; // Refresh the whole course data if even one is ready
+                    }
+                } catch (e) { console.error(e); }
+            }
+
+            if (foundAny) {
+                fetch(`/api/instructor/courses/${id}`).then(r => r.json()).then(setCourse);
+            }
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [course?.lessons, id]);
+
     const handleChange = (field: keyof Course, value: unknown) => {
         if (!course) return;
         setCourse({ ...course, [field]: value });
