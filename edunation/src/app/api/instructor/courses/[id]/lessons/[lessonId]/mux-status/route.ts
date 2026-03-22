@@ -9,6 +9,17 @@ const mux = new Mux({
     tokenSecret: process.env.MUX_TOKEN_SECRET!,
 });
 
+function formatDuration(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+
+    if (h > 0) {
+        return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ id: string; lessonId: string }> }
@@ -42,15 +53,17 @@ export async function GET(
                 const playbackId = asset.playback_ids?.[0]?.id;
 
                 if (playbackId) {
+                    const durationStr = asset.duration ? formatDuration(asset.duration) : '00:00';
                     await prisma.lesson.update({
                         where: { id: lessonId },
                         data: {
                             muxAssetId: asset.id,
                             muxPlaybackId: playbackId,
-                            videoUrl: `mux:${playbackId}`
+                            videoUrl: `mux:${playbackId}`,
+                            duration: durationStr
                         }
                     });
-                    return NextResponse.json({ status: 'ready', playbackId });
+                    return NextResponse.json({ status: 'ready', playbackId, duration: durationStr });
                 }
                 return NextResponse.json({ status: 'processing', assetId: asset.id });
             }

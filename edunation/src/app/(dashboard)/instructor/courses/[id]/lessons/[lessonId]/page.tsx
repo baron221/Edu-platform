@@ -5,6 +5,14 @@ import { useParams } from 'next/navigation';
 import styles from './page.module.css';
 import * as Upchunk from '@mux/upchunk';
 
+interface Resource {
+    id: string;
+    title: string;
+    url: string;
+    type: string;
+    description: string | null;
+}
+
 interface Lesson {
     id: string;
     title: string;
@@ -18,6 +26,7 @@ interface Lesson {
     liveAt: string | null;
     isLiveEnabled: boolean;
     subtitleUrl: string | null;
+    resources?: Resource[];
 }
 
 const QUALITY_OPTIONS = ['auto', '1080p', '720p', '480p', '360p'];
@@ -36,13 +45,40 @@ export default function LessonEditorPage() {
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch(`/api/instructor/courses/${courseId}/lessons`)
-            .then(r => r.json())
-            .then((lessons: Lesson[]) => {
-                const found = lessons.find(l => l.id === lessonId);
-                if (found) setLesson(found);
-            });
+        const fetchLesson = async () => {
+            const res = await fetch(`/api/instructor/courses/${courseId}/lessons`);
+            const lessons: Lesson[] = await res.json();
+            const found = lessons.find((l: any) => l.id === lessonId);
+            if (found) setLesson(found);
+        };
+        fetchLesson();
     }, [courseId, lessonId]);
+
+    // --- MUX POLLING LOGIC (For Duration & Status) ---
+    useEffect(() => {
+        if (!lesson?.videoUrl?.startsWith('mux-upload:')) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/mux-status`);
+                const data = await res.json();
+                
+                if (data.status === 'ready') {
+                    setLesson(prev => prev ? ({ 
+                        ...prev, 
+                        muxPlaybackId: data.playbackId, 
+                        videoUrl: `mux:${data.playbackId}`,
+                        duration: data.duration || prev.duration 
+                    }) : null);
+                    clearInterval(interval);
+                }
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [courseId, lessonId, lesson?.videoUrl]);
 
     const handleChange = (field: keyof Lesson, value: unknown) => {
         if (!lesson) return;
@@ -252,54 +288,104 @@ export default function LessonEditorPage() {
                         </div>
                     </div>
 
-                    {/* Subtitles / Captions */}
+                    {/* Materials & Resources Section */}
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
-                            <h2 className={styles.cardTitle}>💬 Subtitles / Captions</h2>
+                            <h2 className={styles.cardTitle}>📚 Materials & Resources</h2>
                         </div>
                         <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', lineHeight: '1.5' }}>
-                            Upload a <strong>.vtt</strong> or <strong>.srt</strong> file to add closed captions to your video. This is great for accessibility and "YouTube-like" features.
+                            Upload documents, source code, or extra links for your students. These will appear in the "Resources" tab of the course page.
                         </p>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>Subtitle File URL</label>
-                            <input
-                                className={styles.input}
-                                value={lesson.subtitleUrl ?? ''}
-                                onChange={e => handleChange('subtitleUrl', e.target.value)}
-                                placeholder="https://.../captions.vtt or /uploads/..."
-                            />
+                        <div className={styles.resourceList}>
+                            {lesson.resources?.map(resource => (
+                                <div key={resource.id} className={styles.resourceItem}>
+                                    <div className={styles.resourceIcon}>
+                                        {resource.type === 'file' ? '📄' : '🔗'}
+                                    </div>
+                                    <div className={styles.resourceInfo}>
+                                        <div className={styles.resourceTitle}>{resource.title}</div>
+                                        <div className={styles.resourceUrl}>{resource.url}</div>
+                                    </div>
+                                    <button 
+                                        className={styles.resourceDelete}
+                                        onClick={async () => {
+                                            if (!confirm('Are you sure you want to remove this resource?')) return;
+                                            await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources/${resource.id}`, { method: 'DELETE' });
+                                            // Refresh lesson
+                                            const res = await fetch(`/api/instructor/courses/${courseId}/lessons`);
+                                            const lessons = await res.json();
+                                            const found = lessons.find((l: any) => l.id === lessonId);
+                                            if (found) setLesson(found);
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                            {(!lesson.resources || lesson.resources.length === 0) && (
+                                <div className={styles.emptyResources}>No materials uploaded yet.</div>
+                            )}
                         </div>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>Upload Subtitle File (.vtt)</label>
-                            <input
-                                type="file"
-                                accept=".vtt,.srt"
-                                onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (!file) return;
-
-                                    const formData = new FormData();
-                                    formData.append('file', file);
-
-                                    try {
-                                        const res = await fetch('/api/upload', {
+                        <div className={styles.addResourceZone}>
+                            <h4 style={{ marginBottom: '10px', fontSize: '14px', fontWeight: 600 }}>Add New Material</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px' }}>
+                                <input id="res-title" className={styles.input} placeholder="Title (e.g. Lesson Handbook)" />
+                                <input id="res-url" className={styles.input} placeholder="URL or select file →" />
+                                <button 
+                                    className={styles.saveBtn} 
+                                    style={{ padding: '8px 16px', fontSize: '12px' }}
+                                    onClick={async () => {
+                                        const title = (document.getElementById('res-title') as HTMLInputElement).value;
+                                        const url = (document.getElementById('res-url') as HTMLInputElement).value;
+                                        if (!title || !url) { alert('Please provide title and URL'); return; }
+                                        
+                                        await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/resources`, {
                                             method: 'POST',
-                                            body: formData,
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ title, url, type: url.startsWith('http') ? 'link' : 'file' })
                                         });
-                                        const data = await res.json();
-                                        if (res.ok && data.url) {
-                                            handleChange('subtitleUrl', data.url);
-                                            alert('Subtitle file uploaded successfully!');
-                                        } else {
-                                            alert(data.error || 'Upload failed');
-                                        }
-                                    } catch (err) {
-                                        alert('An error occurred during upload');
-                                    }
-                                }}
-                            />
+
+                                        // Refresh
+                                        const res = await fetch(`/api/instructor/courses/${courseId}/lessons`);
+                                        const lessons = await res.json();
+                                        const found = lessons.find((l: any) => l.id === lessonId);
+                                        if (found) setLesson(found);
+                                        
+                                        (document.getElementById('res-title') as HTMLInputElement).value = '';
+                                        (document.getElementById('res-url') as HTMLInputElement).value = '';
+                                    }}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                            <div style={{ marginTop: '10px' }}>
+                                <label className={styles.fileUploadBtn}>
+                                    📁 Upload File
+                                    <input 
+                                        type="file" 
+                                        style={{ display: 'none' }} 
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+                                            
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            
+                                            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                                            const data = await uploadRes.json();
+                                            
+                                            if (uploadRes.ok && data.url) {
+                                                (document.getElementById('res-url') as HTMLInputElement).value = data.url;
+                                                if (!(document.getElementById('res-title') as HTMLInputElement).value) {
+                                                    (document.getElementById('res-title') as HTMLInputElement).value = file.name;
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -323,6 +409,9 @@ export default function LessonEditorPage() {
                         <div className={styles.field}>
                             <label className={styles.label}>Estimated Duration</label>
                             <input className={styles.input} value={lesson.duration ?? ''} onChange={e => handleChange('duration', e.target.value)} placeholder="e.g. 12:30" />
+                            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                                {lesson.videoUrl?.startsWith('mux:') ? '✅ Synced from Mux' : 'Will auto-calculate after upload'}
+                            </p>
                         </div>
 
                         <div className={styles.field}>

@@ -22,30 +22,22 @@ async function verifyAccess(courseId: string) {
     return { ok: true };
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string, lessonId: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string; lessonId: string }> }) {
     const { id, lessonId } = await params;
     const access = await verifyAccess(id);
     if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
 
-    const body = await req.json();
+    const body = await req.json(); // { title, url, type, description }
     
-    if (!body.title) {
-        return NextResponse.json({ error: 'Title is required' }, { status: 400 });
-    }
+    const resource = await prisma.resource.create({
+        data: {
+            title: body.title,
+            url: body.url,
+            type: body.type || 'link',
+            description: body.description || '',
+            lessonId: lessonId,
+        }
+    });
 
-    try {
-        const resource = await prisma.resource.create({
-            data: {
-                lessonId: lessonId,
-                title: body.title,
-                description: body.description || null,
-                url: body.url || null,
-                type: body.type || 'link',
-            }
-        });
-        return NextResponse.json(resource, { status: 201 });
-    } catch (err) {
-        console.error('Error creating resource:', err);
-        return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 });
-    }
+    return NextResponse.json(resource, { status: 201 });
 }

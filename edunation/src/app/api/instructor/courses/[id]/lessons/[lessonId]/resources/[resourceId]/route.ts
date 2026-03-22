@@ -22,18 +22,14 @@ async function verifyAccess(courseId: string) {
     return { ok: true };
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, resourceId: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string; lessonId: string; resourceId: string }> }) {
     const { id, resourceId } = await params;
     const access = await verifyAccess(id);
     if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
 
-    try {
-        await prisma.resource.delete({
-            where: { id: resourceId }
-        });
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        console.error('Error deleting resource:', err);
-        return NextResponse.json({ error: 'Failed to delete resource' }, { status: 500 });
-    }
+    await prisma.resource.delete({
+        where: { id: resourceId }
+    });
+
+    return NextResponse.json({ ok: true });
 }
