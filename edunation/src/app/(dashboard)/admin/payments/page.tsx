@@ -120,13 +120,13 @@ export default function AdminPaymentsPage() {
                             </div>
 
                             <div>
-                                <span className={`${styles.statusBadge} ${styles['status' + p.status]}`}>
+                                <span className={`${styles.statusBadge} ${styles['status' + p.status?.toLowerCase()]}`}>
                                     {p.status}
                                 </span>
                             </div>
 
                             <div className={styles.actions}>
-                                {p.status === 'pending' && (
+                                {p.status?.toLowerCase() === 'pending' ? (
                                     <>
                                         <button className={styles.approveBtn} onClick={() => handleStatusUpdate(p.id, 'approved')}>
                                             ✅ Approve
@@ -135,6 +135,8 @@ export default function AdminPaymentsPage() {
                                             ❌ Reject
                                         </button>
                                     </>
+                                ) : (
+                                    <span className={styles.processedText}>Processed</span>
                                 )}
                             </div>
                         </div>
