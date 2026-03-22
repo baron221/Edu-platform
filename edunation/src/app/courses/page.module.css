@@ -210,35 +210,7 @@
     }
 
     .filtersBar {
-        padding: 4px 0;
-        top: 0;
-    }
-
-    .filtersInner {
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .categories, .typeFilter {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding: 4px 0;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        gap: 6px;
-    }
-
-    .categories::-webkit-scrollbar, .typeFilter::-webkit-scrollbar {
         display: none;
-    }
-
-    .catBtn, .filterBtn {
-        flex-shrink: 0;
-        white-space: nowrap;
-        padding: 5px 12px;
-        font-size: 11px;
-        height: 32px;
     }
 
     .results {
