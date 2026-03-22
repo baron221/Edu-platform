@@ -225,7 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                 </header>
 
-                <div style={{ padding: '32px' }}>
+                <div className={styles.contentWrapper}>
                     {children}
                 </div>
             </main>

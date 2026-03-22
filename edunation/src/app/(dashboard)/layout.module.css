@@ -448,3 +448,12 @@
     color: white !important;
     box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
 }
+.contentWrapper {
+    padding: 24px;
+}
+
+@media (max-width: 1024px) {
+    .contentWrapper {
+        padding: 16px;
+    }
+}
