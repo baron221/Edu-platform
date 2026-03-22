@@ -80,16 +80,20 @@ export async function PATCH(req: Request) {
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() + durationDays);
 
+                const planToGrant = payment.planId.includes('studio') ? 'studio' : 
+                                  payment.planId.includes('pro') ? 'pro' : 
+                                  'starter';
+
                 await prisma.instructorSubscription.upsert({
                     where: { userId: payment.userId },
                     create: {
                         userId: payment.userId,
-                        plan: payment.planId.includes('pro') ? 'pro' : 'starter',
+                        plan: planToGrant,
                         status: 'active',
                         endDate
                     },
                     update: {
-                        plan: payment.planId.includes('pro') ? 'pro' : 'starter',
+                        plan: planToGrant,
                         status: 'active',
                         endDate
                     }

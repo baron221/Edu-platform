@@ -47,6 +47,10 @@ export default function InstructorSubscribePage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [processingPayment, setProcessingPayment] = useState(false);
+    const [showManualForm, setShowManualForm] = useState(false);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [manualSuccess, setManualSuccess] = useState(false);
 
     useEffect(() => {
         fetch('/api/instructor/subscribe')
@@ -111,6 +115,52 @@ export default function InstructorSubscribePage() {
         }
     };
 
+    const handleManualSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!receiptFile || !selectedPlan) return;
+
+        setUploading(true);
+        setError('');
+
+        try {
+            // 1. Upload to a temp or permanent store (using a simple form data for the API)
+            // For now, let's assume we use a base64 or a direct upload if you have an upload route.
+            // If there's no dedicated upload route, we'll use a placeholder or check if there's one.
+            // Looking at the codebase, there's usually an /api/upload.
+            
+            const formData = new FormData();
+            formData.append('file', receiptFile);
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+            const { url } = await uploadRes.json();
+
+            // 2. Create manual payment entry
+            const res = await fetch('/api/manual-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    planId: selectedPlan,
+                    receiptUrl: url
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to submit manual payment');
+
+            setManualSuccess(true);
+            setShowManualForm(false);
+            setShowPaymentModal(false);
+        } catch (e: any) {
+            setError(e.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div className={styles.page}>
             {/* Hero */}
@@ -140,6 +190,13 @@ export default function InstructorSubscribePage() {
             {success && (
                 <div className="container" style={{ marginBottom: 24 }}>
                     <div className={styles.successBanner}>{success}</div>
+                </div>
+            )}
+            {manualSuccess && (
+                <div className="container" style={{ marginBottom: 24 }}>
+                    <div className={styles.successBanner}>
+                        🎉 Receipt submitted successfully! Our admin team will verify your payment within 24 hours.
+                    </div>
                 </div>
             )}
             {error && (
@@ -242,7 +299,54 @@ export default function InstructorSubscribePage() {
                                 <div className={styles.payIcon} style={{ fontSize: '14px', color: '#6366f1' }}>Stripe</div>
                                 <span>Pay with Stripe (Card)</span>
                             </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.manualBtn}`}
+                                onClick={() => setShowManualForm(true)}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon} style={{ color: '#10b981' }}>💳</div>
+                                <span>Uzcard / Humo / Transfer</span>
+                            </button>
                         </div>
+
+                        {showManualForm && (
+                            <form className={styles.manualForm} onSubmit={handleManualSubmit}>
+                                <div className={styles.manualFormHeader}>
+                                    <h3>Upload Payment Receipt</h3>
+                                    <p>Please transfer the amount to our card/bank and upload the screenshot here.</p>
+                                    <div className={styles.bankDetails}>
+                                        <strong>Card:</strong> 8600 0000 0000 0000<br/>
+                                        <strong>Name:</strong> EduNationUz LLC
+                                    </div>
+                                </div>
+                                
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={e => setReceiptFile(e.target.files?.[0] || null)}
+                                    required
+                                    className={styles.fileInput}
+                                />
+                                
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary" 
+                                    style={{ width: '100%', justifyContent: 'center' }}
+                                    disabled={uploading || !receiptFile}
+                                >
+                                    {uploading ? 'Uploading...' : 'Submit Receipt'}
+                                </button>
+                                
+                                <button 
+                                    type="button" 
+                                    className={styles.backBtn}
+                                    onClick={() => setShowManualForm(false)}
+                                >
+                                    ← Back to methods
+                                </button>
+                            </form>
+                        )}
 
                         <button
                             className={styles.closeModalBtn}

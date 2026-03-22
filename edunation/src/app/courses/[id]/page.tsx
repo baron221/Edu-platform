@@ -43,6 +43,10 @@ export default function CourseDetailPage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
+    const [showManualForm, setShowManualForm] = useState(false);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [manualSuccess, setManualSuccess] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -116,6 +120,45 @@ export default function CourseDetailPage() {
             alert('Payment error occurred.');
         } finally {
             setProcessingPayment(false);
+        }
+    };
+
+    const handleManualSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!receiptFile || !course) return;
+
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', receiptFile);
+
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!uploadRes.ok) throw new Error('Failed to upload receipt');
+            const { url } = await uploadRes.json();
+
+            const res = await fetch('/api/manual-payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    courseId: course.id,
+                    receiptUrl: url
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to submit manual payment');
+
+            setManualSuccess(true);
+            setShowManualForm(false);
+            setShowPaymentModal(false);
+            toast.success('Receipt submitted! Admin will verify soon.');
+        } catch (e: any) {
+            toast.error(e.message);
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -626,7 +669,54 @@ export default function CourseDetailPage() {
                                 <div className={styles.payIcon}>💳</div>
                                 <span>Visa / Mastercard</span>
                             </button>
+
+                            <button
+                                className={`${styles.payBtn} ${styles.manualBtn}`}
+                                onClick={() => setShowManualForm(true)}
+                                disabled={processingPayment}
+                            >
+                                <div className={styles.payIcon} style={{ color: '#10b981' }}>💵</div>
+                                <span>Uzcard / Humo / Transfer</span>
+                            </button>
                         </div>
+
+                        {showManualForm && (
+                            <form className={styles.manualForm} onSubmit={handleManualSubmit}>
+                                <div className={styles.manualFormHeader}>
+                                    <h3>Upload Payment Receipt</h3>
+                                    <p>Please transfer the amount to our card and upload the screenshot here.</p>
+                                    <div className={styles.bankDetails}>
+                                        <strong>Card:</strong> 8600 0000 0000 0000<br/>
+                                        <strong>Name:</strong> EduNationUz LLC
+                                    </div>
+                                </div>
+                                
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={e => setReceiptFile(e.target.files?.[0] || null)}
+                                    required
+                                    className={styles.fileInput}
+                                />
+                                
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary" 
+                                    style={{ width: '100%', justifyContent: 'center' }}
+                                    disabled={uploading || !receiptFile}
+                                >
+                                    {uploading ? 'Uploading...' : 'Submit Receipt'}
+                                </button>
+                                
+                                <button 
+                                    type="button" 
+                                    className={styles.backBtn}
+                                    onClick={() => setShowManualForm(false)}
+                                >
+                                    ← Back to methods
+                                </button>
+                            </form>
+                        )}
 
                         <button className={styles.closeModalBtn} onClick={() => setShowPaymentModal(false)}>
                             Cancel
