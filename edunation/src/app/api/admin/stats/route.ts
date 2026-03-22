@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        const [totalCourses, totalUsers, totalEnrollments, recentUsers, enrollments, pendingPaymentsCount] = await Promise.all([
+        const [totalCourses, totalUsers, totalEnrollments, recentUsers, enrollments, pendingPaymentsCount, pendingPayments] = await Promise.all([
             prisma.course.count(),
             prisma.user.count(),
             prisma.enrollment.count(),
@@ -26,7 +26,13 @@ export async function GET() {
                     }
                 }
             }),
-            (prisma as any).manualPayment.count({ where: { status: 'pending' } })
+            (prisma as any).manualPayment.count({ where: { status: 'pending' } }),
+            (prisma as any).manualPayment.findMany({
+                where: { status: 'pending' },
+                include: { user: true, course: true },
+                orderBy: { createdAt: 'desc' },
+                take: 5
+            })
         ]);
 
         // Calculate Revenue from non-free courses
@@ -77,7 +83,8 @@ export async function GET() {
             recentUsers,
             totalRevenue,
             courseDropoffs,
-            pendingPaymentsCount
+            pendingPaymentsCount,
+            pendingPayments
         });
     } catch (e) {
         console.error('Error fetching admin stats:', e);

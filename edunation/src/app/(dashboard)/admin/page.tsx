@@ -10,6 +10,17 @@ interface Stats {
     totalEnrollments: number;
     totalRevenue: number;
     pendingPaymentsCount: number;
+    pendingPayments: {
+        id: string;
+        userId: string;
+        courseId: string | null;
+        planId: string | null;
+        receiptUrl: string;
+        status: string;
+        createdAt: string;
+        user: { name: string | null; email: string | null };
+        course: { title: string; price: number } | null;
+    }[];
     recentUsers: { id: string; name: string | null; email: string | null; role: string; createdAt: string }[];
     courseDropoffs: { title: string; enrollments: number; completions: number; totalLessons: number; avgProgress: number }[];
 }
@@ -35,6 +46,25 @@ export default function AdminDashboard() {
         { label: t.admin.totalUsers, value: stats?.totalUsers ?? 0, icon: '👥', color: '#06b6d4', href: '/admin/users' },
         { label: t.admin.pendingPayments, value: stats?.pendingPaymentsCount ?? 0, icon: '💳', color: (stats?.pendingPaymentsCount ?? 0) > 0 ? '#ef4444' : '#10b981', href: '/admin/payments' },
     ];
+
+    const handleStatusUpdate = async (id: string, status: 'approved' | 'rejected') => {
+        if (!confirm(`Are you sure you want to ${status} this payment?`)) return;
+        try {
+            const res = await fetch('/api/admin/manual-payments', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status })
+            });
+            if (res.ok) {
+                // Refresh stats
+                const r = await fetch('/api/admin/stats');
+                const data = await r.json();
+                setStats(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const fetchAnalytics = async () => {
         setLoadingAnalytics(true);
@@ -76,6 +106,44 @@ export default function AdminDashboard() {
                     </Link>
                 ))}
             </div>
+
+            {/* Pending Approvals Section */}
+            {stats?.pendingPayments && stats.pendingPayments.length > 0 && (
+                <div className={styles.section} style={{ marginBottom: '40px', border: '1px solid #7c3aed44' }}>
+                    <div className={styles.sectionHeaderFlex}>
+                        <h2 className={styles.sectionTitle} style={{ borderBottom: 'none', paddingBottom: 0 }}>
+                            💳 {t.admin.pendingPayments} <span style={{ fontSize: '12px', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '10px', marginLeft: '8px' }}>{stats.pendingPaymentsCount}</span>
+                        </h2>
+                        <Link href="/admin/payments" className={styles.aiBtnSubtle}>View All</Link>
+                    </div>
+                    <div className={styles.table} style={{ padding: '0 24px 24px' }}>
+                        {stats.pendingPayments.map(p => (
+                            <div key={p.id} className={styles.tableRow} style={{ gridTemplateColumns: '1fr 1.5fr 1fr 1fr' }}>
+                                <div className={styles.userInfo}>
+                                    <span className={styles.tdName}>{p.user.name || 'User'}</span>
+                                    <br /><small style={{ color: '#64748b' }}>{p.user.email}</small>
+                                </div>
+                                <div>
+                                    <span style={{ fontWeight: 600 }}>{p.courseId ? `📚 ${p.course?.title}` : `⭐ Plan: ${p.planId}`}</span>
+                                </div>
+                                <div>
+                                    <a href={p.receiptUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7c3aed', textDecoration: 'underline', fontSize: '13px' }}>View Receipt</a>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                    <button 
+                                        onClick={() => handleStatusUpdate(p.id, 'approved')}
+                                        style={{ padding: '4px 10px', borderRadius: '6px', background: '#10b981', color: 'white', fontSize: '12px', fontWeight: 600 }}
+                                    >Approve</button>
+                                    <button 
+                                        onClick={() => handleStatusUpdate(p.id, 'rejected')}
+                                        style={{ padding: '4px 10px', borderRadius: '6px', background: '#ef4444', color: 'white', fontSize: '12px', fontWeight: 600 }}
+                                    >Reject</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* AI Student Sentiment Analytics */}
             <div className={styles.section} style={{ marginBottom: '40px' }}>
