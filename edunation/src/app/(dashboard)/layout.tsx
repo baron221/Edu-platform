@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import AIAssistant from '@/components/AIAssistant';
 import NotificationBell from '@/components/NotificationBell';
+import BottomNav from '@/components/BottomNav';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './layout.module.css';
 
@@ -118,6 +119,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
 
                 <div className={styles.sidebarFooter}>
+                    {/* Language Switcher - Mobile Only */}
+                    <div className={`${styles.langSwitcher} ${styles.mobileOnly}`}>
+                        {LANGS.map(l => (
+                            <button
+                                key={l.code}
+                                className={`${styles.langBtn} ${language === l.code ? styles.langBtnActive : ''}`}
+                                onClick={() => setLanguage(l.code)}
+                                title={l.code.toUpperCase()}
+                            >
+                                {l.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* User Info - Mobile Only */}
+                    <div className={`${styles.userInfo} ${styles.mobileOnly}`}>
+                        <div className={styles.userAvatar}>
+                            {session?.user?.name?.charAt(0).toUpperCase() ?? 'I'}
+                        </div>
+                        <div>
+                            <div className={styles.userName}>{session?.user?.name ?? 'User'}</div>
+                            <div className={styles.userRole}>
+                                {(() => {
+                                    const u = session?.user as any;
+                                    if (u?.role === 'admin') return 'Administrator';
+                                    if (u?.role === 'instructor') return 'Instructor';
+                                    if (u?.isExpert) return 'Expert';
+                                    return 'Student';
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+
                     <button
                         className={styles.signOutBtn}
                         onClick={() => signOut({ callbackUrl: '/' })}
@@ -198,6 +232,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Global AI Assistant for Instructors/Admins */}
             <AIAssistant />
+
+            {/* Bottom Nav for Mobile */}
+            <BottomNav />
         </div>
     );
 }
