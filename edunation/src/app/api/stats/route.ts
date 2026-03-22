@@ -16,26 +16,26 @@ export async function GET() {
         lastCompletedCert,
         recentCourse,
     ] = await Promise.all([
-        prisma.user.count(),
-        prisma.course.count({ where: { published: true } }),
+        (prisma as any).user.count(),
+        (prisma as any).course.count({ where: { published: true } }),
         // Count distinct instructors from published courses
-        prisma.course.findMany({
+        (prisma as any).course.findMany({
             where: { published: true },
             select: { instructor: true },
             distinct: ['instructor'],
-        }).then(r => r.length),
-        prisma.enrollment.count(),
+        }).then((r: any) => r.length),
+        (prisma as any).enrollment.count(),
         // Average review rating
-        prisma.review.aggregate({ _avg: { rating: true } }),
-        prisma.review.count(),
-        prisma.lesson.count({ where: { course: { published: true } } }),
+        (prisma as any).review.aggregate({ _avg: { rating: true } }),
+        (prisma as any).review.count(),
+        (prisma as any).lesson.count({ where: { course: { published: true } } }),
         // Most recent certificate issued
-        prisma.certificate.findFirst({
+        (prisma as any).certificate.findFirst({
             orderBy: { issuedAt: 'desc' },
             include: { course: { select: { title: true } } },
         }),
         // Most recently published course
-        prisma.course.findFirst({
+        (prisma as any).course.findFirst({
             where: { published: true },
             orderBy: { createdAt: 'desc' },
             select: { title: true, category: true },
@@ -63,7 +63,7 @@ export async function GET() {
         recentCourseTitle: recentCourse?.title || null,
         recentCourseCategory: recentCourse?.category || null,
         // For social proof: how many enrolled this week
-        recentEnrollCount: await prisma.enrollment.count({
+        recentEnrollCount: await (prisma as any).enrollment.count({
             where: {
                 enrolledAt: {
                     gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
