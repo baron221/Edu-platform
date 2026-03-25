@@ -100,7 +100,7 @@ export default function AboutPage() {
                         <h2 className={styles.ctaTitle}>{t.about.ctaTitle}</h2>
                         <p className={styles.ctaDesc}>{t.about.ctaDesc}</p>
                         <div className={styles.ctaBtns}>
-                            <Link href="/signup" className="btn btn-primary btn-lg">{t.about.getStarted}</Link>
+                            <Link href="/login" className="btn btn-primary btn-lg">{t.about.getStarted}</Link>
                             <Link href="/courses" className="btn btn-secondary btn-lg">{t.about.browseCourses}</Link>
                         </div>
                     </div>

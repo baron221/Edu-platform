@@ -23,7 +23,7 @@ export default function PricingPage() {
 
     const handleTrial = async (type: 'student' | 'instructor') => {
         if (!session) {
-            router.push('/signup');
+            router.push('/login');
             return;
         }
 
@@ -165,7 +165,7 @@ export default function PricingPage() {
                                     </div>
 
                                     <Link
-                                        href={plan.id === 'enterprise' ? '/about' : '/signup'}
+                                        href={plan.id === 'enterprise' ? '/about' : '/login'}
                                         className={`btn ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
                                         style={{ width: '100%', justifyContent: 'center', marginBottom: '28px' }}
                                     >

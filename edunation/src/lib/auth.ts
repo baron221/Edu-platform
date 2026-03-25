@@ -1,4 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
+import { cookies } from 'next/headers';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -181,6 +182,15 @@ export const authOptions: NextAuthOptions = {
 
     events: {
         async createUser({ user }) {
+            const cookieStore = await cookies();
+            const roleCookie = cookieStore.get('edu_role')?.value;
+            const finalRole = (roleCookie === 'instructor' ? 'instructor' : 'student');
+
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { role: finalRole }
+            });
+
             const existing = await prisma.subscription.findUnique({ where: { userId: user.id } });
             if (!existing) {
                 await prisma.subscription.create({
@@ -190,7 +200,7 @@ export const authOptions: NextAuthOptions = {
 
             const account = await prisma.account.findFirst({ where: { userId: user.id } });
             const provider = (account?.provider ?? 'email') as 'google' | 'github' | 'telegram' | 'email';
-            notifyNewUser({ name: user.name ?? null, email: user.email ?? null, role: (user as any).role ?? 'student', provider });
+            notifyNewUser({ name: user.name ?? null, email: user.email ?? null, role: finalRole, provider });
         },
 
         async signIn({ user, account }) {

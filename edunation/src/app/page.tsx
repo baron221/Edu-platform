@@ -338,7 +338,7 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <Link
-                  href={plan.id === 'enterprise' ? '/about' : '/signup'}
+                  href={plan.id === 'enterprise' ? '/about' : '/login'}
                   className={`btn ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ width: '100%', justifyContent: 'center', marginTop: '24px' }}
                 >

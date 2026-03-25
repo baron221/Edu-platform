@@ -184,7 +184,7 @@ export default function ExpertsPage() {
                                     {t.experts.becomeExpert}
                                 </Link>
                             ) : (
-                                <Link href="/signup" className={styles.ctaBtn}>
+                                <Link href="/login" className={styles.ctaBtn}>
                                     {t.experts.startFree}
                                 </Link>
                             )}

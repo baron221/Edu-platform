@@ -12,6 +12,7 @@ export default function LoginPage() {
     const router = useRouter();
 
     const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
+    const [role, setRole] = useState<'student' | 'instructor'>('student');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -118,6 +119,7 @@ export default function LoginPage() {
     const handleOAuth = async (provider: 'google' | 'github') => {
         setLoading(provider);
         setError('');
+        document.cookie = `edu_role=${role}; path=/; max-age=3600;`;
         try {
             await signIn(provider, { callbackUrl: '/' });
         } catch {
@@ -129,6 +131,7 @@ export default function LoginPage() {
     const handleTelegram = () => {
         setLoading('telegram');
         setError('');
+        document.cookie = `edu_role=${role}; path=/; max-age=3600;`;
 
         const botId = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? '8657675755';
         const origin = window.location.origin;
@@ -190,6 +193,32 @@ export default function LoginPage() {
 
                 <h1 className={styles.title}>{t.auth.loginTitle}</h1>
                 <p className={styles.subtitle}>{t.auth.loginSubtitle}</p>
+
+                {/* Role Selector */}
+                <div className={styles.field} style={{ marginBottom: '24px' }}>
+                    <div className={styles.roleHeaderContainer}>
+                        <label className={styles.label}>{t.auth.roleLabel}</label>
+                        <span className={styles.roleWarning}>{t.auth.roleWarning}</span>
+                    </div>
+                    <div className={styles.roleToggle}>
+                        <button
+                            type="button"
+                            className={`${styles.roleBtn} ${role === 'student' ? styles.roleBtnActive : ''}`}
+                            onClick={() => setRole('student')}
+                        >
+                            <span className={styles.roleIcon}>🎓</span>
+                            <span className={styles.roleLabel}>{t.auth.roleStudent}</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.roleBtn} ${role === 'instructor' ? styles.roleBtnActive : ''}`}
+                            onClick={() => setRole('instructor')}
+                        >
+                            <span className={styles.roleIcon}>👩‍🏫</span>
+                            <span className={styles.roleLabel}>{t.auth.roleTeacher}</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div className={styles.oauthPrimary}>
                     <button
@@ -335,10 +364,7 @@ export default function LoginPage() {
                     )}
                 </form>
 
-                <p className={styles.switch}>
-                    {t.auth.noAccount}{' '}
-                    <Link href="/signup" className={styles.switchLink}>{t.auth.signUpFree}</Link>
-                </p>
+                {/* Switch to signup removed */}
             </div>
         </div>
     );

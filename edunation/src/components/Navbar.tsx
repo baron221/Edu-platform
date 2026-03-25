@@ -220,7 +220,7 @@ export default function Navbar() {
                     ) : (
                         <>
                             <Link href="/login" className="btn btn-secondary btn-sm">{t.nav.login}</Link>
-                            <Link href="/signup" className="btn btn-primary btn-sm">{t.nav.startFree}</Link>
+                            <Link href="/login" className="btn btn-primary btn-sm">{t.nav.startFree}</Link>
                         </>
                     )}
                 </div>
@@ -318,7 +318,7 @@ export default function Navbar() {
                     ) : (
                         <>
                             <Link href="/login" className="btn btn-secondary" onClick={() => setMenuOpen(false)}>{t.nav.login}</Link>
-                            <Link href="/signup" className="btn btn-primary" onClick={() => setMenuOpen(false)}>{t.nav.startFree}</Link>
+                            <Link href="/login" className="btn btn-primary" onClick={() => setMenuOpen(false)}>{t.nav.startFree}</Link>
                         </>
                     )}
                 </div>

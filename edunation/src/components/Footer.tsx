@@ -45,7 +45,7 @@ export default function Footer() {
                             <Link href="/pricing" className={styles.colLink}>{t.footer.pricingPlans}</Link>
                             <Link href="/about" className={styles.colLink}>{t.footer.aboutUs}</Link>
                             <Link href="/courses" className={styles.colLink}>{t.footer.freeCourses}</Link>
-                            <Link href="/signup" className={styles.colLink}>{t.footer.becomeInstructor}</Link>
+                            <Link href="/login" className={styles.colLink}>{t.footer.becomeInstructor}</Link>
                             <Link href="/about" className={styles.colLink}>{t.footer.blog}</Link>
                         </nav>
                     </div>
