@@ -11,11 +11,7 @@ export default function LoginPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
     const [role, setRole] = useState<'student' | 'instructor'>('student');
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
 
     // Phone state
     const [phone, setPhone] = useState('+998');
@@ -41,22 +37,6 @@ export default function LoginPage() {
 
     if (status === 'authenticated') return null;
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading('email');
-        const result = await signIn('credentials', {
-            redirect: false,
-            email,
-            password,
-        });
-        setLoading(null);
-        if (result?.error) {
-            setError('Invalid email or password. Please try again.');
-        } else {
-            // Role redirect will be handled by the useEffect above
-        }
-    };
 
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -274,93 +254,32 @@ export default function LoginPage() {
                 )}
 
                 <div className={styles.divider}>
-                    <span>or sign in with</span>
+                    <span>or sign in with Phone</span>
                 </div>
 
-                {/* Auth Method Toggle */}
-                <div className={styles.methodToggle}>
-                    <button
-                        className={`${styles.methodBtn} ${authMethod === 'email' ? styles.methodBtnActive : ''}`}
-                        onClick={() => setAuthMethod('email')}
-                        type="button"
-                    >
-                        {t.auth.methodEmail}
-                    </button>
-                    <button
-                        className={`${styles.methodBtn} ${authMethod === 'phone' ? styles.methodBtnActive : ''}`}
-                        onClick={() => { setAuthMethod('phone'); setError(''); }}
-                        type="button"
-                    >
-                        {t.auth.methodPhone}
-                    </button>
-                </div>
+                <form className={styles.form} onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} autoComplete="off">
+                    <div className={styles.field}>
+                        <label className={styles.label}>Phone Number</label>
+                        <input type="tel" className="input" placeholder="+998901234567"
+                            value={phone} onChange={e => setPhone(e.target.value)} disabled={otpSent || loading === 'send-otp'} required />
+                    </div>
 
-                <form className={styles.form} onSubmit={authMethod === 'email' ? handleEmailLogin : (otpSent ? handleVerifyOtp : handleSendOtp)} autoComplete="off">
-                    {authMethod === 'email' ? (
-                        <>
-                            <div className={styles.field}>
-                                <label className={styles.label}>{t.auth.emailLabel}</label>
-                                <input
-                                    type="email"
-                                    className="input"
-                                    placeholder={t.auth.emailPlaceholder}
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    autoComplete="off"
-                                    required
-                                />
-                            </div>
+                    {otpSent && (
+                        <div className={styles.field}>
+                            <label className={styles.label}>OTP Code (6 digits)</label>
+                            <input type="text" className="input" placeholder="123456" maxLength={6}
+                                value={otp} onChange={e => setOtp(e.target.value)} required />
+                        </div>
+                    )}
 
-                            <div className={styles.field}>
-                                <div className={styles.labelRow}>
-                                    <label className={styles.label}>{t.auth.passwordLabel}</label>
-                                    <Link href="/forgot-password" className={styles.forgot}>{t.auth.forgotPassword}</Link>
-                                </div>
-                                <input
-                                    type="password"
-                                    className="input"
-                                    placeholder={t.auth.passwordPlaceholder}
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    autoComplete="new-password"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                className={styles.submitBtn}
-                                disabled={loading === 'email'}
-                            >
-                                {loading === 'email' ? 'Signing in...' : t.auth.loginBtn}
-                            </button>
-                        </>
+                    {!otpSent ? (
+                        <button type="submit" className={styles.submitBtn} disabled={loading === 'send-otp'}>
+                            {loading === 'send-otp' ? 'Sending...' : 'Send OTP'}
+                        </button>
                     ) : (
-                        <>
-                            <div className={styles.field}>
-                                <label className={styles.label}>Phone Number</label>
-                                <input type="tel" className="input" placeholder="+998901234567"
-                                    value={phone} onChange={e => setPhone(e.target.value)} disabled={otpSent || loading === 'send-otp'} required />
-                            </div>
-
-                            {otpSent && (
-                                <div className={styles.field}>
-                                    <label className={styles.label}>OTP Code (6 digits)</label>
-                                    <input type="text" className="input" placeholder="123456" maxLength={6}
-                                        value={otp} onChange={e => setOtp(e.target.value)} required />
-                                </div>
-                            )}
-
-                            {!otpSent ? (
-                                <button type="submit" className={styles.submitBtn} disabled={loading === 'send-otp'}>
-                                    {loading === 'send-otp' ? 'Sending...' : 'Send OTP'}
-                                </button>
-                            ) : (
-                                <button type="submit" className={styles.submitBtn} disabled={loading === 'verify-otp'}>
-                                    {loading === 'verify-otp' ? 'Verifying...' : 'Verify & Sign in'}
-                                </button>
-                            )}
-                        </>
+                        <button type="submit" className={styles.submitBtn} disabled={loading === 'verify-otp'}>
+                            {loading === 'verify-otp' ? 'Verifying...' : 'Verify & Sign in'}
+                        </button>
                     )}
                 </form>
 
