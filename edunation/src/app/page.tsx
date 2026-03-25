@@ -410,7 +410,7 @@ export default function HomePage() {
                 : t.home.ctaSubtitle}
             </p>
             <div className={styles.ctaButtons}>
-              <Link href="/signup" className="btn btn-primary btn-lg">{t.home.startLearning}</Link>
+              <Link href="/login" className="btn btn-primary btn-lg">{t.home.startLearning}</Link>
               <Link href="/courses" className="btn btn-secondary btn-lg">{t.home.browseCoursesCta}</Link>
             </div>
           </div>

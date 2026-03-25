@@ -254,7 +254,7 @@ export default function PricingPage() {
                             {t.pricing.ctaTitle} <span className="gradient-text">{t.pricing.ctaTitleGrad}</span>
                         </h2>
                         <p className={styles.ctaDesc}>{t.pricing.ctaDesc}</p>
-                        <Link href="/signup" className="btn btn-primary btn-lg">{t.pricing.createAccount}</Link>
+                        <Link href="/login" className="btn btn-primary btn-lg">{t.pricing.createAccount}</Link>
                     </div>
                 </div>
             </section>
