@@ -386,6 +386,10 @@ export default function CourseDetailPage() {
                                             }}
                                             playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
                                             streamType="on-demand"
+                                            playsInline={true}
+                                            defaultResolution="1080p"
+                                            targetResolution="1080p"
+                                            minResolution="720p"
                                             primaryColor="#7c3aed"
                                             accentColor="#06b6d4"
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}

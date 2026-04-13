@@ -149,10 +149,7 @@
     overflow: hidden;
     margin-bottom: 24px;
     border: 1px solid var(--border);
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+    border: 1px solid var(--border);
 }
 
 .videoWrapper video {
@@ -169,8 +166,7 @@
 }
 
 .videoWrapper video::-webkit-media-controls-panel {
-    width: calc(100% + 30px);
-    /* Move the '...' menu out of view if possible */
+    width: 100%;
 }
 
 
