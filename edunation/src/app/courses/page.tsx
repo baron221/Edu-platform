@@ -13,7 +13,8 @@ const CATEGORIES = [
     { name: 'Mobile Development', icon: '📱' },
     { name: 'Business', icon: '💼' },
     { name: 'Mathematics', icon: '📐' },
-    { name: 'English Language', icon: '🇬🇧' },
+    { name: 'English', icon: '🇬🇧' },
+    { name: 'IELTS', icon: '📝' },
     { name: 'Video Editing', icon: '🎬' },
     { name: 'Technology', icon: '🚀' },
 ];
