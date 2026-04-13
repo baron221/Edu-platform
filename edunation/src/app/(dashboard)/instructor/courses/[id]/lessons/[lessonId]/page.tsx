@@ -392,6 +392,12 @@ export default function LessonEditorPage() {
                                             const file = e.target.files?.[0];
                                             if (!file) return;
                                             
+                                            // Vercel Serverless Function limit
+                                            if (file.size > 4.5 * 1024 * 1024) {
+                                                alert('File size exceeds the 4.5MB limit. Please upload a smaller file or host it externally (like Google Drive) and provide a link.');
+                                                return;
+                                            }
+                                            
                                             setUploadingMaterial(true);
                                             const formData = new FormData();
                                             formData.append('file', file);

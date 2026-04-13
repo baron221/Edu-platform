@@ -48,8 +48,8 @@ export default function SettingsPage() {
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error('Image size must be less than 5MB.');
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error('Image size must be less than 4MB.');
             return;
         }
 
@@ -218,7 +218,7 @@ export default function SettingsPage() {
                                             accept="image/*"
                                         />
                                     </div>
-                                    <p className={styles.hint}>Recommended: Square image, max 5MB.</p>
+                                    <p className={styles.hint}>Recommended: Square image, max 4MB.</p>
                                 </div>
                             </div>
 

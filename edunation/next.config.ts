@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
     'sharita-blanketless-commiseratively.ngrok-free.dev',
     'localhost:3000'
   ],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb', // Increased from default but strictly capped for vercel limits
+    },
+  },
   turbopack: {},
 };
 

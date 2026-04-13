@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import MuxPlayer from '@mux/mux-player-react';
+import * as Upchunk from '@mux/upchunk';
 import styles from './page.module.css';
 
 interface Lesson {
@@ -146,58 +147,77 @@ export default function CourseEditorPage() {
         e.preventDefault();
         setCreatingLesson(true);
 
-        let videoUrl = '';
-        if (videoFile) {
-            const formData = new FormData();
-            formData.append('file', videoFile);
+        try {
+            // 1. Create the lesson first without a video so we get an ID for Mux
+            const res = await fetch(`/api/instructor/courses/${id}/lessons`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...newLessonData, videoUrl: '' }),
+            });
 
-            try {
-                const interval = setInterval(() => {
-                    setUploadProgress(p => {
-                        if (p >= 90) { clearInterval(interval); return p; }
-                        return p + 10;
-                    });
-                }, 300);
-
-                const uploadRes = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                clearInterval(interval);
-                setUploadProgress(100);
-
-                if (uploadRes.ok) {
-                    const data = await uploadRes.json();
-                    videoUrl = data.url;
-                } else {
-                    alert('Video upload failed');
-                    setCreatingLesson(false);
-                    return;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Video upload error');
-                setCreatingLesson(false);
-                return;
+            if (!res.ok) {
+                throw new Error('Failed to create lesson');
             }
+
+            const newLesson = await res.json();
+            const newLessonId = newLesson.id;
+
+            // 2. If there's a video file, upload it directly to MUX
+            if (videoFile && newLessonId) {
+                const ticketRes = await fetch(`/api/instructor/courses/${id}/lessons/${newLessonId}/mux-upload`, {
+                    method: 'POST',
+                });
+                const ticketData = await ticketRes.json();
+
+                if (!ticketRes.ok) {
+                    throw new Error(ticketData.error || 'Failed to get upload ticket');
+                }
+
+                await new Promise((resolve, reject) => {
+                    const upload = Upchunk.createUpload({
+                        endpoint: ticketData.url,
+                        file: videoFile,
+                        chunkSize: 5120, // 5MB chunks
+                    });
+
+                    upload.on('progress', progress => {
+                        setUploadProgress(progress.detail);
+                    });
+
+                    upload.on('success', async () => {
+                        setUploadProgress(100);
+                        // Update the lesson with the mux-upload status so polling kicks in
+                        await fetch(`/api/instructor/courses/${id}/lessons/${newLessonId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ videoUrl: `mux-upload:${ticketData.uploadId}` }),
+                        });
+                        resolve(true);
+                    });
+
+                    upload.on('error', err => {
+                        console.error('Mux Upchunk Error:', err);
+                        alert('An error occurred during upload to Mux.');
+                        reject(err);
+                    });
+                });
+            }
+
+            // 3. Refresh course data
+            const r = await fetch(`/api/instructor/courses/${id}`);
+            const data = await r.json();
+            setCourse(data);
+
+            setShowLessonModal(false);
+            setNewLessonData({ title: '', description: '', isFree: false });
+            setVideoFile(null);
+            setUploadProgress(0);
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message || 'An error occurred during lesson creation');
+        } finally {
+            setCreatingLesson(false);
         }
-
-        const res = await fetch(`/api/instructor/courses/${id}/lessons`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...newLessonData, videoUrl }),
-        });
-
-        const r = await fetch(`/api/instructor/courses/${id}`);
-        const data = await r.json();
-        setCourse(data);
-
-        setShowLessonModal(false);
-        setNewLessonData({ title: '', description: '', isFree: false });
-        setVideoFile(null);
-        setUploadProgress(0);
-        setCreatingLesson(false);
     };
 
     const deleteLesson = async (lessonId: string) => {
