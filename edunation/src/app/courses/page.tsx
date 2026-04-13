@@ -15,6 +15,7 @@ const CATEGORIES = [
     { name: 'Mathematics', icon: '📐' },
     { name: 'English', icon: '🇬🇧' },
     { name: 'IELTS', icon: '📝' },
+    { name: 'Multilevel', icon: '🎓' },
     { name: 'Video Editing', icon: '🎬' },
     { name: 'Technology', icon: '🚀' },
 ];
