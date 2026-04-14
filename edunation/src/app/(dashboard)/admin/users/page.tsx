@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
                                         setSubPlan(e.target.value);
                                         setSubMaxCourses(e.target.value === 'studio' ? 999 : e.target.value === 'pro' ? 20 : 3);
                                     }}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid var(--border)', color: '#0f172a' }}
                                 >
                                     <option value="starter" style={{ color: '#0f172a' }}>Starter</option>
                                     <option value="pro" style={{ color: '#0f172a' }}>Pro</option>
@@ -243,7 +243,7 @@ export default function AdminUsersPage() {
                                     type="date"
                                     value={subEndDate}
                                     onChange={e => setSubEndDate(e.target.value)}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid var(--border)', color: '#0f172a' }}
                                 />
                             </div>
 
@@ -253,7 +253,7 @@ export default function AdminUsersPage() {
                                     type="number"
                                     value={subMaxCourses}
                                     onChange={e => setSubMaxCourses(parseInt(e.target.value))}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#f1f5f9', border: '1px solid var(--border)', color: '#0f172a' }}
                                 />
                             </div>
                         </div>
@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button
                                 onClick={() => setEditingSub(null)}
-                                style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: '#0f172a', cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
