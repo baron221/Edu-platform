@@ -171,7 +171,7 @@ export const translations = {
             ],
             faqs: [
                 { q: 'Can I cancel my subscription anytime?', a: "Yes, absolutely! You can cancel your Pro or Enterprise subscription at any time. You'll retain access until the end of your billing period." },
-                { q: 'What happens after the free trial?', a: "After the 7-day free trial, you'll be charged the regular subscription price. We'll send you a reminder 3 days before the trial ends." },
+                { q: 'Is there a student discount?', a: 'Yes! Students get 50% off Pro plans. Contact us with your student email for verification.' },
                 { q: 'Do free courses stay free forever?', a: 'Yes! All courses marked as "Free" are permanently free. No credit card required to access them.' },
                 { q: 'Can I download videos for offline viewing?', a: 'Yes, Pro and Enterprise subscribers can download videos via our mobile app for offline viewing.' },
                 { q: 'Is there a student discount?', a: 'Yes! Students get 50% off Pro plans. Contact us with your student email for verification.' },
@@ -253,7 +253,7 @@ export const translations = {
         // Plans CTA
         planCta: {
             free: 'Get Started Free',
-            pro: 'Start Pro Trial',
+            pro: 'Get Pro Plan',
             enterprise: 'Contact Sales',
         },
         // Dashboard
@@ -858,7 +858,6 @@ export const translations = {
             ],
             faqs: [
                 { q: 'Obunani istalgan vaqtda bekor qila olamanmi?', a: "Ha, albatta! Pro yoki Korporativ obunani istalgan vaqtda bekor qilishingiz mumkin. To'lov davri oxirigacha kirishni saqlab qolasiz." },
-                { q: 'Bepul sinov muddatidan keyin nima bo\'ladi?', a: "7 kunlik bepul sinov muddatidan so'ng sizdan oddiy obuna narxi olinadi. Sinov muddati tugashidan 3 kun oldin eslatma yuboramiz." },
                 { q: 'Bepul kurslar abadiy bepul qoladimi?', a: '"Bepul" deb belgilangan barcha kurslar doimiy ravishda bepul. Ularga kirish uchun kredit kartasi talab qilinmaydi.' },
                 { q: 'Videolarni offline ko\'rish uchun yuklab olish mumkinmi?', a: 'Ha, Pro va Korporativ abonentlar mobil ilovamiz orqali videolarni offline ko\'rish uchun yuklab olishlari mumkin.' },
                 { q: 'Talabalar uchun chegirma bormi?', a: "Ha! Talabalar Pro rejalarda 50% chegirma olishadi. Tasdiqlash uchun talaba emailingiz bilan biz bilan bog'laning." },
@@ -935,7 +934,7 @@ export const translations = {
         ],
         planCta: {
             free: 'Bepul boshlash',
-            pro: 'Pro sinovini boshlash',
+            pro: 'Pro rejasini olish',
             enterprise: 'Savdo bo\'limi bilan bog\'lanish',
         },
         // Dashboard
@@ -1539,7 +1538,6 @@ export const translations = {
             ],
             faqs: [
                 { q: 'Могу ли я отменить подписку в любое время?', a: 'Да, конечно! Вы можете отменить подписку Pro или Корпоративную в любое время. Доступ сохранится до конца расчётного периода.' },
-                { q: 'Что происходит после бесплатного пробного периода?', a: 'После 7-дневного бесплатного пробного периода с вас будет взиматься обычная стоимость подписки. Мы отправим напоминание за 3 дня до окончания.' },
                 { q: 'Бесплатные курсы всегда будут бесплатными?', a: 'Да! Все курсы, помеченные как "Бесплатно", постоянно бесплатны. Кредитная карта не требуется.' },
                 { q: 'Можно ли скачать видео для просмотра офлайн?', a: 'Да, подписчики Pro и Корпоративного плана могут скачивать видео через наше мобильное приложение.' },
                 { q: 'Есть ли скидка для студентов?', a: 'Да! Студенты получают скидку 50% на планы Pro. Свяжитесь с нами со студенческой почтой для верификации.' },
@@ -1616,7 +1614,7 @@ export const translations = {
         ],
         planCta: {
             free: 'Начать бесплатно',
-            pro: 'Начать пробный период Pro',
+            pro: 'Получить план Pro',
             enterprise: 'Связаться с отделом продаж',
         },
         // Dashboard

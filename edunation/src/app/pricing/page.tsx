@@ -87,35 +87,24 @@ export default function PricingPage() {
             <section className={styles.trialSection}>
                 <div className="container">
                     <div className={styles.trialBox}>
-                        <div className="section-label" style={{ margin: '0 auto 20px' }}>FREE TRIAL</div>
+                        <div className="section-label" style={{ margin: '0 auto 20px' }}>SPECIAL OFFERS</div>
                         <h2 className={styles.title} style={{ fontSize: '32px' }}>
-                            {t.trial.startStudent.split(' ').slice(0, 2).join(' ')} <span className="gradient-text">1-Month Free</span>
+                            {t.trial.instructorTitle}
                         </h2>
-                        <p className={styles.subtitle} style={{ marginBottom: '0' }}>
-                           Try our premium features for 30 days. No credit card required.
+                        <p className={styles.subtitle} style={{ marginBottom: '24px' }}>
+                           Try our educator features for 30 days. No credit card required.
                         </p>
 
-                        <div className={styles.trialGrid}>
-                            <div className={styles.trialCard}>
-                                <div className={styles.trialBadge}>FOR STUDENTS</div>
-                                <h3>Student Free Trial</h3>
-                                <p>Get 30 days of "Pro" access. Watch all courses, download materials, and earn certificates.</p>
-                                <button 
-                                    className="btn btn-primary" 
-                                    onClick={() => handleTrial('student')}
-                                    disabled={!!activating}
-                                >
-                                    {activating === 'student' ? t.trial.activating : t.trial.startStudent}
-                                </button>
-                            </div>
+                        <div className={styles.trialGrid} style={{ gridTemplateColumns: 'minmax(0, 500px)', justifyContent: 'center' }}>
                             <div className={styles.trialCard}>
                                 <div className={styles.trialBadge}>FOR INSTRUCTORS</div>
-                                <h3>Instructor Free Trial</h3>
-                                <p>Become an instructor for 30 days. Create courses, manage students, and use AI features for free.</p>
+                                <h3>{t.trial.instructorTitle}</h3>
+                                <p>{t.trial.instructorDesc}</p>
                                 <button 
                                     className="btn btn-secondary" 
                                     onClick={() => handleTrial('instructor')}
                                     disabled={!!activating}
+                                    style={{ width: '100%', justifyContent: 'center' }}
                                 >
                                     {activating === 'instructor' ? t.trial.activating : t.trial.startInstructor}
                                 </button>
