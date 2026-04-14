@@ -559,7 +559,7 @@ export default function CourseDetailPage() {
                             </div>
                         )}
 
-                        {!course.isFree && !isSubscribed && !isEnrolled && !getsUniversityFreeAccess && (
+                        {!isSubscribed && !isEnrolled && !getsUniversityFreeAccess && (
                             <div className={styles.enrollCard}>
                                 <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
                                 <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>
@@ -573,15 +573,7 @@ export default function CourseDetailPage() {
                             </div>
                         )}
 
-                        {course.isFree && !isEnrolled && (
-                            <div className={styles.enrollCard}>
-                                <div className={styles.enrollFree}>{t.courseDetail.freeCourseLabel}</div>
-                                <p className={styles.enrollDesc}>{t.courseDetail.freeCourseDesc}</p>
-                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
-                                    {enrolling ? 'Enrolling...' : t.courseDetail.getAccessFree}
-                                </button>
-                            </div>
-                        )}
+
 
                         {renderLessonsList(styles.desktopOnly)}
 

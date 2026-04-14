@@ -67,7 +67,7 @@ export default function CourseCard({ course }: Props) {
     return (
         <Link href={`/courses/${course.slug}`} className={styles.card}>
             {/* Shine effect overlay */}
-            <div className={`${styles.shine} ${!course.isFree ? styles.shinePremium : ''}`} />
+            <div className={`${styles.shine} ${styles.shinePremium}`} />
             
             {/* Thumbnail */}
             <div className={styles.thumbnail}>
@@ -89,10 +89,7 @@ export default function CourseCard({ course }: Props) {
                 {/* Badges Overlay */}
                 <div className={styles.badges}>
                     {course.isNew && <span className={`${styles.badge} ${styles.badgeNew}`}>{t.shared.new}</span>}
-                    {course.isFree
-                        ? <span className={`${styles.badge} ${styles.badgeFree}`}>{t.shared.free}</span>
-                        : <span className={`${styles.badge} ${styles.badgePremium}`}>{t.shared.premium}</span>
-                    }
+                    <span className={`${styles.badge} ${styles.badgePremium}`}>{t.shared.premium}</span>
                 </div>
 
                 {/* Level Overlay */}
@@ -129,13 +126,9 @@ export default function CourseCard({ course }: Props) {
 
                 <div className={styles.footer}>
                     <div className={styles.priceContainer}>
-                        {course.isFree ? (
-                            <span className={styles.freeText}>{t.shared.free}</span>
-                        ) : (
-                            <div className={styles.priceLayout}>
-                                <span className={styles.priceValue}>{formatPrice(course.price, t.shared.currency)}</span>
-                            </div>
-                        )}
+                        <div className={styles.priceLayout}>
+                            <span className={styles.priceValue}>{formatPrice(course.price, t.shared.currency)}</span>
+                        </div>
                     </div>
                     <div className={styles.actionIcon}>→</div>
                 </div>

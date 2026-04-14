@@ -102,17 +102,7 @@ export default function CoursesPage() {
                         </div>
 
                         <div className={styles.typeFilter}>
-                            {(['all', 'free', 'premium'] as const).map(f => (
-                                <button
-                                    key={f}
-                                    className={`${styles.filterBtn} ${filter === f ? styles.filterActive : ''}`}
-                                    onClick={() => setFilter(f)}
-                                >
-                                    {f === 'all' ? t.courses.allFilter :
-                                        f === 'free' ? t.courses.freeFilter :
-                                            t.courses.premiumFilter}
-                                </button>
-                            ))}
+                            {/* Hide free/premium filter since all courses are paid or accessed via trial */}
                         </div>
                     </div>
                 </div>

@@ -63,7 +63,6 @@ function LiveDot() {
 export default function HomePage() {
   const { t } = useLanguage();
   const [featuredCourses, setFeaturedCourses] = useState<CourseDB[]>([]);
-  const [freeCourses, setFreeCourses] = useState<CourseDB[]>([]);
   const [stats, setStats] = useState<SiteStats | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
@@ -73,7 +72,6 @@ export default function HomePage() {
       .then(r => r.json())
       .then((data: CourseDB[]) => {
         setFeaturedCourses(data.slice(0, 3));
-        setFreeCourses(data.filter(c => c.isFree).slice(0, 3));
       });
   }, []);
 
@@ -232,31 +230,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========== FREE COURSES ========== */}
-      <section className="section">
-        <div className="container">
-          <div className={styles.sectionHead}>
-            <div>
-              <div className="section-label">{t.home.freeSection}</div>
-              <h2 className="section-title">
-                {t.home.freeSectionTitle1} <span className="gradient-text">{t.home.freeSectionTitleGrad}</span>
-              </h2>
-              <p className="section-subtitle">{t.home.freeSectionSubtitle}</p>
-            </div>
-            <Link href="/courses" className="btn btn-outline">{t.home.viewAllFree}</Link>
-          </div>
 
-          <div className={styles.scrollContainer}>
-            <div className={styles.scrollContent}>
-              {freeCourses.map(course => (
-                <div key={course.id} className={styles.scrollItem}>
-                  <CourseCard course={course} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ========== FEATURES ========== */}
       <section className={`section ${styles.featuresSection}`}>
@@ -406,7 +380,7 @@ export default function HomePage() {
                   ? `${formatCount(enrollCount)} ta yozilish bilan qo'shiling. Bugun ${courseCount}+ kursga kiring.`
                   : t.language === 'ru'
                     ? `Присоединяйтесь к ${formatCount(enrollCount)} зачислениям. Доступ к ${courseCount}+ курсам сегодня.`
-                    : `Join ${formatCount(enrollCount)} enrollments. Access ${courseCount}+ courses today — no credit card required.`)
+                    : `Join ${formatCount(enrollCount)} enrollments. Access ${courseCount}+ courses today.`)
                 : t.home.ctaSubtitle}
             </p>
             <div className={styles.ctaButtons}>

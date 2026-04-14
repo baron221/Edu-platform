@@ -83,42 +83,7 @@ export default function PricingPage() {
                 </div>
             </section>
 
-            {/* Free Trial Banner/Section */}
-            <section className={styles.trialSection}>
-                <div className="container">
-                    <div className={styles.trialBox}>
-                        <div className="section-label" style={{ margin: '0 auto 20px' }}>SPECIAL OFFERS</div>
-                        <h2 className={styles.title} style={{ fontSize: '32px' }}>
-                            {t.trial.instructorTitle}
-                        </h2>
-                        <p className={styles.subtitle} style={{ marginBottom: '24px' }}>
-                           Try our educator features for 30 days. No credit card required.
-                        </p>
 
-                        <div className={styles.trialGrid} style={{ gridTemplateColumns: 'minmax(0, 500px)', justifyContent: 'center' }}>
-                            <div className={styles.trialCard}>
-                                <div className={styles.trialBadge}>FOR INSTRUCTORS</div>
-                                <h3>{t.trial.instructorTitle}</h3>
-                                <p>{t.trial.instructorDesc}</p>
-                                <button 
-                                    className="btn btn-secondary" 
-                                    onClick={() => handleTrial('instructor')}
-                                    disabled={!!activating}
-                                    style={{ width: '100%', justifyContent: 'center' }}
-                                >
-                                    {activating === 'instructor' ? t.trial.activating : t.trial.startInstructor}
-                                </button>
-                            </div>
-                        </div>
-
-                        {feedback && (
-                            <div className={`${styles.feedback} ${styles[feedback.type]}`}>
-                                {feedback.message}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </section>
 
             {/* Plans */}
             <section className={styles.plansSection}>
