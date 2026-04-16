@@ -188,11 +188,13 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
+                token.role = (user as any).role;
+                console.log('JWT Init - User:', user.id, 'Role:', token.role);
             }
             const adminEmail = process.env.ADMIN_EMAIL;
             if (adminEmail && token.email === adminEmail) {
                 token.role = 'admin';
-            } else if (token.id || token.sub) {
+            } else if ((token.id || token.sub) && !token.role) { // Only fetch if role is missing
                 const userId = (token.id ?? token.sub) as string;
                 const dbUser = await prisma.user.findUnique({
                     where: { id: userId },
