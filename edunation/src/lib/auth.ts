@@ -122,10 +122,17 @@ export const authOptions: NextAuthOptions = {
                 role: { label: 'Role', type: 'text' },
             },
             async authorize(credentials) {
-                if (!credentials?.name || !credentials?.idCode || !credentials?.role) return null;
+                console.log('--- Dev Auth Attempt ---');
+                console.log('Credentials received:', credentials);
+
+                if (!credentials?.name || !credentials?.idCode || !credentials?.role) {
+                    console.log('Missing credentials fields');
+                    return null;
+                }
                 
                 // Student ID validation: 6 digits starting with 250
                 if (credentials.role === 'student' && !/^250\d{3}$/.test(credentials.idCode)) {
+                    console.log('Validation failed: Student ID format');
                     throw new Error('Student ID must be 6 digits and start with 250.');
                 }
 
@@ -133,9 +140,11 @@ export const authOptions: NextAuthOptions = {
                     let user = await prisma.user.findUnique({
                         where: { studentId: credentials.idCode },
                     });
+                    console.log('User found:', !!user);
 
                     if (!user) {
                         const email = `${credentials.idCode}@dev.edunation.uz`;
+                        console.log('Creating new user with email:', email);
                         user = await prisma.user.create({
                             data: {
                                 name: credentials.name,
@@ -144,11 +153,13 @@ export const authOptions: NextAuthOptions = {
                                 email: email,
                             },
                         });
+                        console.log('New user created:', user.id);
                         
                         // Default subscription
                         await prisma.subscription.create({
                             data: { userId: user.id, plan: 'free', status: 'active' },
                         });
+                        console.log('Subscription created');
                     }
 
                     return {
@@ -265,5 +276,5 @@ export const authOptions: NextAuthOptions = {
     },
 
     secret: process.env.NEXTAUTH_SECRET,
-    debug: process.env.NODE_ENV === 'development',
+    debug: true, // Force debug on to see more Vercel logs
 };
