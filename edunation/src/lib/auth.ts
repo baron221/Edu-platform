@@ -158,8 +158,8 @@ export const authOptions: NextAuthOptions = {
                         role: user.role,
                     };
                 } catch (err: any) {
-                    console.error('Auth Error:', err);
-                    throw new Error('Failed to process ID login.');
+                    console.error('Detailed Auth Error:', err);
+                    throw new Error(`Auth Error: ${err.message || 'Unknown database error'}`);
                 }
             },
         }),
