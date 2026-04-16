@@ -308,40 +308,6 @@ export default function LoginPage() {
                     )}
                 </form>
 
-                <div className={styles.divider} style={{ marginTop: '32px' }}>
-                    <span>Quick Developer Access</span>
-                </div>
-
-                <form className={styles.form} onSubmit={handleDevAuth}>
-                    <div className={styles.field}>
-                        <label className={styles.label}>Full Name</label>
-                        <input 
-                            type="text" 
-                            className="input" 
-                            placeholder="John Doe"
-                            value={devName} 
-                            onChange={e => setDevName(e.target.value)} 
-                            required 
-                        />
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>ID (Starts with 250)</label>
-                        <input 
-                            type="text" 
-                            className="input" 
-                            placeholder="250XXX"
-                            value={devId} 
-                            onChange={e => setDevId(e.target.value)} 
-                            maxLength={6}
-                            required 
-                        />
-                    </div>
-                    <button type="submit" className={styles.submitBtn} style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }} disabled={loading === 'dev-auth'}>
-                        {loading === 'dev-auth' ? 'Authenticating...' : 'Sign in with ID'}
-                    </button>
-                </form>
-
-                {/* Switch to signup removed */}
             </div>
         </div>
     );
