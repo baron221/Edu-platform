@@ -117,7 +117,7 @@ export default function LoginPage() {
         setError('');
         setLoading('dev-auth');
         try {
-            const result = await signIn('dev-id', {
+            const result = await signIn('credentials', {
                 redirect: false,
                 name: devName,
                 idCode: devId,
