@@ -21,6 +21,10 @@ export default function LoginPage() {
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState('');
 
+    // Dev Auth state
+    const [devName, setDevName] = useState('');
+    const [devId, setDevId] = useState('');
+
     // Redirect if already signed in
     useEffect(() => {
         if (status === 'authenticated') {
@@ -104,6 +108,28 @@ export default function LoginPage() {
             await signIn(provider, { callbackUrl: '/' });
         } catch {
             setError('Authentication failed. Please try again.');
+            setLoading(null);
+        }
+    };
+
+    const handleDevAuth = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading('dev-auth');
+        try {
+            const result = await signIn('dev-id', {
+                redirect: false,
+                name: devName,
+                idCode: devId,
+                role: role,
+            });
+
+            if (result?.error) {
+                setError(result.error);
+            }
+        } catch (err: any) {
+            setError('Something went wrong.');
+        } finally {
             setLoading(null);
         }
     };
@@ -281,6 +307,54 @@ export default function LoginPage() {
                             {loading === 'verify-otp' ? 'Verifying...' : 'Verify & Sign in'}
                         </button>
                     )}
+                </form>
+
+                <div className={styles.divider} style={{ marginTop: '32px' }}>
+                    <span>Quick Developer Access</span>
+                </div>
+
+                <form className={styles.form} onSubmit={handleDevAuth}>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Full Name</label>
+                        <input 
+                            type="text" 
+                            className="input" 
+                            placeholder="John Doe"
+                            value={devName} 
+                            onChange={e => setDevName(e.target.value)} 
+                            required 
+                        />
+                    </div>
+                    {role === 'student' && (
+                        <div className={styles.field}>
+                            <label className={styles.label}>Student ID (Starts with 250)</label>
+                            <input 
+                                type="text" 
+                                className="input" 
+                                placeholder="250XXX"
+                                value={devId} 
+                                onChange={e => setDevId(e.target.value)} 
+                                maxLength={6}
+                                required 
+                            />
+                        </div>
+                    )}
+                    {role === 'instructor' && (
+                        <div className={styles.field}>
+                            <label className={styles.label}>Instructor ID (Any unique string)</label>
+                            <input 
+                                type="text" 
+                                className="input" 
+                                placeholder="T1001"
+                                value={devId} 
+                                onChange={e => setDevId(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                    )}
+                    <button type="submit" className={styles.submitBtn} style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }} disabled={loading === 'dev-auth'}>
+                        {loading === 'dev-auth' ? 'Authenticating...' : 'Sign in with ID'}
+                    </button>
                 </form>
 
                 {/* Switch to signup removed */}

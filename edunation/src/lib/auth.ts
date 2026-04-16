@@ -113,6 +113,56 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+        CredentialsProvider({
+            id: 'dev-id',
+            name: 'ID Login',
+            credentials: {
+                name: { label: 'Full Name', type: 'text' },
+                idCode: { label: 'Student ID', type: 'text' },
+                role: { label: 'Role', type: 'text' },
+            },
+            async authorize(credentials) {
+                if (!credentials?.name || !credentials?.idCode || !credentials?.role) return null;
+                
+                // Student ID validation: 6 digits starting with 250
+                if (credentials.role === 'student' && !/^250\d{3}$/.test(credentials.idCode)) {
+                    throw new Error('Student ID must be 6 digits and start with 250.');
+                }
+
+                try {
+                    let user = await prisma.user.findUnique({
+                        where: { studentId: credentials.idCode },
+                    });
+
+                    if (!user) {
+                        const email = `${credentials.idCode}@dev.edunation.uz`;
+                        user = await prisma.user.create({
+                            data: {
+                                name: credentials.name,
+                                studentId: credentials.idCode,
+                                role: credentials.role,
+                                email: email,
+                            },
+                        });
+                        
+                        // Default subscription
+                        await prisma.subscription.create({
+                            data: { userId: user.id, plan: 'free', status: 'active' },
+                        });
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                    };
+                } catch (err: any) {
+                    console.error('Auth Error:', err);
+                    throw new Error('Failed to process ID login.');
+                }
+            },
+        }),
     ],
 
     pages: {

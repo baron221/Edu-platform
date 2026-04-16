@@ -50,6 +50,7 @@ model User {
   password               String?
   telegramId             String?                 @unique
   phone                  String?                 @unique
+  studentId              String?                 @unique
   role                   String                  @default("student")
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
