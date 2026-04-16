@@ -270,9 +270,14 @@ export default function CourseEditorPage() {
                     <div className={styles.card}>
                         <div className={styles.cardHeader}>
                             <h2 className={styles.cardTitle}>📚 Course Curriculum ({course.lessons.length})</h2>
-                            <button className={styles.addLessonBtn} onClick={() => setShowLessonModal(true)}>
-                                + Add New Lesson
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <Link href={`/instructor/courses/${id}/exams`} className={styles.addLessonBtn} style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', textDecoration: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
+                                    🎓 Manage Exams
+                                </Link>
+                                <button className={styles.addLessonBtn} onClick={() => setShowLessonModal(true)}>
+                                    + Add New Lesson
+                                </button>
+                            </div>
                         </div>
 
                         <div className={styles.lessonList}>

@@ -612,6 +612,29 @@ export default function CourseDetailPage() {
                             </div>
                         )}
 
+                        {isEnrolled && course.exams && course.exams.length > 0 && (
+                            <div className={styles.enrollCard} style={{ border: '1px solid #c7d2fe', background: '#f5f7ff' }}>
+                                <h4 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 800, color: '#4338ca' }}>
+                                    🎓 Course Exams
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {course.exams.map((exam: any) => (
+                                        <button 
+                                            key={exam.id}
+                                            className="btn btn-primary"
+                                            style={{ width: '100%', justifyContent: 'center', fontSize: '13px', padding: '10px' }}
+                                            onClick={() => router.push(`/exams/${exam.id}`)}
+                                        >
+                                            {exam.type === 'FINAL' ? '🏆 Final Exam' : '📝 Midterm Exam'}: {exam.title}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p style={{ fontSize: '11px', color: '#6366f1', marginTop: '10px', fontWeight: 500 }}>
+                                    * Note: You can only take these once.
+                                </p>
+                            </div>
+                        )}
+
                         {/* Community Chat link */}
                         <Link
                             href={`/community/${course.id}`}

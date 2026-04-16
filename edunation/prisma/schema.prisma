@@ -79,6 +79,7 @@ model User {
   sessions               Session[]
   subscription           Subscription?
   subscriptionPayments   SubscriptionPayment[]
+  examAttempts           ExamAttempt[]
 }
 
 model PhoneOtp {
@@ -171,6 +172,7 @@ model Course {
   progress       Progress[]
   purchases      Purchase[]
   reviews        Review[]
+  exams          Exam[]
 }
 
 model Lesson {
@@ -490,4 +492,96 @@ model PromoCode {
   updatedAt     DateTime  @updatedAt
 
   @@index([code])
+}
+
+enum ExamType {
+  MIDTERM
+  FINAL
+}
+
+enum QuestionType {
+  MCQ
+  CODING
+}
+
+model Exam {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  type        ExamType @default(MIDTERM)
+  timeLimit   Int      @default(60) // in minutes
+  passingScore Int     @default(60)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   ExamQuestion[]
+  attempts    ExamAttempt[]
+
+  @@index([courseId])
+}
+
+model ExamQuestion {
+  id          String       @id @default(cuid())
+  examId      String
+  type        QuestionType @default(MCQ)
+  text        String
+  explanation String?
+  order       Int          @default(0)
+  points      Int          @default(1)
+  
+  // MCQ specific
+  options     ExamOption[]
+  
+  // Coding specific
+  language    String?      @default("cpp")
+  starterCode String?      @db.Text
+  testCases   Json?        // Array of { input: string, output: string }
+
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  responses   ExamResponse[]
+
+  @@index([examId])
+}
+
+model ExamOption {
+  id          String       @id @default(cuid())
+  questionId  String
+  text        String
+  isCorrect   Boolean      @default(false)
+  question    ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model ExamAttempt {
+  id          String       @id @default(cuid())
+  examId      String
+  userId      String
+  startTime   DateTime     @default(now())
+  submittedAt DateTime?
+  score       Float        @default(0)
+  status      String       @default("IN_PROGRESS") // IN_PROGRESS, SUBMITTED, GRADED
+  warningCount Int        @default(0)
+  
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses   ExamResponse[]
+
+  @@index([examId])
+  @@index([userId])
+  @@unique([userId, examId])
+}
+
+model ExamResponse {
+  id            String       @id @default(cuid())
+  attemptId     String
+  questionId    String
+  answer        String       @db.Text
+  isCorrect     Boolean?
+  pointsEarned  Float        @default(0)
+  feedback      String?
+
+  attempt       ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question      ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId])
 }
