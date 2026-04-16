@@ -123,14 +123,46 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.name || !credentials?.idCode || !credentials?.role) return null;
-                
-                // Return immediate success with mock user to test NextAuth pipe
-                return {
-                    id: `dev-${credentials.idCode}`,
-                    name: credentials.name,
-                    email: `${credentials.idCode}@dev.edunation.uz`,
-                    role: credentials.role as string,
-                };
+
+                // Student ID validation: 6 digits starting with 250
+                if (credentials.role === 'student' && !/^250\d{3}$/.test(credentials.idCode)) {
+                    throw new Error('Student ID must be 6 digits and start with 250.');
+                }
+
+                try {
+                    const email = `${credentials.idCode}@dev.edunation.uz`;
+                    
+                    const user = await prisma.user.upsert({
+                        where: { studentId: credentials.idCode },
+                        update: {
+                            name: credentials.name,
+                            role: credentials.role,
+                        },
+                        create: {
+                            name: credentials.name,
+                            studentId: credentials.idCode,
+                            role: credentials.role,
+                            email: email,
+                        },
+                    });
+
+                    // Ensure subscription exists
+                    await prisma.subscription.upsert({
+                        where: { userId: user.id },
+                        update: {},
+                        create: { userId: user.id, plan: 'free', status: 'active' },
+                    });
+
+                    return {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                    };
+                } catch (err: any) {
+                    console.error('Final Auth Error:', err);
+                    throw new Error(`Auth Error: ${err.message || 'Database sync failed'}`);
+                }
             },
         }),
     ],
