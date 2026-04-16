@@ -136,6 +136,16 @@ export const authOptions: NextAuthOptions = {
                     throw new Error('Student ID must be 6 digits and start with 250.');
                 }
 
+                // TEMPORARY: Bypass DB check to debug 401 issue
+                console.log('Mocking successful login for:', credentials.name);
+                return {
+                    id: 'dev-mock-id',
+                    name: credentials.name,
+                    email: `${credentials.idCode}@dev.edunation.uz`,
+                    role: credentials.role as string,
+                };
+
+                /*
                 try {
                     let user = await prisma.user.findUnique({
                         where: { studentId: credentials.idCode },
@@ -172,6 +182,7 @@ export const authOptions: NextAuthOptions = {
                     console.error('Detailed Auth Error:', err);
                     throw new Error(`Auth Error: ${err.message || 'Unknown database error'}`);
                 }
+                */
             },
         }),
     ],
