@@ -10,7 +10,7 @@ import prisma from '@/lib/prisma';
 import { notifyNewUser, notifySignIn } from '@/lib/telegram';
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    // adapter: PrismaAdapter(prisma),
 
     providers: [
         GoogleProvider({
