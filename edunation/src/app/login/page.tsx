@@ -121,7 +121,6 @@ export default function LoginPage() {
                 redirect: false,
                 name: devName,
                 idCode: devId,
-                role: role,
             });
 
             if (result?.error) {
@@ -325,33 +324,18 @@ export default function LoginPage() {
                             required 
                         />
                     </div>
-                    {role === 'student' && (
-                        <div className={styles.field}>
-                            <label className={styles.label}>Student ID (Starts with 250)</label>
-                            <input 
-                                type="text" 
-                                className="input" 
-                                placeholder="250XXX"
-                                value={devId} 
-                                onChange={e => setDevId(e.target.value)} 
-                                maxLength={6}
-                                required 
-                            />
-                        </div>
-                    )}
-                    {role === 'instructor' && (
-                        <div className={styles.field}>
-                            <label className={styles.label}>Instructor ID (Any unique string)</label>
-                            <input 
-                                type="text" 
-                                className="input" 
-                                placeholder="T1001"
-                                value={devId} 
-                                onChange={e => setDevId(e.target.value)} 
-                                required 
-                            />
-                        </div>
-                    )}
+                    <div className={styles.field}>
+                        <label className={styles.label}>ID (Starts with 250)</label>
+                        <input 
+                            type="text" 
+                            className="input" 
+                            placeholder="250XXX"
+                            value={devId} 
+                            onChange={e => setDevId(e.target.value)} 
+                            maxLength={6}
+                            required 
+                        />
+                    </div>
                     <button type="submit" className={styles.submitBtn} style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }} disabled={loading === 'dev-auth'}>
                         {loading === 'dev-auth' ? 'Authenticating...' : 'Sign in with ID'}
                     </button>

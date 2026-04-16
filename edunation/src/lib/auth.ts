@@ -119,39 +119,56 @@ export const authOptions: NextAuthOptions = {
             credentials: {
                 name: { label: 'Name', type: 'text' },
                 idCode: { label: 'ID', type: 'text' },
-                role: { label: 'Role', type: 'text' },
             },
             async authorize(credentials) {
-                if (!credentials?.name || !credentials?.idCode || !credentials?.role) return null;
+                if (!credentials?.name || !credentials?.idCode) return null;
 
                 // Student ID validation: 6 digits starting with 250
-                if (credentials.role === 'student' && !/^250\d{3}$/.test(credentials.idCode)) {
+                if (!/^250\d{3}$/.test(credentials.idCode)) {
                     throw new Error('Student ID must be 6 digits and start with 250.');
                 }
 
                 try {
                     const email = `${credentials.idCode}@dev.edunation.uz`;
+                    console.log('Syncing user:', credentials.idCode, email);
                     
-                    const user = await prisma.user.upsert({
+                    // 1. Try finding by studentId
+                    let user = await prisma.user.findUnique({
                         where: { studentId: credentials.idCode },
-                        update: {
-                            name: credentials.name,
-                            role: credentials.role,
-                        },
-                        create: {
-                            name: credentials.name,
-                            studentId: credentials.idCode,
-                            role: credentials.role,
-                            email: email,
-                        },
                     });
 
-                    // Ensure subscription exists
-                    await prisma.subscription.upsert({
-                        where: { userId: user.id },
-                        update: {},
-                        create: { userId: user.id, plan: 'free', status: 'active' },
-                    });
+                    // 2. If not found, try finding by email
+                    if (!user) {
+                        user = await prisma.user.findUnique({
+                            where: { email: email },
+                        });
+                    }
+
+                    if (user) {
+                        // Update existing user (don't overwrite role)
+                        user = await prisma.user.update({
+                            where: { id: user.id },
+                            data: {
+                                name: credentials.name,
+                                studentId: credentials.idCode,
+                            },
+                        });
+                        console.log('User updated:', user.id);
+                    } else {
+                        // Create new user (Role defaults to "student")
+                        user = await prisma.user.create({
+                            data: {
+                                name: credentials.name,
+                                studentId: credentials.idCode,
+                                email: email,
+                            },
+                        });
+                        console.log('User created:', user.id);
+                        
+                        await prisma.subscription.create({
+                            data: { userId: user.id, plan: 'free', status: 'active' },
+                        });
+                    }
 
                     return {
                         id: user.id,
@@ -160,8 +177,8 @@ export const authOptions: NextAuthOptions = {
                         role: user.role,
                     };
                 } catch (err: any) {
-                    console.error('Final Auth Error:', err);
-                    throw new Error(`Auth Error: ${err.message || 'Database sync failed'}`);
+                    console.error('Database Auth Error:', err);
+                    throw new Error(`Auth Error: ${err.message || 'Database synchronization failed'}`);
                 }
             },
         }),
