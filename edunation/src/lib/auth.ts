@@ -114,82 +114,23 @@ export const authOptions: NextAuthOptions = {
             },
         }),
         CredentialsProvider({
-            id: 'dev-id',
+            id: 'credentials', // Use standard ID
             name: 'ID Login',
             credentials: {
-                name: { label: 'Full Name', type: 'text' },
-                idCode: { label: 'Student ID', type: 'text' },
+                name: { label: 'Name', type: 'text' },
+                idCode: { label: 'ID', type: 'text' },
                 role: { label: 'Role', type: 'text' },
             },
             async authorize(credentials) {
-                console.log('--- Dev Auth Attempt ---');
-                console.log('Credentials received:', credentials);
-
-                if (!credentials?.name || !credentials?.idCode || !credentials?.role) {
-                    console.log('Missing credentials fields');
-                    return null;
-                }
+                if (!credentials?.name || !credentials?.idCode || !credentials?.role) return null;
                 
-                // Student ID validation: 6 digits starting with 250
-                if (credentials.role === 'student' && !/^250\d{3}$/.test(credentials.idCode)) {
-                    console.log('Validation failed: Student ID format');
-                    throw new Error('Student ID must be 6 digits and start with 250.');
-                }
-
-                try {
-                    const email = `${credentials.idCode}@dev.edunation.uz`;
-                    console.log('Syncing user:', credentials.idCode, email);
-                    
-                    // 1. Try finding by studentId
-                    let user = await prisma.user.findUnique({
-                        where: { studentId: credentials.idCode },
-                    });
-
-                    // 2. If not found, try finding by email (in case they previously logged in without studentId)
-                    if (!user) {
-                        user = await prisma.user.findUnique({
-                            where: { email: email },
-                        });
-                    }
-
-                    if (user) {
-                        // Update existing user
-                        user = await prisma.user.update({
-                            where: { id: user.id },
-                            data: {
-                                name: credentials.name,
-                                role: credentials.role,
-                                studentId: credentials.idCode, // Ensure studentId is set
-                            },
-                        });
-                        console.log('User updated:', user.id);
-                    } else {
-                        // Create new user
-                        user = await prisma.user.create({
-                            data: {
-                                name: credentials.name,
-                                studentId: credentials.idCode,
-                                role: credentials.role,
-                                email: email,
-                            },
-                        });
-                        console.log('User created:', user.id);
-                        
-                        await prisma.subscription.create({
-                            data: { userId: user.id, plan: 'free', status: 'active' },
-                        });
-                    }
-
-                    return {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        role: user.role,
-                    };
-                } catch (err: any) {
-                    console.error('Database Auth Error:', err);
-                    throw new Error(`Auth Error: ${err.message || 'Database synchronization failed'}`);
-                }
+                // Return immediate success with mock user to test NextAuth pipe
+                return {
+                    id: `dev-${credentials.idCode}`,
+                    name: credentials.name,
+                    email: `${credentials.idCode}@dev.edunation.uz`,
+                    role: credentials.role as string,
+                };
             },
         }),
     ],
