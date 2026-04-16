@@ -136,41 +136,33 @@ export const authOptions: NextAuthOptions = {
                     throw new Error('Student ID must be 6 digits and start with 250.');
                 }
 
-                // TEMPORARY: Bypass DB check to debug 401 issue
-                console.log('Mocking successful login for:', credentials.name);
-                return {
-                    id: 'dev-mock-id',
-                    name: credentials.name,
-                    email: `${credentials.idCode}@dev.edunation.uz`,
-                    role: credentials.role as string,
-                };
-
-                /*
                 try {
-                    let user = await prisma.user.findUnique({
+                    console.log('Searching for user with Student ID:', credentials.idCode);
+                    const email = `${credentials.idCode}@dev.edunation.uz`;
+                    
+                    // Use upsert to be safe
+                    const user = await prisma.user.upsert({
                         where: { studentId: credentials.idCode },
+                        update: {
+                            name: credentials.name,
+                            role: credentials.role,
+                        },
+                        create: {
+                            name: credentials.name,
+                            studentId: credentials.idCode,
+                            role: credentials.role,
+                            email: email,
+                        },
                     });
-                    console.log('User found:', !!user);
 
-                    if (!user) {
-                        const email = `${credentials.idCode}@dev.edunation.uz`;
-                        console.log('Creating new user with email:', email);
-                        user = await prisma.user.create({
-                            data: {
-                                name: credentials.name,
-                                studentId: credentials.idCode,
-                                role: credentials.role,
-                                email: email,
-                            },
-                        });
-                        console.log('New user created:', user.id);
-                        
-                        // Default subscription
-                        await prisma.subscription.create({
-                            data: { userId: user.id, plan: 'free', status: 'active' },
-                        });
-                        console.log('Subscription created');
-                    }
+                    console.log('User synced:', user.id);
+                    
+                    // Ensure subscription exists
+                    await prisma.subscription.upsert({
+                        where: { userId: user.id },
+                        update: {},
+                        create: { userId: user.id, plan: 'free', status: 'active' },
+                    });
 
                     return {
                         id: user.id,
@@ -179,10 +171,9 @@ export const authOptions: NextAuthOptions = {
                         role: user.role,
                     };
                 } catch (err: any) {
-                    console.error('Detailed Auth Error:', err);
-                    throw new Error(`Auth Error: ${err.message || 'Unknown database error'}`);
+                    console.error('Final Auth Error:', err);
+                    throw new Error(`Auth Error: ${err.message || 'Database sync failed'}`);
                 }
-                */
             },
         }),
     ],
