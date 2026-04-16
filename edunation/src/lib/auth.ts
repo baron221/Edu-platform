@@ -137,32 +137,48 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    console.log('Searching for user with Student ID:', credentials.idCode);
                     const email = `${credentials.idCode}@dev.edunation.uz`;
+                    console.log('Syncing user:', credentials.idCode, email);
                     
-                    // Use upsert to be safe
-                    const user = await prisma.user.upsert({
+                    // 1. Try finding by studentId
+                    let user = await prisma.user.findUnique({
                         where: { studentId: credentials.idCode },
-                        update: {
-                            name: credentials.name,
-                            role: credentials.role,
-                        },
-                        create: {
-                            name: credentials.name,
-                            studentId: credentials.idCode,
-                            role: credentials.role,
-                            email: email,
-                        },
                     });
 
-                    console.log('User synced:', user.id);
-                    
-                    // Ensure subscription exists
-                    await prisma.subscription.upsert({
-                        where: { userId: user.id },
-                        update: {},
-                        create: { userId: user.id, plan: 'free', status: 'active' },
-                    });
+                    // 2. If not found, try finding by email (in case they previously logged in without studentId)
+                    if (!user) {
+                        user = await prisma.user.findUnique({
+                            where: { email: email },
+                        });
+                    }
+
+                    if (user) {
+                        // Update existing user
+                        user = await prisma.user.update({
+                            where: { id: user.id },
+                            data: {
+                                name: credentials.name,
+                                role: credentials.role,
+                                studentId: credentials.idCode, // Ensure studentId is set
+                            },
+                        });
+                        console.log('User updated:', user.id);
+                    } else {
+                        // Create new user
+                        user = await prisma.user.create({
+                            data: {
+                                name: credentials.name,
+                                studentId: credentials.idCode,
+                                role: credentials.role,
+                                email: email,
+                            },
+                        });
+                        console.log('User created:', user.id);
+                        
+                        await prisma.subscription.create({
+                            data: { userId: user.id, plan: 'free', status: 'active' },
+                        });
+                    }
 
                     return {
                         id: user.id,
@@ -171,8 +187,8 @@ export const authOptions: NextAuthOptions = {
                         role: user.role,
                     };
                 } catch (err: any) {
-                    console.error('Final Auth Error:', err);
-                    throw new Error(`Auth Error: ${err.message || 'Database sync failed'}`);
+                    console.error('Database Auth Error:', err);
+                    throw new Error(`Auth Error: ${err.message || 'Database synchronization failed'}`);
                 }
             },
         }),
