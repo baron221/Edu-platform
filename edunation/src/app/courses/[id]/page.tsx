@@ -377,9 +377,9 @@ export default function CourseDetailPage() {
                         <div className={styles.videoSection}>
                             <div className={styles.videoWrapper}>
                                 {activeLesson && canWatch(activeLesson) ? (
-                                    activeLesson.muxPlaybackId ? (
+                                    (activeLesson.muxPlaybackId || (activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux:'))) ? (
                                         <MuxPlayer
-                                            playbackId={activeLesson.muxPlaybackId}
+                                            playbackId={activeLesson.muxPlaybackId || activeLesson.videoUrl.split(':')[1]}
                                             metadata={{
                                                 video_id: activeLesson.id,
                                                 video_title: activeLesson.title,
