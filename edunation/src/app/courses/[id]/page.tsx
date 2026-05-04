@@ -503,21 +503,21 @@ export default function CourseDetailPage() {
                                     )}
 
                                     {/* AI-Generated Extra Resources */}
-                                    {isEnrolled && canWatch(activeLesson) && activeLesson.resources && activeLesson.resources.length > 0 && (
+                                    {canWatch(activeLesson) && activeLesson.resources && activeLesson.resources.length > 0 && (
                                         <div style={{ marginTop: '24px' }}>
                                             <ResourceList resources={activeLesson.resources} />
                                         </div>
                                     )}
 
                                     {/* Pre-Generated Lesson Quiz */}
-                                    {isEnrolled && canWatch(activeLesson) && activeLesson.quizzes && activeLesson.quizzes.length > 0 && (
+                                    {canWatch(activeLesson) && activeLesson.quizzes && activeLesson.quizzes.length > 0 && (
                                         <div style={{ marginTop: '24px' }}>
                                             <QuizViewer quiz={activeLesson.quizzes[0]} />
                                         </div>
                                     )}
 
                                     {/* Dynamic On-Demand AI Practice Space */}
-                                    {isEnrolled && canWatch(activeLesson) && (!activeLesson.quizzes || activeLesson.quizzes.length === 0) && (
+                                    {canWatch(activeLesson) && (!activeLesson.quizzes || activeLesson.quizzes.length === 0) && (
                                         <div className={styles.quizWrapper} style={{ marginTop: '24px' }}>
                                             <h3 className={styles.quizSectionTitle}>🤖 Dynamic AI Practice Space</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
