@@ -274,7 +274,9 @@ export default function CourseDetailPage() {
         );
     }
 
-    const canWatch = (lesson: typeof activeLesson) => lesson.isFree || isSubscribed || isEnrolled || getsUniversityFreeAccess;
+    const isAdmin = session?.user && (session.user as any).role === 'admin';
+    const isInstructor = session?.user && (session.user as any).role === 'instructor' && course?.instructorId === (session.user as any).id;
+    const canWatch = (lesson: typeof activeLesson) => lesson.isFree || isSubscribed || isEnrolled || getsUniversityFreeAccess || isAdmin || isInstructor;
     const isLessonCompleted = (lessonId: string) => progress.some(p => p.lessonId === lessonId && p.completed);
 
     // Calculate progress percentage
