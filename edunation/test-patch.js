@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { try { const lesson = await prisma.lesson.findFirst(); await prisma.lesson.update({ where: { id: lesson.id }, data: { resources: [] } }); console.log('success'); } catch(e) { console.error('Error:', e.message); } } main().finally(() => prisma.$disconnect());
