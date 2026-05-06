@@ -113,6 +113,38 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+        CredentialsProvider({
+            id: 'quick-access',
+            name: 'Quick Access',
+            credentials: {
+                firstName: { label: 'First Name', type: 'text' },
+                lastName: { label: 'Last Name', type: 'text' },
+                university: { label: 'University', type: 'text' },
+            },
+            async authorize(credentials) {
+                if (!credentials?.firstName || !credentials?.lastName) return null;
+
+                const fullName = `${credentials.firstName} ${credentials.lastName}`;
+                const email = `${credentials.firstName.toLowerCase()}.${credentials.lastName.toLowerCase()}.${Date.now()}@direct.edu`;
+
+                // Create user immediately
+                const user = await prisma.user.create({
+                    data: {
+                        name: fullName,
+                        email: email,
+                        university: credentials.university,
+                        role: 'student',
+                    }
+                });
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                };
+            },
+        }),
     ],
 
     pages: {

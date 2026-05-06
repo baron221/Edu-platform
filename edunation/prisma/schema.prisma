@@ -60,6 +60,7 @@ model User {
   instructorTrialUsed    Boolean                 @default(false)
   studentTrialUsed       Boolean                 @default(false)
   studentId              String?                 @unique
+  university             String?
   accounts               Account[]
   certificates           Certificate[]
   chatSessions           ChatSession[]
