@@ -315,30 +315,40 @@ export default function CourseDetailPage() {
             </h3>
 
             <div className={styles.lessons}>
-                {course.lessons?.map((lesson: any, idx: number) => (
-                    <button
-                        key={lesson.id}
-                        className={`${styles.lessonItem} ${activeLesson?.id === lesson.id ? styles.lessonActive : ''} ${!canWatch(lesson) ? styles.lessonLocked : ''}`}
-                        onClick={() => setActiveLesson(lesson)}
-                    >
-                        <div className={styles.lessonNum}>{idx + 1}</div>
-                        <div className={styles.lessonInfo}>
-                            <div className={styles.lessonTitle}>{lesson.title}</div>
-                            <div className={styles.lessonDuration}>{lesson.duration}</div>
-                        </div>
-                        <div className={styles.lessonStatus}>
-                            {isLessonCompleted(lesson.id) ? (
-                                <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>✓</span>
-                            ) : lesson.isFree ? (
-                                <span className={styles.freeTag}>{t.courseDetail.free}</span>
-                            ) : canWatch(lesson) ? (
-                                <span>▶</span>
-                            ) : (
-                                <span className={styles.lockIcon}>🔒</span>
-                            )}
-                        </div>
-                    </button>
-                ))}
+                {course.lessons?.map((lesson: any, idx: number) => {
+                    const isCompleted = isLessonCompleted(lesson.id);
+                    const isPrevCompleted = idx === 0 || isLessonCompleted(course.lessons[idx - 1].id);
+                    const isLockedSequentially = !isPrevCompleted && !isAdmin && !isInstructor;
+                    const canAccess = canWatch(lesson) && !isLockedSequentially;
+
+                    return (
+                        <button
+                            key={lesson.id}
+                            className={`${styles.lessonItem} ${activeLesson?.id === lesson.id ? styles.lessonActive : ''} ${!canAccess ? styles.lessonLocked : ''}`}
+                            onClick={() => canAccess && setActiveLesson(lesson)}
+                            title={isLockedSequentially ? 'Please complete the previous lesson first' : ''}
+                        >
+                            <div className={styles.lessonNum}>{idx + 1}</div>
+                            <div className={styles.lessonInfo}>
+                                <div className={styles.lessonTitle}>{lesson.title}</div>
+                                <div className={styles.lessonDuration}>{lesson.duration}</div>
+                            </div>
+                            <div className={styles.lessonStatus}>
+                                {isCompleted ? (
+                                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>✓</span>
+                                ) : lesson.isFree ? (
+                                    <span className={styles.freeTag}>{t.courseDetail.free}</span>
+                                ) : isLockedSequentially ? (
+                                    <span className={styles.lockIcon} style={{ opacity: 0.5 }}>🔒</span>
+                                ) : canWatch(lesson) ? (
+                                    <span>▶</span>
+                                ) : (
+                                    <span className={styles.lockIcon}>🔒</span>
+                                )}
+                            </div>
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
