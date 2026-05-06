@@ -53,30 +53,65 @@ export default function CertificateModal({ courseName, studentName, instructorNa
                 {/* The Certificate Preview that will be screenshotted */}
                 <div className={styles.certWrapper}>
                     <div className={styles.certificate} ref={certRef}>
-                        <div className={styles.certBorder}>
-                            <div className={styles.certHeader}>
-                                <h1>Certificate of Completion</h1>
-                                <p>This certifies that</p>
+                        <div className={styles.guilloche} />
+                        
+                        {/* Decorative Corner Ornaments */}
+                        <svg className={`${styles.ornament} ${styles.topL}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                        </svg>
+                        <svg className={`${styles.ornament} ${styles.topR}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                        </svg>
+                        <svg className={`${styles.ornament} ${styles.botL}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                        </svg>
+                        <svg className={`${styles.ornament} ${styles.botR}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                        </svg>
+
+                        <div className={styles.innerBorder}>
+                            <div className={styles.platformRow}>
+                                <img src="/images/logo.png" alt="Logo" className={styles.logoImg} />
+                                <span className={styles.platformName}>EduNationUz</span>
                             </div>
 
-                            <div className={styles.studentName}>
-                                {studentName}
+                            <div className={styles.content}>
+                                <div className={styles.label}>Certificate of Completion</div>
+                                <h1 className={styles.mainTitle}>Completion</h1>
+                                <p className={styles.thisIs}>This is to certify that</p>
+                                <h2 className={styles.studentName}>{studentName}</h2>
+                                <p className={styles.hasCompleted}>has successfully completed the course</p>
+                                <h3 className={styles.courseTitle}>{courseName}</h3>
                             </div>
 
-                            <div className={styles.certBody}>
-                                <p>has successfully completed the course</p>
-                                <h2>{courseName}</h2>
-                            </div>
+                            <div className={styles.footer}>
+                                <div className={styles.signatureRow}>
+                                    <div className={styles.signer}>
+                                        <div className={styles.signatureSlot}>
+                                            <div className={styles.signatureText}>{instructorName}</div>
+                                        </div>
+                                        <div className={styles.footerLabel}>Instructor</div>
+                                    </div>
 
-                            <div className={styles.certFooter}>
-                                <div className={styles.signatureBlock}>
-                                    <div className={styles.signatureLine}></div>
-                                    <span>{instructorName}</span>
-                                    <span className={styles.signatureTitle}>Instructor</span>
-                                </div>
-                                <div className={styles.logoBlock}>
-                                    <span className={styles.logo}>🎓 EduNation</span>
-                                    <span className={styles.dateText}>Issued on: {new Date(date).toLocaleDateString()}</span>
+                                    <div className={styles.sealContainer}>
+                                        <div className={styles.goldenSeal}>
+                                            <div className={styles.sealInner}>
+                                                <span className={styles.sealLogo}>🏅</span>
+                                                <div className={styles.sealText}>Official<br/>Certified</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.signer}>
+                                        <div className={styles.signatureSlot}>
+                                            <div className={styles.verifDate}>{new Date(date).toLocaleDateString()}</div>
+                                        </div>
+                                        <div className={styles.footerLabel}>Date Issued</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
