@@ -43,29 +43,6 @@ export async function POST(request: Request) {
             return new NextResponse('Course not found', { status: 404 });
         }
 
-        // University Free Access Check
-        const isUniversityStudent = /^\d{6}@npuu\.uz$/i.test(userEmail);
-        const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
-        const getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
-
-        // New Student Free Access Check
-        const enrollmentCount = await prisma.enrollment.count({ where: { userId } });
-        const isNewStudent = enrollmentCount === 0;
-
-        // Only allow enrollment if the course is free (for this endpoint)
-        if (!course.isFree && !getsUniversityFreeAccess && !isNewStudent) {
-            // For paid courses, we'd normally verify payment here. 
-            // Since there's no payment gateway yet, we just block free enrollment.
-            // UNLESS the user has an active Pro subscription.
-            const subscription = await prisma.subscription.findUnique({
-                where: { userId }
-            });
-            const isPro = subscription?.status === 'active' && subscription.plan !== 'free';
-            if (!isPro) {
-                return new NextResponse('Payment required', { status: 402 });
-            }
-        }
-
         const enrollment = await prisma.enrollment.create({
             data: {
                 userId,

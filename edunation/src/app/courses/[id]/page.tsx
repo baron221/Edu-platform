@@ -33,9 +33,6 @@ export default function CourseDetailPage() {
     const [activeLesson, setActiveLesson] = useState<any>(null);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isEnrolled, setIsEnrolled] = useState(false);
-    const [getsUniversityFreeAccess, setGetsUniversityFreeAccess] = useState(false);
-    const [isNewStudent, setIsNewStudent] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [progress, setProgress] = useState<any[]>([]);
     const [error, setError] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
@@ -60,8 +57,6 @@ export default function CourseDetailPage() {
                 setCourse(data);
                 setIsSubscribed(data.isSubscribed);
                 setIsEnrolled(data.isEnrolled);
-                setGetsUniversityFreeAccess(data.getsUniversityFreeAccess);
-                setIsNewStudent(data.isNewStudent || false);
                 setProgress(data.progress || []);
                 if (data.lessons && data.lessons.length > 0) {
                     setActiveLesson(data.lessons[0]);
@@ -553,36 +548,13 @@ export default function CourseDetailPage() {
                                 <span className={styles.statValue}>{totalLessons} lessons</span>
                             </div>
                         </div>
-                        {getsUniversityFreeAccess && !isEnrolled && (
-                            <div className={styles.enrollCard} style={{ border: '2px solid #10b981' }}>
-                                <div className={styles.enrollFree}>University Free Access</div>
-                                <p className={styles.enrollDesc}>As a student of National Pedagogical University, you have free access to this course.</p>
-                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', background: '#10b981', borderColor: '#10b981' }} onClick={handleEnroll} disabled={enrolling}>
-                                    {enrolling ? 'Enrolling...' : 'Claim Free Access'}
-                                </button>
-                            </div>
-                        )}
-                        {isNewStudent && !isEnrolled && (
+                        {!isEnrolled && (
                             <div className={styles.enrollCard} style={{ border: '2px solid #7c3aed', background: '#f5f3ff' }}>
-                                <div className={styles.enrollFree} style={{ color: '#7c3aed' }}>🎁 Welcome Gift</div>
-                                <p className={styles.enrollDesc}>As a new student, you can claim your <b>first course for free!</b></p>
+                                <div className={styles.enrollFree} style={{ color: '#7c3aed' }}>🎁 Free Access</div>
+                                <p className={styles.enrollDesc}>This course is currently <b>free for all students!</b> Start learning today.</p>
                                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
-                                    {enrolling ? 'Enrolling...' : 'Claim First Course Free'}
+                                    {enrolling ? 'Enrolling...' : 'Start Learning for Free'}
                                 </button>
-                            </div>
-                        )}
-
-                        {!isSubscribed && !isEnrolled && !getsUniversityFreeAccess && !isNewStudent && (
-                            <div className={styles.enrollCard}>
-                                <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
-                                <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>
-                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setShowPaymentModal(true)} disabled={enrolling}>
-                                    {enrolling ? 'Enrolling...' : t.courseDetail.enrollNow}
-                                </button>
-                                <Link href="/pricing" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}>
-                                    {t.courseDetail.tryPro} – 370 000 {t.shared.currency}{t.shared.mo}
-                                </Link>
-                                <p className={styles.enrollNote}>{t.courseDetail.moneyBack}</p>
                             </div>
                         )}
 

@@ -60,10 +60,8 @@ export async function GET(
             });
             isEnrolled = !!enrollment;
 
-            const subscription = await prisma.subscription.findUnique({
-                where: { userId: userId }
-            });
-            isSubscribed = subscription?.status === 'active' && subscription.plan !== 'free';
+            // Subscriptions are effectively unlimited for now
+            isSubscribed = true;
 
             progress = await prisma.progress.findMany({
                 where: {
@@ -71,13 +69,7 @@ export async function GET(
                     courseId: course.id
                 }
             });
-            const isUniversityStudent = /^\d{6}@npuu\.uz$/i.test(userEmail);
-            const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
-            getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
-
-            // Check if user is a new student (0 enrollments)
-            const enrollmentCount = await prisma.enrollment.count({ where: { userId } });
-            (course as any).isNewStudent = enrollmentCount === 0;
+            getsUniversityFreeAccess = true; // Everyone gets free access
         }
 
         return NextResponse.json({
