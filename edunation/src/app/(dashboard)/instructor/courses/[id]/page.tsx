@@ -31,7 +31,7 @@ interface Course {
     lessons: Lesson[];
 }
 
-const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business', 'English', 'IELTS', 'Multilevel', 'Pedagogy Assessment'];
+const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business', 'English', 'IELTS', 'Multilevel', 'Pedagogy', 'Assessment'];
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
 export default function CourseEditorPage() {

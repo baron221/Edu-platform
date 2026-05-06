@@ -39,6 +39,8 @@ export default function CourseDetailPage() {
     const [updatingProgress, setUpdatingProgress] = useState(false);
     const [showCert, setShowCert] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [isVideoFinished, setIsVideoFinished] = useState(false);
+
     const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
     const [showManualForm, setShowManualForm] = useState(false);
@@ -99,6 +101,10 @@ export default function CourseDetailPage() {
 
         return () => clearInterval(interval);
     }, [activeLesson, course?.id]);
+
+    useEffect(() => {
+        setIsVideoFinished(false);
+    }, [activeLesson?.id]);
 
     const handleEnroll = async () => {
         setEnrolling(true);
@@ -400,6 +406,7 @@ export default function CourseDetailPage() {
                                             accentColor="#06b6d4"
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
                                             onEnded={() => {
+                                                setIsVideoFinished(true);
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
                                                 }
@@ -423,6 +430,7 @@ export default function CourseDetailPage() {
                                             onContextMenu={e => e.preventDefault()}
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
                                             onEnded={() => {
+                                                setIsVideoFinished(true);
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
                                                 }
@@ -490,14 +498,15 @@ export default function CourseDetailPage() {
                                             <p className={styles.videoDesc}>{activeLesson.description}</p>
                                             <div className={styles.videoDuration}>⏱ {activeLesson.duration}</div>
                                         </div>
-                                        {isEnrolled && canWatch(activeLesson) && (isAdmin || isInstructor) && (
+                                        {isEnrolled && canWatch(activeLesson) && (
                                             <button
                                                 className={`btn ${isLessonCompleted(activeLesson.id) ? 'btn-secondary' : 'btn-primary'}`}
                                                 onClick={handleMarkComplete}
-                                                disabled={updatingProgress}
-                                                style={{ marginLeft: '1rem', flexShrink: 0 }}
+                                                disabled={updatingProgress || (!isVideoFinished && !isAdmin && !isInstructor)}
+                                                style={{ marginLeft: '1rem', flexShrink: 0, opacity: (!isVideoFinished && !isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) ? 0.5 : 1 }}
+                                                title={(!isVideoFinished && !isAdmin && !isInstructor) ? 'Please watch the video until the end to mark as complete' : ''}
                                             >
-                                                {isLessonCompleted(activeLesson.id) ? '✓ Completed' : 'Mark as Complete'}
+                                                {isLessonCompleted(activeLesson.id) ? '✓ Completed' : isVideoFinished ? 'Mark as Complete' : 'Watch to Complete'}
                                             </button>
                                         )}
                                     </div>

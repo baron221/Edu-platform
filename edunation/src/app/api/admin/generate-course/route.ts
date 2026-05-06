@@ -73,7 +73,7 @@ export async function POST(req: Request) {
             system: `You are an expert curriculum designer and educator for EduNationUz.
             IMPORTANT:
             1. Generate ALL content entirely in ${targetLanguage}.
-            2. For the 'category' field, you MUST choose from this specific list only: 'Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business', 'Mathematics', 'English', 'IELTS', 'Multilevel', 'Video Editing', 'Technology', 'Pedagogy Assessment'.
+            2. For the 'category' field, you MUST choose from this specific list only: 'Web Development', 'Data Science', 'Design', 'Marketing', 'Mobile Development', 'Business', 'Mathematics', 'English', 'IELTS', 'Multilevel', 'Video Editing', 'Technology', 'Pedagogy', 'Assessment'.
             3. Do not translate the category names themselves into ${targetLanguage}; use the English category names from the list above.`,
             prompt: `Topic: ${topic}`,
         });
