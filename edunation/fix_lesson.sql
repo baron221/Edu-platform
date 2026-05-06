@@ -1,0 +1,1 @@
+UPDATE "Lesson" SET "muxAssetId" = 'Vy202oBeihAzvHCUHr00tLgasmxYGXjXGN1g5OFOlxppc', "muxPlaybackId" = 'EAi94YC401f5FWkhVq2hUb9cRGPqc00NPPa8BcDuDATBc', "videoUrl" = 'mux:EAi94YC401f5FWkhVq2hUb9cRGPqc00NPPa8BcDuDATBc' WHERE "id" = 'cmoq3bj3f00028f8et6gi9j3b';

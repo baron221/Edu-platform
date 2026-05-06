@@ -490,7 +490,7 @@ export default function CourseDetailPage() {
                                             <p className={styles.videoDesc}>{activeLesson.description}</p>
                                             <div className={styles.videoDuration}>⏱ {activeLesson.duration}</div>
                                         </div>
-                                        {isEnrolled && canWatch(activeLesson) && (
+                                        {isEnrolled && canWatch(activeLesson) && (isAdmin || isInstructor) && (
                                             <button
                                                 className={`btn ${isLessonCompleted(activeLesson.id) ? 'btn-secondary' : 'btn-primary'}`}
                                                 onClick={handleMarkComplete}
