@@ -34,6 +34,7 @@ export default function CourseDetailPage() {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [getsUniversityFreeAccess, setGetsUniversityFreeAccess] = useState(false);
+    const [isNewStudent, setIsNewStudent] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [progress, setProgress] = useState<any[]>([]);
     const [error, setError] = useState(false);
@@ -60,6 +61,7 @@ export default function CourseDetailPage() {
                 setIsSubscribed(data.isSubscribed);
                 setIsEnrolled(data.isEnrolled);
                 setGetsUniversityFreeAccess(data.getsUniversityFreeAccess);
+                setIsNewStudent(data.isNewStudent || false);
                 setProgress(data.progress || []);
                 if (data.lessons && data.lessons.length > 0) {
                     setActiveLesson(data.lessons[0]);
@@ -560,8 +562,17 @@ export default function CourseDetailPage() {
                                 </button>
                             </div>
                         )}
+                        {isNewStudent && !isEnrolled && (
+                            <div className={styles.enrollCard} style={{ border: '2px solid #7c3aed', background: '#f5f3ff' }}>
+                                <div className={styles.enrollFree} style={{ color: '#7c3aed' }}>🎁 Welcome Gift</div>
+                                <p className={styles.enrollDesc}>As a new student, you can claim your <b>first course for free!</b></p>
+                                <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleEnroll} disabled={enrolling}>
+                                    {enrolling ? 'Enrolling...' : 'Claim First Course Free'}
+                                </button>
+                            </div>
+                        )}
 
-                        {!isSubscribed && !isEnrolled && !getsUniversityFreeAccess && (
+                        {!isSubscribed && !isEnrolled && !getsUniversityFreeAccess && !isNewStudent && (
                             <div className={styles.enrollCard}>
                                 <div className={styles.enrollPrice}>{formatUZS(course.price, t.shared.currency)}</div>
                                 <p className={styles.enrollDesc}>{t.courseDetail.oneTimePurchase}</p>

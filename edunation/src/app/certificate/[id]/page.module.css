@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@400;500;600;700;800&family=Pinyon+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;800&display=swap');
 
 .page {
     min-height: 100vh;
-    background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+    background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 860px;
+    max-width: 900px;
     margin-bottom: 40px;
 }
 
@@ -37,161 +37,205 @@
 }
 
 .printBtn {
-    background: linear-gradient(135deg, #f59e0b, #b45309);
-    color: white;
+    background: linear-gradient(135deg, #d4af37, #b8860b);
+    color: #451a03;
     padding: 12px 28px;
     border-radius: 12px;
     border: none;
     cursor: pointer;
     font-size: 15px;
-    font-weight: 700;
-    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+    font-weight: 800;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
     transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .printBtn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
 }
 
 /* Certificate Outer Frame */
 .certFrame {
     width: 100%;
-    max-width: 860px;
-    padding: 24px;
-    background: linear-gradient(135deg, #d4af37, #f9f295, #b8860b, #f9f295, #d4af37);
-    border-radius: 4px;
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+    max-width: 1000px;
+    padding: 20px;
+    background: #0f172a;
+    border-radius: 8px;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(212, 175, 55, 0.2);
     position: relative;
+    overflow: hidden;
+}
+
+.certFrame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 45%, rgba(212, 175, 55, 0.1) 50%, transparent 55%);
+    background-size: 200% 200%;
+    animation: shine 10s infinite linear;
+}
+
+@keyframes shine {
+    0% { background-position: -200% -200%; }
+    100% { background-position: 200% 200%; }
 }
 
 /* Main Certificate Body */
 .cert {
     position: relative;
-    background: #fff;
+    background: #fdfcf7;
     background-image: 
-        radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 70%),
-        url("https://www.transparenttextures.com/patterns/linen.png");
-    padding: 60px;
-    min-height: 600px;
+        url("https://www.transparenttextures.com/patterns/natural-paper.png"),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 1) 0%, rgba(248, 245, 235, 1) 100%);
+    padding: 0;
+    aspect-ratio: 1.414 / 1; /* A4 Landscape ratio */
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 40px solid transparent;
-    border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 0 L100 0 L100 100 L0 100 Z' fill='none' stroke='%23d4af37' stroke-width='2'/%3E%3C/svg%3E") 30 stretch;
+    border: 3px solid #1e293b;
+    box-sizing: border-box;
 }
 
 .innerBorder {
-    border: 1px solid rgba(184, 134, 11, 0.4);
-    width: 100%;
-    height: 100%;
-    padding: 40px;
+    border: 1px solid #1e293b;
+    margin: 15px;
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    padding: 40px;
+    box-sizing: border-box;
 }
 
 /* Ornaments */
-.corner {
+.ornament {
     position: absolute;
-    width: 80px;
-    height: 80px;
-    border: 2px solid #d4af37;
-    z-index: 2;
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+    opacity: 0.8;
 }
 
-.topL { top: 10px; left: 10px; border-right: none; border-bottom: none; }
-.topR { top: 10px; right: 10px; border-left: none; border-bottom: none; }
-.botL { bottom: 10px; left: 10px; border-right: none; border-top: none; }
-.botR { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+.topL { top: 10px; left: 10px; }
+.topR { top: 10px; right: 10px; transform: rotate(90deg); }
+.botL { bottom: 10px; left: 10px; transform: rotate(-90deg); }
+.botR { bottom: 10px; right: 10px; transform: rotate(180deg); }
 
 .platformRow {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    margin-bottom: 40px;
+    gap: 12px;
+    margin-bottom: 20px;
+    z-index: 5;
 }
 
 .platformIcon {
-    font-size: 40px;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .platformName {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 900;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 700;
     color: #1e293b;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
 }
 
 .content {
     text-align: center;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    z-index: 5;
 }
 
 .label {
-    font-size: 14px;
-    font-weight: 800;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 700;
     color: #b8860b;
     text-transform: uppercase;
-    letter-spacing: 0.4em;
-    margin-bottom: 24px;
+    letter-spacing: 0.5em;
+    margin-bottom: 20px;
+}
+
+.mainTitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 10px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .thisIs {
-    font-size: 18px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
     font-style: italic;
-    color: #64748b;
-    margin-bottom: 12px;
+    color: #475569;
+    margin-bottom: 30px;
 }
 
 .studentName {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(40px, 6vw, 64px);
-    font-weight: 900;
-    color: #1e293b;
-    margin-bottom: 16px;
-    text-shadow: 1px 1px 0px white, 2px 2px 0px rgba(0,0,0,0.05);
+    font-family: 'Great Vibes', cursive;
+    font-size: clamp(48px, 8vw, 84px);
+    font-weight: 400;
+    color: #1d4ed8; /* Elegant Blue */
+    margin: 0 0 30px;
+    line-height: 1.2;
+    padding-bottom: 10px;
+    border-bottom: 1px double rgba(184, 134, 11, 0.3);
+    width: fit-content;
+    align-self: center;
 }
 
 .hasCompleted {
-    font-size: 18px;
-    color: #64748b;
-    margin-bottom: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: #475569;
+    margin-bottom: 15px;
 }
 
 .courseTitle {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(24px, 4vw, 36px);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 4.5vw, 42px);
     font-weight: 700;
-    color: #b8860b;
-    margin-bottom: 20px;
-    max-width: 600px;
-    line-height: 1.2;
+    color: #1e293b;
+    margin: 0 auto 15px;
+    max-width: 80%;
+    line-height: 1.1;
 }
 
 .categoryBadge {
     display: inline-block;
-    padding: 6px 16px;
-    background: rgba(184, 134, 11, 0.1);
+    padding: 4px 14px;
+    background: rgba(184, 134, 11, 0.05);
     border: 1px solid rgba(184, 134, 11, 0.2);
-    border-radius: 50px;
-    font-size: 12px;
+    border-radius: 4px;
+    font-size: 11px;
     font-weight: 700;
     color: #8a6d3b;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    align-self: center;
 }
 
 /* Footer & Signatures */
 .footer {
     width: 100%;
-    margin-top: 60px;
-    margin-bottom: 40px;
+    margin-top: 40px;
+    z-index: 5;
 }
 
 .signatureRow {
@@ -199,75 +243,77 @@
     justify-content: space-between;
     align-items: flex-end;
     width: 100%;
+    padding: 0 40px;
 }
 
 .signer {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 200px;
 }
 
 .signatureSlot {
-    width: 180px;
-    border-bottom: 1px solid #d4af37;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    height: 60px;
+    width: 100%;
+    border-bottom: 1.5px solid #1e293b;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    height: 50px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
 }
 
 .signatureText {
-    font-family: 'Pinyon Script', cursive;
+    font-family: 'Great Vibes', cursive;
     font-size: 32px;
     color: #1e293b;
-    line-height: 1;
+    line-height: 0.8;
 }
 
 .verifDate {
+    font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 16px;
     color: #1e293b;
 }
 
 .footerLabel {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
 }
 
 /* Golden Seal */
 .sealContainer {
-    flex: 1;
     display: flex;
     justify-content: center;
     position: relative;
+    margin-bottom: -20px;
 }
 
 .goldenSeal {
-    width: 110px;
-    height: 110px;
+    width: 120px;
+    height: 120px;
     background: radial-gradient(circle, #f9f295, #d4af37, #b8860b);
     border-radius: 50%;
-    padding: 4px;
+    padding: 5px;
     box-shadow: 
-        0 8px 24px rgba(184, 134, 11, 0.4),
-        inset 0 0 15px rgba(255, 255, 255, 0.5);
+        0 8px 30px rgba(184, 134, 11, 0.4),
+        inset 0 0 15px rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
 }
 
-.goldenSeal::before {
+.goldenSeal::after {
     content: '';
     position: absolute;
-    inset: -6px;
-    border: 2px dashed #b8860b;
+    inset: -2px;
+    border: 2px solid #b8860b;
     border-radius: 50%;
 }
 
@@ -275,7 +321,7 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -283,12 +329,13 @@
     text-align: center;
 }
 
-.sealLogo { font-size: 32px; margin-bottom: 2px; }
+.sealLogo { font-size: 36px; margin-bottom: -5px; }
 .sealText {
-    font-size: 7px;
+    font-size: 8px;
     font-weight: 900;
-    color: #78350f;
-    line-height: 1;
+    color: #451a03;
+    line-height: 1.1;
+    text-transform: uppercase;
 }
 
 /* Meta */
@@ -296,20 +343,33 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
+    padding: 20px 40px 0;
+    margin-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    z-index: 5;
 }
 
 .certId {
-    font-size: 10px;
+    font-size: 9px;
     color: #94a3b8;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .verifyLink {
-    font-size: 10px;
+    font-size: 9px;
     color: #94a3b8;
     font-weight: 600;
+}
+
+/* Guilloche Pattern Background */
+.guilloche {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        repeating-linear-gradient(45deg, rgba(184, 134, 11, 0.02) 0px, rgba(184, 134, 11, 0.02) 1px, transparent 1px, transparent 10px),
+        repeating-linear-gradient(-45deg, rgba(184, 134, 11, 0.02) 0px, rgba(184, 134, 11, 0.02) 1px, transparent 1px, transparent 10px);
+    pointer-events: none;
 }
 
 /* Print Overrides */
@@ -332,17 +392,20 @@
     }
 
     .cert {
-        border-width: 20px !important;
-        min-height: auto !important;
+        border-width: 2px !important;
         width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1.414 / 1 !important;
         box-sizing: border-box !important;
     }
 }
 
-@media (max-width: 768px) {
-    .cert { padding: 30px; border-width: 20px !important; }
+@media (max-width: 900px) {
+    .cert { aspect-ratio: auto; padding-bottom: 40px; }
     .innerBorder { padding: 20px; }
-    .signatureRow { flex-direction: column; align-items: center; gap: 40px; }
-    .studentName { font-size: 36px; }
-    .courseTitle { font-size: 22px; }
-}
+    .mainTitle { font-size: 40px; }
+    .studentName { font-size: 48px; }
+    .courseTitle { font-size: 24px; }
+    .signatureRow { flex-direction: column; align-items: center; gap: 30px; }
+    .sealContainer { margin-top: 20px; }
+}

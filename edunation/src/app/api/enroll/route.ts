@@ -48,8 +48,12 @@ export async function POST(request: Request) {
         const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
         const getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
 
+        // New Student Free Access Check
+        const enrollmentCount = await prisma.enrollment.count({ where: { userId } });
+        const isNewStudent = enrollmentCount === 0;
+
         // Only allow enrollment if the course is free (for this endpoint)
-        if (!course.isFree && !getsUniversityFreeAccess) {
+        if (!course.isFree && !getsUniversityFreeAccess && !isNewStudent) {
             // For paid courses, we'd normally verify payment here. 
             // Since there's no payment gateway yet, we just block free enrollment.
             // UNLESS the user has an active Pro subscription.

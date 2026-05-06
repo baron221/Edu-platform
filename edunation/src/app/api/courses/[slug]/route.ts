@@ -74,6 +74,10 @@ export async function GET(
             const isUniversityStudent = /^\d{6}@npuu\.uz$/i.test(userEmail);
             const isEligibleCategory = ['math', 'it', 'web development', 'computer science', 'english'].includes(course.category.toLowerCase());
             getsUniversityFreeAccess = isUniversityStudent && isEligibleCategory;
+
+            // Check if user is a new student (0 enrollments)
+            const enrollmentCount = await prisma.enrollment.count({ where: { userId } });
+            (course as any).isNewStudent = enrollmentCount === 0;
         }
 
         return NextResponse.json({

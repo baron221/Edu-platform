@@ -49,16 +49,32 @@ export default function CertificatePage() {
         <div className={styles.page}>
             <div className={styles.actions}>
                 <Link href="/dashboard" className={styles.backLink}>{tr.back}</Link>
-                <button className={styles.printBtn} onClick={() => window.print()}>{tr.print}</button>
+                <button className={styles.printBtn} onClick={() => window.print()}>
+                    <span>🖨️</span> {tr.print}
+                </button>
             </div>
 
             <div className={styles.certFrame}>
                 <div className={styles.cert} id="certificate">
-                    {/* Decorative Corner Ornaments */}
-                    <div className={`${styles.corner} ${styles.topL}`} />
-                    <div className={`${styles.corner} ${styles.topR}`} />
-                    <div className={`${styles.corner} ${styles.botL}`} />
-                    <div className={`${styles.corner} ${styles.botR}`} />
+                    <div className={styles.guilloche} />
+                    
+                    {/* Decorative Corner Ornaments - SVG for premium look */}
+                    <svg className={`${styles.ornament} ${styles.topL}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                        <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                    </svg>
+                    <svg className={`${styles.ornament} ${styles.topR}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                        <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                    </svg>
+                    <svg className={`${styles.ornament} ${styles.botL}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                        <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                    </svg>
+                    <svg className={`${styles.ornament} ${styles.botR}`} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 10V40M10 10H40M10 10L30 30" stroke="#b8860b" strokeWidth="2" strokeLinecap="round"/>
+                        <circle cx="10" cy="10" r="2" fill="#b8860b"/>
+                    </svg>
 
                     <div className={styles.innerBorder}>
                         <div className={styles.platformRow}>
@@ -68,10 +84,11 @@ export default function CertificatePage() {
 
                         <div className={styles.content}>
                             <div className={styles.label}>{tr.label}</div>
+                            <h1 className={styles.mainTitle}>Completion</h1>
                             <p className={styles.thisIs}>{tr.thisIs}</p>
-                            <h1 className={styles.studentName}>{cert.user.name || 'Dedicated Learner'}</h1>
+                            <h2 className={styles.studentName}>{cert.user.name || 'Dedicated Learner'}</h2>
                             <p className={styles.hasCompleted}>{tr.hasCompleted}</p>
-                            <h2 className={styles.courseTitle}>{cert.course.title}</h2>
+                            <h3 className={styles.courseTitle}>{cert.course.title}</h3>
                             <div className={styles.categoryBadge}>{cert.course.category}</div>
                         </div>
 
@@ -87,8 +104,8 @@ export default function CertificatePage() {
                                 <div className={styles.sealContainer}>
                                     <div className={styles.goldenSeal}>
                                         <div className={styles.sealInner}>
-                                            <span className={styles.sealLogo}>🎓</span>
-                                            <div className={styles.sealText}>OFFICIAL SEAL</div>
+                                            <span className={styles.sealLogo}>🏅</span>
+                                            <div className={styles.sealText}>Official<br/>Certified</div>
                                         </div>
                                     </div>
                                 </div>
@@ -104,7 +121,7 @@ export default function CertificatePage() {
 
                         <div className={styles.bottomMeta}>
                             <div className={styles.certId}>{tr.certId}: {cert.id}</div>
-                            <div className={styles.verifyLink}>Verify at: edunation.uz/verify</div>
+                            <div className={styles.verifyLink}>Verify authenticity at: <b>edunation.uz/verify</b></div>
                         </div>
                     </div>
                 </div>
