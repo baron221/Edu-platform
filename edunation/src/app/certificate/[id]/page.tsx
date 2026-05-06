@@ -78,7 +78,7 @@ export default function CertificatePage() {
 
                     <div className={styles.innerBorder}>
                         <div className={styles.platformRow}>
-                            <div className={styles.platformIcon}>🎓</div>
+                            <img src="/images/logo.png" alt="NPUU Logo" className={styles.logoImg} />
                             <span className={styles.platformName}>EduNationUz</span>
                         </div>
 
