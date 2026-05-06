@@ -122,20 +122,42 @@ export const authOptions: NextAuthOptions = {
                 university: { label: 'University', type: 'text' },
             },
             async authorize(credentials) {
-                if (!credentials?.firstName || !credentials?.lastName) return null;
+                if (!credentials?.firstName || !credentials?.lastName || !credentials?.university) return null;
 
-                const fullName = `${credentials.firstName} ${credentials.lastName}`;
-                const email = `${credentials.firstName.toLowerCase()}.${credentials.lastName.toLowerCase()}.${Date.now()}@direct.edu`;
+                const fullName = `${credentials.firstName.trim()} ${credentials.lastName.trim()}`;
+                const university = credentials.university.trim();
+                
+                // Create a deterministic email based on name and university to find the same user later
+                const slugName = fullName.toLowerCase().replace(/\s+/g, '.');
+                const slugUni = university.toLowerCase().replace(/\s+/g, '.');
+                const stableEmail = `${slugName}.${slugUni}@direct.edunation.uz`;
 
-                // Create user immediately
-                const user = await prisma.user.create({
-                    data: {
-                        name: fullName,
-                        email: email,
-                        university: credentials.university,
-                        role: 'student',
+                // 1. Try to find existing user first
+                let user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            { email: stableEmail },
+                            {
+                                AND: [
+                                    { name: fullName },
+                                    { university: university }
+                                ]
+                            }
+                        ]
                     }
                 });
+
+                // 2. If not found, create a new one
+                if (!user) {
+                    user = await prisma.user.create({
+                        data: {
+                            name: fullName,
+                            email: stableEmail,
+                            university: university,
+                            role: 'student',
+                        }
+                    });
+                }
 
                 return {
                     id: user.id,
