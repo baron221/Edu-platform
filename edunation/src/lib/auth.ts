@@ -10,7 +10,7 @@ import prisma from '@/lib/prisma';
 import { notifyNewUser, notifySignIn } from '@/lib/telegram';
 
 export const authOptions: NextAuthOptions = {
-    // adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(prisma),
 
     providers: [
         GoogleProvider({
@@ -124,9 +124,9 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.sub = user.id;
                 token.email = user.email;
                 token.role = (user as any).role;
-                // console.log('JWT Init - User:', user.id, 'Role:', token.role);
             }
             const adminEmail = process.env.ADMIN_EMAIL;
             if (adminEmail && token.email === adminEmail) {
@@ -159,7 +159,7 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token, user }) {
             if (session.user) {
                 if (token) {
-                    (session.user as any).id = token.sub;
+                    (session.user as any).id = (token.id ?? token.sub) as string;
                     (session.user as any).name = token.name;
                     (session.user as any).image = token.picture;
                     (session.user as any).role = token.role as string;

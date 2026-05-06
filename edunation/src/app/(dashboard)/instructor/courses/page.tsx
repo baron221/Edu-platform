@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
@@ -17,6 +18,9 @@ interface Course {
 
 export default function AdminCoursesPage() {
     const { t, language } = useLanguage();
+    const { data: session } = useSession();
+    const userRole = (session?.user as any)?.role;
+
     const [courses, setCourses] = useState<Course[]>([]);
     const [subscription, setSubscription] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -48,6 +52,7 @@ export default function AdminCoursesPage() {
     useEffect(() => { load(); }, []);
 
     const requireSubscription = (e: React.MouseEvent) => {
+        if (userRole === 'admin') return false; // Admins always have access
         if (!subscription) {
             e.preventDefault();
             router.push('/instructor/subscribe');
@@ -137,7 +142,7 @@ export default function AdminCoursesPage() {
 
     return (
         <div className={styles.page}>
-            {!loading && !subscription && (
+            {!loading && !subscription && userRole !== 'admin' && (
                 <div className={styles.subscriptionBanner}>
                     <div className={styles.bannerIcon}>⚠️</div>
                     <div className={styles.bannerText}>

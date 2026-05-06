@@ -44,6 +44,13 @@ export async function POST(req: Request) {
                 }
             }
         }
+        
+        // Final sanity check: Ensure user exists in DB to prevent FK violation
+        const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
+        if (!dbUser) {
+            console.error('[MANUAL_PAYMENT_ERROR] User not found in DB:', session.user.id);
+            return NextResponse.json({ error: 'User account not found. Please try logging out and back in.' }, { status: 404 });
+        }
 
         // Create the manual payment entry
         const manualPayment = await (prisma as any).manualPayment.create({

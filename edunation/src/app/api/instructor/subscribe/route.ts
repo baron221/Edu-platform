@@ -71,5 +71,18 @@ export async function GET(req: Request) {
         orderBy: { createdAt: 'desc' }
     }) : null;
 
-    return NextResponse.json({ subscription: sub, pendingPayment, rejectedPayment, plans: PLANS });
+    // If user is admin, provide virtual sub
+    let effectiveSub = sub;
+    if ((session?.user as any)?.role === 'admin' && !effectiveSub) {
+        effectiveSub = {
+            plan: 'admin',
+            status: 'active',
+            startDate: new Date(),
+            endDate: null,
+            maxCourses: 9999,
+            canAdvertise: true
+        } as any;
+    }
+
+    return NextResponse.json({ subscription: effectiveSub, pendingPayment, rejectedPayment, plans: PLANS });
 }

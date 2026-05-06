@@ -2,12 +2,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface CurrentSub { plan: string; status: string; endDate: string | null; }
 
 export default function InstructorSubscribePage() {
     const { t } = useLanguage();
+    const { data: session } = useSession();
+    const userRole = (session?.user as any)?.role;
     const [current, setCurrent] = useState<CurrentSub | null>(null);
     const [pendingPayment, setPendingPayment] = useState<any>(null);
     const [rejectedPayment, setRejectedPayment] = useState<any>(null);
@@ -176,7 +179,14 @@ export default function InstructorSubscribePage() {
             </section>
 
             {/* Current subscription notice */}
-            {current && current.status === 'active' && (
+            {userRole === 'admin' ? (
+                <div className="container" style={{ marginBottom: 24 }}>
+                    <div className={styles.currentBanner} style={{ borderColor: '#7c3aed', background: '#f5f3ff' }}>
+                        🛡️ <strong>Administrator Access</strong> · {t.instructorSub.unlimited}
+                        <Link href="/instructor/courses" className={styles.dashLink}> → {t.instructorSub.goDash}</Link>
+                    </div>
+                </div>
+            ) : current && current.status === 'active' && (
                 <div className="container" style={{ marginBottom: 24 }}>
                     <div className={styles.currentBanner}>
                         ✅ {t.instructorSub.currentPlan} <strong>{current.plan.toUpperCase()}</strong> {t.instructorSub.planSuffix}

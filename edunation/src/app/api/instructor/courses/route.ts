@@ -26,9 +26,21 @@ export async function GET() {
             })
         ]);
 
+        // If user is admin, provide a mock "Unlimited" subscription if none exists
+        let effectiveSubscription = subscription;
+        if (role === 'admin' && !effectiveSubscription) {
+            effectiveSubscription = {
+                plan: 'admin',
+                status: 'active',
+                maxCourses: 9999,
+                canAdvertise: true,
+                endDate: null
+            } as any;
+        }
+
         return NextResponse.json({
             courses,
-            subscription: subscription || null
+            subscription: effectiveSubscription || null
         });
     } catch {
         return NextResponse.json({ error: 'Failed to fetch courses' }, { status: 500 });

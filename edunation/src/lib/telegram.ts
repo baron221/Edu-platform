@@ -15,6 +15,9 @@ export async function notifyAdmin(message: string): Promise<void> {
     if (!BOT_TOKEN || !ADMIN_CHAT) return; // Silently skip if not configured
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -23,7 +26,9 @@ export async function notifyAdmin(message: string): Promise<void> {
                 text: message,
                 parse_mode: 'HTML',
             }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
     } catch (err) {
         // Non-critical — never let notification failure break the main flow
         console.error('[TELEGRAM_NOTIFY_ERROR]', err);
@@ -70,10 +75,15 @@ export async function notifyAdminWithPhoto(photo: string, caption: string): Prom
 
         console.log(`[TELEGRAM] Sending photo notification. Chat: ${ADMIN_CHAT}, Photo length: ${photo.length}`);
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s for photos
+
         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
             method: 'POST',
             body: formData,
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             const errorText = await response.text();
