@@ -397,122 +397,143 @@ export default function CourseDetailPage() {
                     <div className={styles.main}>
                         <div className={styles.videoSection}>
                             <div className={styles.videoWrapper}>
-                                {activeLesson && canWatch(activeLesson) ? (
-                                    (activeLesson.muxPlaybackId || (activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux:'))) ? (
-                                        <MuxPlayer
-                                            playbackId={activeLesson.muxPlaybackId || activeLesson.videoUrl.split(':')[1]}
-                                            metadata={{
-                                                video_id: activeLesson.id,
-                                                video_title: activeLesson.title,
-                                            }}
-                                            playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
-                                            streamType="on-demand"
-                                            playsInline={true}
-                                            primaryColor="#7c3aed"
-                                            accentColor="#06b6d4"
-                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
-                                            onTimeUpdate={(e) => {
-                                                const currentTime = (e.target as any).currentTime;
-                                                if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
-                                                    if (currentTime > maxReachedTime + 2) {
-                                                        (e.target as any).currentTime = maxReachedTime;
-                                                    } else {
-                                                        setMaxReachedTime(Math.max(maxReachedTime, currentTime));
-                                                    }
-                                                }
-                                            }}
-                                            onEnded={() => {
+                                {activeLesson && (
+                                    (() => {
+                                        // Double check locking logic for the current active lesson
+                                        const currentIndex = course.lessons.findIndex(l => l.id === activeLesson.id);
+                                        let isStrictlyLocked = false;
+                                        if (currentIndex > 0 && !isAdmin && !isInstructor) {
+                                            const previousLesson = course.lessons[currentIndex - 1];
+                                            const prevCompleted = isLessonCompleted(previousLesson.id);
+                                            if (!prevCompleted) isStrictlyLocked = true;
+                                        }
 
-                                                setIsVideoFinished(true);
-                                                if (!isLessonCompleted(activeLesson.id)) {
-                                                    handleMarkComplete(activeLesson.id);
-                                                }
-                                            }}
-                                        >
-                                            {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
-                                                <track
-                                                    label="English"
-                                                    kind="subtitles"
-                                                    srcLang="en"
-                                                    src={activeLesson.subtitleUrl}
-                                                    default
-                                                />
-                                            )}
-                                        </MuxPlayer>
-                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
-                                        <video
-                                            key={activeLesson.id}
-                                            controls
-                                            controlsList="nodownload"
-                                            onContextMenu={e => e.preventDefault()}
-                                            style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
-                                            onTimeUpdate={(e) => {
-                                                const currentTime = (e.target as any).currentTime;
-                                                if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
-                                                    if (currentTime > maxReachedTime + 2) {
-                                                        (e.target as any).currentTime = maxReachedTime;
-                                                    } else {
-                                                        setMaxReachedTime(Math.max(maxReachedTime, currentTime));
-                                                    }
-                                                }
-                                            }}
-                                            onEnded={() => {
+                                        if (isStrictlyLocked) {
+                                            return (
+                                                <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
+                                                    <div className={styles.lockIcon}>🔒</div>
+                                                    <h3 className={styles.lockedTitle}>Dars qulflangan</h3>
+                                                    <p className={styles.lockedDesc}>Ushbu darsni ko'rish uchun avvalgi darsni yakunlashingiz kerak.</p>
+                                                </div>
+                                            );
+                                        }
 
-                                                setIsVideoFinished(true);
-                                                if (!isLessonCompleted(activeLesson.id)) {
-                                                    handleMarkComplete(activeLesson.id);
-                                                }
-                                            }}
-                                        >
-                                            <source 
-                                                src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`} 
-                                                type={activeLesson.videoUrl.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'}
-                                            />
-                                            {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
-                                                <track
-                                                    label="English"
-                                                    kind="subtitles"
-                                                    srcLang="en"
-                                                    src={activeLesson.subtitleUrl}
-                                                    default
+                                        return canWatch(activeLesson) ? (
+                                            (activeLesson.muxPlaybackId || (activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux:'))) ? (
+                                                <MuxPlayer
+                                                    playbackId={activeLesson.muxPlaybackId || activeLesson.videoUrl.split(':')[1]}
+                                                    metadata={{
+                                                        video_id: activeLesson.id,
+                                                        video_title: activeLesson.title,
+                                                    }}
+                                                    playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
+                                                    streamType="on-demand"
+                                                    playsInline={true}
+                                                    primaryColor="#7c3aed"
+                                                    accentColor="#06b6d4"
+                                                    style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                                    onTimeUpdate={(e) => {
+                                                        const currentTime = (e.target as any).currentTime;
+                                                        if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
+                                                            if (currentTime > maxReachedTime + 2) {
+                                                                (e.target as any).currentTime = maxReachedTime;
+                                                            } else {
+                                                                setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                            }
+                                                        }
+                                                    }}
+                                                    onEnded={() => {
+                                                        setIsVideoFinished(true);
+                                                        if (!isLessonCompleted(activeLesson.id)) {
+                                                            handleMarkComplete(activeLesson.id);
+                                                        }
+                                                    }}
+                                                >
+                                                    {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
+                                                        <track
+                                                            label="English"
+                                                            kind="subtitles"
+                                                            srcLang="en"
+                                                            src={activeLesson.subtitleUrl}
+                                                            default
+                                                        />
+                                                    )}
+                                                </MuxPlayer>
+                                            ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
+                                                <video
+                                                    key={activeLesson.id}
+                                                    controls
+                                                    controlsList="nodownload"
+                                                    onContextMenu={e => e.preventDefault()}
+                                                    style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                                                    onTimeUpdate={(e) => {
+                                                        const currentTime = (e.target as any).currentTime;
+                                                        if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
+                                                            if (currentTime > maxReachedTime + 2) {
+                                                                (e.target as any).currentTime = maxReachedTime;
+                                                            } else {
+                                                                setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                            }
+                                                        }
+                                                    }}
+                                                    onEnded={() => {
+                                                        setIsVideoFinished(true);
+                                                        if (!isLessonCompleted(activeLesson.id)) {
+                                                            handleMarkComplete(activeLesson.id);
+                                                        }
+                                                    }}
+                                                >
+                                                    <source 
+                                                        src={`${typeof window !== 'undefined' ? window.location.origin : ''}${activeLesson.videoUrl.replace('/uploads/', '/api/video/')}`} 
+                                                        type={activeLesson.videoUrl.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'}
+                                                    />
+                                                    {activeLesson.subtitleUrl && activeLesson.subtitleUrl.trim() !== '' && (
+                                                        <track
+                                                            label="English"
+                                                            kind="subtitles"
+                                                            srcLang="en"
+                                                            src={activeLesson.subtitleUrl}
+                                                            default
+                                                        />
+                                                    )}
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
+                                                <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
+                                                    <div className={styles.spinner}></div>
+                                                    <h3 className={styles.lockedTitle}>Video Processing</h3>
+                                                    <p className={styles.lockedDesc}>This video was just uploaded to Mux and is currently being encoded. Check back in a few minutes!</p>
+                                                </div>
+                                            ) : activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
+                                                <iframe
+                                                    className={styles.videoIframe}
+                                                    src={activeLesson.videoUrl}
+                                                    title={activeLesson.title}
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
                                                 />
-                                            )}
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux-upload') ? (
-                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
-                                            <div className={styles.spinner}></div>
-                                            <h3 className={styles.lockedTitle}>Video Processing</h3>
-                                            <p className={styles.lockedDesc}>This video was just uploaded to Mux and is currently being encoded. Check back in a few minutes!</p>
-                                        </div>
-                                    ) : activeLesson.videoUrl && activeLesson.videoUrl.trim() !== '' ? (
-                                        <iframe
-                                            className={styles.videoIframe}
-                                            src={activeLesson.videoUrl}
-                                            title={activeLesson.title}
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                        />
-                                    ) : (
-                                        <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
-                                            <div className={styles.lockedIcon}>⏳</div>
-                                            <h3 className={styles.lockedTitle}>Not Uploaded</h3>
-                                            <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
-                                        </div>
-                                    )
-                                ) : activeLesson ? (
-                                    <div className={styles.locked}>
-                                        <div className={styles.lockedIcon}>🔒</div>
-                                        <h3 className={styles.lockedTitle}>{t.courseDetail.premiumContent}</h3>
-                                        <p className={styles.lockedDesc}>{t.courseDetail.premiumDesc}</p>
-                                        <Link href="/pricing" className="btn btn-primary">
-                                            {t.courseDetail.unlockPro}
-                                        </Link>
-                                    </div>
-                                ) : (
-                                    <div className={styles.locked}>
-                                        <p>No lessons available</p>
-                                    </div>
+                                            ) : (
+                                                <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
+                                                    <div className={styles.lockedIcon}>⏳</div>
+                                                    <h3 className={styles.lockedTitle}>Not Uploaded</h3>
+                                                    <p className={styles.lockedDesc}>The video for this lesson has not been uploaded yet.</p>
+                                                </div>
+                                            )
+                                        ) : activeLesson ? (
+                                            <div className={styles.locked}>
+                                                <div className={styles.lockedIcon}>🔒</div>
+                                                <h3 className={styles.lockedTitle}>{t.courseDetail.premiumContent}</h3>
+                                                <p className={styles.lockedDesc}>{t.courseDetail.premiumDesc}</p>
+                                                <Link href="/pricing" className="btn btn-primary">
+                                                    {t.courseDetail.unlockPro}
+                                                </Link>
+                                            </div>
+                                        ) : (
+                                            <div className={styles.locked}>
+                                                <p>No lessons available</p>
+                                            </div>
+                                        )
+                                    })()
                                 )}
                             </div>
 
