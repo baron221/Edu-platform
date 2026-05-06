@@ -400,7 +400,7 @@ export default function CourseDetailPage() {
                                 {activeLesson && (
                                     (() => {
                                         // Double check locking logic for the current active lesson
-                                        const currentIndex = course.lessons.findIndex(l => l.id === activeLesson.id);
+                                        const currentIndex = course.lessons.findIndex((l: any) => l.id === activeLesson.id);
                                         let isStrictlyLocked = false;
                                         if (currentIndex > 0 && !isAdmin && !isInstructor) {
                                             const previousLesson = course.lessons[currentIndex - 1];
