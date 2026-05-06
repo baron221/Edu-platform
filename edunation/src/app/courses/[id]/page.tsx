@@ -40,6 +40,9 @@ export default function CourseDetailPage() {
     const [showCert, setShowCert] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isVideoFinished, setIsVideoFinished] = useState(false);
+    const [maxReachedTime, setMaxReachedTime] = useState(0);
+    const lastTimeRef = useRef(0);
+
 
     const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
@@ -104,7 +107,10 @@ export default function CourseDetailPage() {
 
     useEffect(() => {
         setIsVideoFinished(false);
+        setMaxReachedTime(0);
+        lastTimeRef.current = 0;
     }, [activeLesson?.id]);
+
 
     const handleEnroll = async () => {
         setEnrolling(true);
@@ -405,7 +411,18 @@ export default function CourseDetailPage() {
                                             primaryColor="#7c3aed"
                                             accentColor="#06b6d4"
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                            onTimeUpdate={(e) => {
+                                                const currentTime = (e.target as any).currentTime;
+                                                if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
+                                                    if (currentTime > maxReachedTime + 2) {
+                                                        (e.target as any).currentTime = maxReachedTime;
+                                                    } else {
+                                                        setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                    }
+                                                }
+                                            }}
                                             onEnded={() => {
+
                                                 setIsVideoFinished(true);
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
@@ -429,7 +446,18 @@ export default function CourseDetailPage() {
                                             controlsList="nodownload"
                                             onContextMenu={e => e.preventDefault()}
                                             style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                                            onTimeUpdate={(e) => {
+                                                const currentTime = (e.target as any).currentTime;
+                                                if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
+                                                    if (currentTime > maxReachedTime + 2) {
+                                                        (e.target as any).currentTime = maxReachedTime;
+                                                    } else {
+                                                        setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                    }
+                                                }
+                                            }}
                                             onEnded={() => {
+
                                                 setIsVideoFinished(true);
                                                 if (!isLessonCompleted(activeLesson.id)) {
                                                     handleMarkComplete(activeLesson.id);
