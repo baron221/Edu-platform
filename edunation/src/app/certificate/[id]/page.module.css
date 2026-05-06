@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;800&family=Cinzel+Decorative:wght@400;700;900&display=swap');
 
 .page {
     min-height: 100vh;
@@ -188,16 +188,18 @@
 }
 
 .studentName {
-    font-family: 'Great Vibes', cursive;
-    font-size: clamp(32px, 6vw, 72px);
-    font-weight: 400;
-    color: #1d4ed8; /* Elegant Blue */
-    margin: 10px 0 20px;
-    line-height: 1.2;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 56px);
+    font-weight: 700;
+    color: #1e3a8a; /* Deep Navy Blue */
+    margin: 15px 0 25px;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
     padding-bottom: 10px;
-    border-bottom: 1px double rgba(184, 134, 11, 0.3);
+    border-bottom: 1px double rgba(184, 134, 11, 0.4);
     width: fit-content;
     align-self: center;
+    text-transform: uppercase;
 }
 
 .hasCompleted {

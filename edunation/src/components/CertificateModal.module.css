@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@400;600;800&family=Cinzel+Decorative:wght@400;700;900&display=swap');
 
 .overlay {
     position: fixed;
@@ -190,12 +190,15 @@
 }
 
 .studentName {
-    font-family: 'Great Vibes', cursive;
-    font-size: 64px;
-    color: #1d4ed8;
-    margin: 5px 0 15px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 10px 0 15px;
     border-bottom: 1px double rgba(184, 134, 11, 0.3);
     padding-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .hasCompleted {
