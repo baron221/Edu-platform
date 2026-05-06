@@ -1,0 +1,186 @@
+.container {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: white;
+}
+
+.submitBtn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submitBtn:hover {
+    background: #6d28d9;
+}
+
+.statusCard {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid #94a3b8;
+}
+
+.statusCard.approved { border-left-color: #10b981; }
+.statusCard.rejected { border-left-color: #ef4444; }
+.statusCard.pending { border-left-color: #f59e0b; }
+
+.statusInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.statusBadge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.approved .statusBadge { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.rejected .statusBadge { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+.pending .statusBadge { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+
+.grade {
+    color: #cbd5e1;
+}
+
+.grade strong {
+    color: #7c3aed;
+    font-size: 18px;
+}
+
+.feedback {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.feedback strong {
+    display: block;
+    color: #94a3b8;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.feedback p {
+    margin: 0;
+    color: #e2e8f0;
+}
+
+.submissionDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.fileLink {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.fileLink:hover {
+    text-decoration: underline;
+}
+
+.editBtn {
+    margin-top: 15px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #94a3b8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.field textarea {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    color: white;
+    resize: vertical;
+}
+
+.fileInput {
+    color: #94a3b8;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.saveBtn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    color: #64748b;
+    padding: 20px;
+}

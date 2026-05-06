@@ -80,6 +80,7 @@ model User {
   purchases              Purchase[]
   reviews                Review[]
   sessions               Session[]
+  submissions            Submission[]
   subscription           Subscription?
   subscriptionPayments   SubscriptionPayment[]
 }
@@ -200,6 +201,7 @@ model Lesson {
   progress      Progress[]
   quizzes       Quiz[]
   resources     Resource[]
+  submissions   Submission[]
 }
 
 model Quiz {
@@ -579,4 +581,22 @@ enum ExamType {
 enum QuestionType {
   MCQ
   CODING
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  lessonId    String
+  userId      String
+  fileUrl     String?
+  content     String?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  grade       Int?
+  feedback    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@index([userId])
 }

@@ -14,6 +14,7 @@ import CertificateModal from '@/components/CertificateModal';
 import ReviewsSection from '@/components/ReviewsSection';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
+import AssignmentSection from '@/components/AssignmentSection';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -587,6 +588,14 @@ export default function CourseDetailPage() {
                                             <h3 className={styles.quizSectionTitle}>🤖 Dynamic AI Practice Space</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
                                         </div>
+                                    )}
+
+                                    {/* Homework Assignment Submission Section */}
+                                    {isEnrolled && canWatch(activeLesson) && (
+                                        <AssignmentSection 
+                                            lessonId={activeLesson.id} 
+                                            courseId={course.id} 
+                                        />
                                     )}
                                 </div>
                             )}
