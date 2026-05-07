@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
 import MuxPlayer from '@mux/mux-player-react';
 import * as Upchunk from '@mux/upchunk';
 import styles from './page.module.css';
@@ -187,11 +188,18 @@ export default function CourseEditorPage() {
                     upload.on('success', async () => {
                         setUploadProgress(100);
                         // Update the lesson with the mux-upload status so polling kicks in
-                        await fetch(`/api/instructor/courses/${id}/lessons/${newLessonId}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ videoUrl: `mux-upload:${ticketData.uploadId}` }),
-                        });
+                        try {
+                            const patchRes = await fetch(`/api/instructor/courses/${id}/lessons/${newLessonId}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ videoUrl: `mux-upload:${ticketData.uploadId}` }),
+                            });
+                            if (!patchRes.ok) throw new Error('Failed to link video to lesson');
+                            toast.success('Video uploaded and linked successfully!');
+                        } catch (patchErr: any) {
+                            console.error('Lesson patch error:', patchErr);
+                            toast.error('Video uploaded but failed to link. Please edit the lesson and re-upload.');
+                        }
                         resolve(true);
                     });
 

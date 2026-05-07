@@ -158,12 +158,27 @@ export default function LessonEditorPage() {
                 setUploadProgress(progress.detail);
             });
 
-            upload.on('success', () => {
+            upload.on('success', async () => {
                 setUploadProgress(100);
                 setTimeout(() => setUploading(false), 1000);
-                // We clear the old videoUrl if it existed and let the Webhook handle the rest
-                handleChange('videoUrl', `mux-upload:${ticketData.uploadId}`);
-                alert('Success! Mux is now encoding your video. It will appear here shortly.');
+                
+                const newVideoUrl = `mux-upload:${ticketData.uploadId}`;
+                
+                // 1. Update local state
+                setLesson(prev => prev ? ({ ...prev, videoUrl: newVideoUrl }) : null);
+                
+                // 2. AUTO-SAVE to database so instructor doesn't lose it!
+                try {
+                    await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...lesson, videoUrl: newVideoUrl }),
+                    });
+                    toast.success('Video uploaded and auto-saved!');
+                } catch (saveErr) {
+                    console.error('Auto-save failed:', saveErr);
+                    toast.error('Video uploaded but failed to auto-save. Please click "Save Changes".');
+                }
             });
 
             upload.on('error', err => {
