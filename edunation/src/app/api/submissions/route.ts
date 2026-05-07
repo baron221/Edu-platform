@@ -140,7 +140,7 @@ export async function PATCH(req: NextRequest) {
             where: { id },
             data: {
                 status,
-                grade,
+                grade: grade ? parseInt(grade) : null,
                 feedback,
                 updatedAt: new Date()
             }
