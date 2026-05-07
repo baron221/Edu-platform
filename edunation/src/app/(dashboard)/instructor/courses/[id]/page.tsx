@@ -282,6 +282,9 @@ export default function CourseEditorPage() {
                                 <Link href={`/instructor/courses/${id}/exams`} className={styles.addLessonBtn} style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', textDecoration: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
                                     🎓 Manage Exams
                                 </Link>
+                                <Link href={`/instructor/courses/${id}/submissions`} className={styles.addLessonBtn} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', textDecoration: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
+                                    📝 Manage Submissions
+                                </Link>
                                 <button className={styles.addLessonBtn} onClick={() => setShowLessonModal(true)}>
                                     + Add New Lesson
                                 </button>

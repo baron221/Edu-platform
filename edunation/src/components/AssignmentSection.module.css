@@ -16,7 +16,8 @@
 .header h3 {
     margin: 0;
     font-size: 18px;
-    color: white;
+    color: #1e293b; /* Darker color for visibility */
+    font-weight: 700;
 }
 
 .submitBtn {

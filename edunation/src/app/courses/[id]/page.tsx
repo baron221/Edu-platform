@@ -575,6 +575,14 @@ export default function CourseDetailPage() {
                                         </div>
                                     )}
 
+                                    {/* Homework Assignment Submission Section */}
+                                    {isEnrolled && canWatch(activeLesson) && (
+                                        <AssignmentSection 
+                                            lessonId={activeLesson.id} 
+                                            courseId={course.id} 
+                                        />
+                                    )}
+
                                     {/* Pre-Generated Lesson Quiz */}
                                     {canWatch(activeLesson) && activeLesson.quizzes && activeLesson.quizzes.length > 0 && (
                                         <div style={{ marginTop: '24px' }}>
@@ -590,13 +598,6 @@ export default function CourseDetailPage() {
                                         </div>
                                     )}
 
-                                    {/* Homework Assignment Submission Section */}
-                                    {isEnrolled && canWatch(activeLesson) && (
-                                        <AssignmentSection 
-                                            lessonId={activeLesson.id} 
-                                            courseId={course.id} 
-                                        />
-                                    )}
                                 </div>
                             )}
                         </div>

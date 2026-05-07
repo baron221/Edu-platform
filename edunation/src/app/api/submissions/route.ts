@@ -68,6 +68,7 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const lessonId = searchParams.get('lessonId');
+        const courseId = searchParams.get('courseId');
         const userId = searchParams.get('userId'); // For instructors to see a specific student
         const all = searchParams.get('all') === 'true'; // For instructors to see all for a lesson
 
@@ -79,6 +80,11 @@ export async function GET(req: NextRequest) {
 
             const where: any = {};
             if (lessonId) where.lessonId = lessonId;
+            if (courseId) {
+                where.lesson = {
+                    courseId: courseId
+                };
+            }
             if (userId) where.userId = userId;
 
             const submissions = await prisma.submission.findMany({
@@ -86,6 +92,9 @@ export async function GET(req: NextRequest) {
                 include: {
                     user: {
                         select: { name: true, email: true, university: true }
+                    },
+                    lesson: {
+                        select: { title: true }
                     }
                 },
                 orderBy: { updatedAt: 'desc' }

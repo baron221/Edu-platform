@@ -1,0 +1,230 @@
+.page {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #f8fafc;
+}
+
+.header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.backBtn {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.backBtn:hover {
+    color: #6366f1;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.statCard {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.statLabel {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.statValue {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.tableContainer {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.th {
+    text-align: left;
+    padding: 16px 24px;
+    background: rgba(15, 23, 42, 0.5);
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.td {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+}
+
+.tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.studentInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.studentName {
+    font-weight: 600;
+}
+
+.studentEmail {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.approved { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.actionBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background: #6366f1;
+    border-color: #6366f1;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modalContent {
+    background: #0f172a;
+    width: 100%;
+    max-width: 600px;
+    padding: 32px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.input, .textarea {
+    width: 100%;
+    padding: 12px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.fileLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+.approveBtn { background: #10b981; color: #fff; }
+.rejectBtn { background: #ef4444; color: #fff; }
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: #64748b;
+}
+
+.empty {
+    padding: 60px;
+    text-align: center;
+    color: #64748b;
+}
