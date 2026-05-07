@@ -2,7 +2,7 @@
     padding: 32px;
     max-width: 1200px;
     margin: 0 auto;
-    color: #f8fafc;
+    color: #1e293b; /* Dark text */
 }
 
 .header {
@@ -29,9 +29,7 @@
 .title {
     font-size: 28px;
     font-weight: 800;
-    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #0f172a; /* Solid dark color */
 }
 
 .stats {
@@ -42,15 +40,15 @@
 }
 
 .statCard {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     padding: 20px;
     border-radius: 16px;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .statLabel {
-    color: #94a3b8;
+    color: #64748b; /* Medium dark label */
     font-size: 14px;
     margin-bottom: 8px;
 }
@@ -58,14 +56,15 @@
 .statValue {
     font-size: 24px;
     font-weight: 700;
+    color: #0f172a; /* Dark value */
 }
 
 .tableContainer {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .table {
@@ -76,20 +75,27 @@
 .th {
     text-align: left;
     padding: 16px 24px;
-    background: rgba(15, 23, 42, 0.5);
-    color: #94a3b8;
+    background: #f8fafc;
+    color: #475569;
     font-weight: 600;
     font-size: 14px;
 }
 
 .td {
     padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid #f1f5f9;
     font-size: 14px;
+    color: #1e293b;
 }
 
 .tr:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: #f8fafc;
+}
+
+.empty {
+    padding: 60px;
+    text-align: center;
+    color: #64748b; /* Darker empty text */
 }
 
 .studentInfo {
