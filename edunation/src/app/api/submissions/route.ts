@@ -7,7 +7,8 @@ import prisma from '@/lib/prisma';
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user?.id) {
+        const user = session?.user as any;
+        if (!user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
         const existing = await prisma.submission.findFirst({
             where: {
                 lessonId,
-                userId: session.user.id
+                userId: user.id
             }
         });
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
         const submission = await prisma.submission.create({
             data: {
                 lessonId,
-                userId: session.user.id,
+                userId: user.id,
                 fileUrl,
                 content,
                 status: 'PENDING'
@@ -60,7 +61,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user?.id) {
+        const user = session?.user as any;
+        if (!user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -71,7 +73,7 @@ export async function GET(req: NextRequest) {
 
         // If 'all' is true, user must be instructor/admin
         if (all || userId) {
-            if (session.user.role !== 'admin' && session.user.role !== 'instructor') {
+            if (user.role !== 'admin' && user.role !== 'instructor') {
                 return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
             }
 
@@ -99,7 +101,7 @@ export async function GET(req: NextRequest) {
         const submission = await prisma.submission.findFirst({
             where: {
                 lessonId,
-                userId: session.user.id
+                userId: user.id
             }
         });
 
@@ -114,7 +116,8 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user?.id || (session.user.role !== 'admin' && session.user.role !== 'instructor')) {
+        const user = session?.user as any;
+        if (!user?.id || (user.role !== 'admin' && user.role !== 'instructor')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
