@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface Submission {
@@ -30,6 +31,7 @@ export default function InstructorSubmissionsPage() {
     const params = useParams();
     const courseId = params.id as string;
     const router = useRouter();
+    const { t } = useLanguage();
     const { data: session } = useSession({
         required: true,
         onUnauthenticated() { router.push('/login'); }
@@ -51,14 +53,14 @@ export default function InstructorSubmissionsPage() {
                 }
             } catch (err) {
                 console.error(err);
-                toast.error('Failed to load submissions');
+                toast.error(t.ai.quiz.error || 'Failed to load');
             } finally {
                 setLoading(false);
             }
         };
 
         if (session) fetchSubmissions();
-    }, [session, courseId]);
+    }, [session, courseId, t]);
 
     const handleGrade = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,14 +78,13 @@ export default function InstructorSubmissionsPage() {
             });
 
             if (res.ok) {
-                toast.success('Submission graded!');
-                // Update local state
+                toast.success(t.settings.successProfile || 'Saved!');
                 setSubmissions(prev => prev.map(s => 
                     s.id === selectedSubmission.id ? { ...s, ...gradeData } : s
                 ));
                 setSelectedSubmission(null);
             } else {
-                toast.error('Failed to save grade');
+                toast.error(t.ai.quiz.error || 'Error');
             }
         } catch (err) {
             toast.error('An error occurred');
@@ -92,7 +93,16 @@ export default function InstructorSubmissionsPage() {
         }
     };
 
-    if (loading) return <div className={styles.loading}>Loading submissions...</div>;
+    const getStatusText = (status: string) => {
+        switch (status.toUpperCase()) {
+            case 'PENDING': return t.shared.statusPending;
+            case 'APPROVED': return t.shared.statusApproved;
+            case 'REJECTED': return t.shared.statusRejected;
+            default: return status;
+        }
+    };
+
+    if (loading) return <div className={styles.loading}>{t.shared.loading}</div>;
 
     const pendingCount = submissions.filter(s => s.status === 'PENDING').length;
 
@@ -101,23 +111,23 @@ export default function InstructorSubmissionsPage() {
             <div className={styles.header}>
                 <div>
                     <Link href={`/instructor/courses/${courseId}`} className={styles.backBtn}>
-                        ← Back to Course
+                        ← {t.instructor.backToCourses}
                     </Link>
-                    <h1 className={styles.title}>Assignment Submissions</h1>
+                    <h1 className={styles.title}>{t.courseDetail.lessonAssignment}</h1>
                 </div>
             </div>
 
             <div className={styles.stats}>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Total Submissions</div>
+                    <div className={styles.statLabel}>{t.instructor.enrollments}</div>
                     <div className={styles.statValue}>{submissions.length}</div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Pending Review</div>
+                    <div className={styles.statLabel}>{t.shared.statusPending}</div>
                     <div className={styles.statValue} style={{ color: '#f59e0b' }}>{pendingCount}</div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Completed</div>
+                    <div className={styles.statLabel}>{t.shared.statusApproved}</div>
                     <div className={styles.statValue} style={{ color: '#10b981' }}>{submissions.length - pendingCount}</div>
                 </div>
             </div>
@@ -126,12 +136,15 @@ export default function InstructorSubmissionsPage() {
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th className={styles.th}>Student</th>
-                            <th className={styles.th}>Lesson</th>
-                            <th className={styles.th}>Submitted At</th>
-                            <th className={styles.th}>Status</th>
-                            <th className={styles.th}>Grade</th>
-                            <th className={styles.th}>Actions</th>
+                            <th className={styles.th}>{t.auth.roleStudent}</th>
+                            <th className={styles.th}>{t.courseDetail.lesson}</th>
+                            <th className={styles.th}>{t.certificate.dateIssued}</th>
+                            <th className={styles.th}>{t.instructor.colStatus}</th>
+                            <th className={styles.th}>
+                                {t.shared.loading === 'Yuklanmoqda...' ? 'Baho' : 
+                                 t.shared.loading === 'Загрузка...' ? 'Оценка' : 'Grade'}
+                            </th>
+                            <th className={styles.th}>{t.instructor.edit}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -143,11 +156,11 @@ export default function InstructorSubmissionsPage() {
                                         <span className={styles.studentEmail}>{s.user.email}</span>
                                     </div>
                                 </td>
-                                <td className={styles.td}>{s.lesson?.title || 'Unknown Lesson'}</td>
+                                <td className={styles.td}>{s.lesson?.title || 'Unknown'}</td>
                                 <td className={styles.td}>{new Date(s.updatedAt).toLocaleDateString()}</td>
                                 <td className={styles.td}>
                                     <span className={`${styles.badge} ${styles[s.status.toLowerCase()]}`}>
-                                        {s.status}
+                                        {getStatusText(s.status)}
                                     </span>
                                 </td>
                                 <td className={styles.td}>{s.grade || '-'}</td>
@@ -163,7 +176,7 @@ export default function InstructorSubmissionsPage() {
                                             });
                                         }}
                                     >
-                                        Review
+                                        {t.instructor.edit}
                                     </button>
                                 </td>
                             </tr>
@@ -171,7 +184,7 @@ export default function InstructorSubmissionsPage() {
                         {submissions.length === 0 && (
                             <tr>
                                 <td colSpan={6} className={styles.empty}>
-                                    No submissions found for this course.
+                                    {t.dashboard.noCourses}
                                 </td>
                             </tr>
                         )}
@@ -183,66 +196,72 @@ export default function InstructorSubmissionsPage() {
             {selectedSubmission && (
                 <div className={styles.modalOverlay} onClick={() => setSelectedSubmission(null)}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <h2 className={styles.modalTitle}>Review Submission</h2>
+                        <h2 className={styles.modalTitle}>{t.instructor.edit}</h2>
                         
                         <div className={styles.field}>
-                            <label className={styles.label}>Student Note / Content</label>
-                            <div className={styles.textarea} style={{ background: '#0f172a', minHeight: '100px' }}>
+                            <label className={styles.label}>{t.instructor.descLabel}</label>
+                            <div className={styles.textarea} style={{ background: '#f1f5f9', color: '#1e293b', minHeight: '100px', border: '1px solid #e2e8f0' }}>
                                 {selectedSubmission.content || 'No text provided.'}
                             </div>
                         </div>
 
                         {selectedSubmission.fileUrl && (
                             <div className={styles.field}>
-                                <label className={styles.label}>Attached File</label>
+                                <label className={styles.label}>{t.instructor.thumbnailLabel}</label>
                                 <a href={selectedSubmission.fileUrl} target="_blank" rel="noreferrer" className={styles.fileLink}>
-                                    📄 Download Submission File
+                                    📁 {t.shared.loading === 'Yuklanmoqda...' ? 'Faylni ko\'rish' : 
+                                         t.shared.loading === 'Загрузка...' ? 'Посмотреть файл' : 'View File'}
                                 </a>
                             </div>
                         )}
 
                         <form onSubmit={handleGrade}>
                             <div className={styles.field}>
-                                <label className={styles.label}>Status</label>
+                                <label className={styles.label}>{t.instructor.colStatus}</label>
                                 <select 
                                     className={styles.select} 
-                                    style={{ width: '100%', padding: '12px', background: '#1e293b', color: '#fff', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}
+                                    style={{ width: '100%', padding: '12px', background: '#fff', color: '#1e293b', borderRadius: '12px', border: '1px solid #cbd5e1' }}
                                     value={gradeData.status}
-                                    onChange={e => setGradeData({ ...gradeData, status: e.target.value })}
+                                    onChange={e => setGradeData({ ...gradeData, status: e.target.value as any })}
                                 >
-                                    <option value="PENDING">Pending</option>
-                                    <option value="APPROVED">Approve</option>
-                                    <option value="REJECTED">Reject</option>
+                                    <option value="PENDING">{t.shared.statusPending}</option>
+                                    <option value="APPROVED">{t.shared.statusApproved}</option>
+                                    <option value="REJECTED">{t.shared.statusRejected}</option>
                                 </select>
                             </div>
 
                             <div className={styles.field}>
-                                <label className={styles.label}>Grade (e.g. 5, 85/100, A+)</label>
+                                <label className={styles.label}>
+                                    {t.shared.loading === 'Yuklanmoqda...' ? 'Baho' : 
+                                     t.shared.loading === 'Загрузка...' ? 'Оценка' : 'Grade'}
+                                </label>
                                 <input 
                                     className={styles.input}
+                                    style={{ background: '#fff', color: '#1e293b', border: '1px solid #cbd5e1' }}
                                     value={gradeData.grade}
                                     onChange={e => setGradeData({ ...gradeData, grade: e.target.value })}
-                                    placeholder="Enter grade..."
+                                    placeholder="5"
                                 />
                             </div>
 
                             <div className={styles.field}>
-                                <label className={styles.label}>Feedback to Student</label>
+                                <label className={styles.label}>Feedback</label>
                                 <textarea 
                                     className={styles.textarea}
+                                    style={{ background: '#fff', color: '#1e293b', border: '1px solid #cbd5e1' }}
                                     rows={4}
                                     value={gradeData.feedback}
                                     onChange={e => setGradeData({ ...gradeData, feedback: e.target.value })}
-                                    placeholder="Great job! One small thing..."
+                                    placeholder={t.reviews.placeholder}
                                 />
                             </div>
 
                             <div className={styles.modalActions}>
-                                <button type="button" className={styles.actionBtn} onClick={() => setSelectedSubmission(null)}>
-                                    Cancel
+                                <button type="button" className={styles.actionBtn} style={{ background: '#94a3b8' }} onClick={() => setSelectedSubmission(null)}>
+                                    {t.instructor.cancel}
                                 </button>
-                                <button type="submit" className={styles.approveBtn} style={{ padding: '10px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer' }} disabled={grading}>
-                                    {grading ? 'Saving...' : 'Save Review'}
+                                <button type="submit" className={styles.approveBtn} style={{ padding: '10px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer', background: '#10b981', color: '#fff' }} disabled={grading}>
+                                    {grading ? t.instructor.saving : t.instructor.saveChanges}
                                 </button>
                             </div>
                         </form>

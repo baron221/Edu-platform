@@ -279,9 +279,6 @@ export default function CourseEditorPage() {
                         <div className={styles.cardHeader}>
                             <h2 className={styles.cardTitle}>📚 Course Curriculum ({course.lessons.length})</h2>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <Link href={`/instructor/courses/${id}/exams`} className={styles.addLessonBtn} style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', textDecoration: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
-                                    🎓 Manage Exams
-                                </Link>
                                 <Link href={`/instructor/courses/${id}/submissions`} className={styles.addLessonBtn} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', textDecoration: 'none', border: 'none', display: 'flex', alignItems: 'center' }}>
                                     📝 Manage Submissions
                                 </Link>

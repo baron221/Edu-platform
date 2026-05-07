@@ -134,6 +134,8 @@ export const translations = {
             lesson: 'lesson',
             yourProgress: 'Your Progress',
             lessonsCompleted: (completed: number, total: number) => `${completed} of ${total} lessons completed`,
+            additionalResources: 'Additional Resources',
+            lessonAssignment: 'Lesson Assignment',
         },
         // Pricing
         pricing: {
@@ -242,6 +244,9 @@ export const translations = {
             perMonth: 'per month',
             currency: 'UZS',
             loading: 'Loading...',
+            statusPending: 'Pending',
+            statusApproved: 'Approved',
+            statusRejected: 'Rejected',
         },
         // Stats
         stats: [
@@ -353,6 +358,7 @@ export const translations = {
                 incorrect: '❌ Incorrect',
                 badge: '✨ AI Generated Quiz',
                 error: 'Failed to generate quiz. Please try again.',
+                dynamicPractice: 'Dynamic AI Practice Space',
             },
             assistant: {
                 title: '🤖 EduNation AI Tutor',
@@ -822,6 +828,8 @@ export const translations = {
             lesson: 'dars',
             yourProgress: 'Sizning natijangiz',
             lessonsCompleted: (completed: number, total: number) => `${total} darsdan ${completed} tasi yakunlandi`,
+            additionalResources: 'Qo\'shimcha materiallar',
+            lessonAssignment: 'Dars topshirig\'i',
         },
         pricing: {
             label: '💎 Narxlar',
@@ -925,6 +933,9 @@ export const translations = {
             perMonth: 'oyiga',
             currency: 'so\'m',
             loading: 'Yuklanmoqda...',
+            statusPending: 'Kutilmoqda',
+            statusApproved: 'Tasdiqlangan',
+            statusRejected: 'Rad etilgan',
         },
         stats: [
             { value: '150K+', label: 'Faol o\'quvchilar' },
@@ -1034,6 +1045,7 @@ export const translations = {
                 incorrect: '❌ Noto\'g\'ri',
                 badge: '✨ AI tomonidan yaratilgan',
                 error: 'Viktorina yaratib bo\'lmadi. Qayta urinib ko\'ring.',
+                dynamicPractice: 'Sun\'iy intellektli amaliyot maydoni',
             },
             assistant: {
                 title: '🤖 EduNation AI Ustozi',
@@ -1502,6 +1514,8 @@ export const translations = {
             lesson: 'урок',
             yourProgress: 'Ваш прогресс',
             lessonsCompleted: (completed: number, total: number) => `Завершено ${completed} из ${total} уроков`,
+            additionalResources: 'Дополнительные ресурсы',
+            lessonAssignment: 'Задание к уроку',
         },
         pricing: {
             label: '💎 Цены',
@@ -1605,6 +1619,9 @@ export const translations = {
             perMonth: 'в месяц',
             currency: 'сум',
             loading: 'Загрузка...',
+            statusPending: 'В ожидании',
+            statusApproved: 'Одобрено',
+            statusRejected: 'Отклонено',
         },
         stats: [
             { value: '150K+', label: 'Активных студентов' },
@@ -1714,6 +1731,7 @@ export const translations = {
                 incorrect: '❌ Неверно',
                 badge: '✨ Тест создан ИИ',
                 error: 'Не удалось создать тест. Попробуйте ещё раз.',
+                dynamicPractice: 'ИИ-пространство для практики',
             },
             assistant: {
                 title: '🤖 EduNation ИИ-репетитор',

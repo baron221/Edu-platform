@@ -593,7 +593,7 @@ export default function CourseDetailPage() {
                                     {/* Dynamic On-Demand AI Practice Space */}
                                     {canWatch(activeLesson) && (!activeLesson.quizzes || activeLesson.quizzes.length === 0) && (
                                         <div className={styles.quizWrapper} style={{ marginTop: '24px' }}>
-                                            <h3 className={styles.quizSectionTitle}>🤖 Dynamic AI Practice Space</h3>
+                                            <h3 className={styles.quizSectionTitle}>🤖 {t.ai.quiz.dynamicPractice}</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
                                         </div>
                                     )}

@@ -67,7 +67,7 @@
 .pending .statusBadge { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
 
 .grade {
-    color: #cbd5e1;
+    color: #64748b;
 }
 
 .grade strong {
@@ -91,7 +91,7 @@
 
 .feedback p {
     margin: 0;
-    color: #e2e8f0;
+    color: #334155;
 }
 
 .submissionDetails {

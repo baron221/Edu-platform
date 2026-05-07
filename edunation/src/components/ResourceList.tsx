@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './ResourceList.module.css';
 
 interface Resource {
@@ -15,14 +16,21 @@ interface ResourceListProps {
 }
 
 export default function ResourceList({ resources }: ResourceListProps) {
+    const { t } = useLanguage();
+
     if (!resources || resources.length === 0) {
         return null;
     }
 
     return (
         <div className={styles.container}>
-            <h3 className={styles.title}>📚 Additional Resources</h3>
-            <p className={styles.subtitle}>Materials to help you master this lesson.</p>
+            <h3 className={styles.title}>📚 {t.courseDetail.additionalResources}</h3>
+            {/* Using a generic subtitle if not in translations, or we can add one */}
+            <p className={styles.subtitle}>
+                {t.shared.loading === 'Yuklanmoqda...' ? 'Darsni o\'zlashtirishga yordam beruvchi materiallar.' : 
+                 t.shared.loading === 'Загрузка...' ? 'Материалы, которые помогут вам освоить этот урок.' :
+                 'Materials to help you master this lesson.'}
+            </p>
 
             <div className={styles.list}>
                 {resources.map((res) => (
