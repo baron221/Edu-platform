@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+// Force redeploy to fix 404 on root
 import Link from 'next/link';
 import CourseCard, { CourseDB } from '@/components/CourseCard';
 import { plans } from '@/lib/data';
