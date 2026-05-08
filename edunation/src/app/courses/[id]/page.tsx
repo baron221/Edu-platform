@@ -41,7 +41,7 @@ export default function CourseDetailPage() {
     const [showCert, setShowCert] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isVideoFinished, setIsVideoFinished] = useState(false);
-    const [maxReachedTime, setMaxReachedTime] = useState(0);
+    const maxReachedTimeRef = useRef(0);
     const lastTimeRef = useRef(0);
 
 
@@ -108,7 +108,7 @@ export default function CourseDetailPage() {
 
     useEffect(() => {
         setIsVideoFinished(false);
-        setMaxReachedTime(0);
+        maxReachedTimeRef.current = 0;
         lastTimeRef.current = 0;
     }, [activeLesson?.id]);
 
@@ -436,10 +436,10 @@ export default function CourseDetailPage() {
                                                     onTimeUpdate={(e) => {
                                                         const currentTime = (e.target as any).currentTime;
                                                         if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
-                                                            if (currentTime > maxReachedTime + 2) {
-                                                                (e.target as any).currentTime = maxReachedTime;
+                                                            if (currentTime > maxReachedTimeRef.current + 2) {
+                                                                (e.target as any).currentTime = maxReachedTimeRef.current;
                                                             } else {
-                                                                setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                                maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
                                                             }
                                                         }
                                                     }}
@@ -470,10 +470,10 @@ export default function CourseDetailPage() {
                                                     onTimeUpdate={(e) => {
                                                         const currentTime = (e.target as any).currentTime;
                                                         if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
-                                                            if (currentTime > maxReachedTime + 2) {
-                                                                (e.target as any).currentTime = maxReachedTime;
+                                                            if (currentTime > maxReachedTimeRef.current + 2) {
+                                                                (e.target as any).currentTime = maxReachedTimeRef.current;
                                                             } else {
-                                                                setMaxReachedTime(Math.max(maxReachedTime, currentTime));
+                                                                maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
                                                             }
                                                         }
                                                     }}
