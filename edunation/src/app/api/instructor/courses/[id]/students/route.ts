@@ -15,7 +15,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         const course = await prisma.course.findUnique({ where: { id: courseId } });
         if (!course) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-        if (userRole !== 'admin' && course.instructorId !== session.user.id) {
+        if (userRole !== 'admin' && course.instructorId !== (session.user as any).id) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
