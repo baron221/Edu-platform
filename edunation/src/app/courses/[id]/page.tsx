@@ -109,9 +109,11 @@ export default function CourseDetailPage() {
 
     useEffect(() => {
         setIsVideoFinished(false);
-        maxReachedTimeRef.current = 0;
-        lastTimeRef.current = 0;
-    }, [activeLesson?.id]);
+        const currentProgress = progress.find(p => p.lessonId === activeLesson?.id);
+        const savedTime = currentProgress?.watchedSec || 0;
+        maxReachedTimeRef.current = savedTime;
+        lastTimeRef.current = savedTime;
+    }, [activeLesson?.id, progress]);
 
 
     const handleEnroll = async () => {
@@ -412,6 +414,9 @@ export default function CourseDetailPage() {
                                             if (!prevCompleted && !isInstructorUnlocked) isStrictlyLocked = true;
                                         }
 
+                                        const currentProgress = progress.find((p: any) => p.lessonId === activeLesson.id);
+                                        const savedTime = currentProgress?.watchedSec || 0;
+
                                         if (isStrictlyLocked) {
                                             return (
                                                 <div className={styles.locked} style={{ aspectRatio: '16/9' }}>
@@ -430,6 +435,7 @@ export default function CourseDetailPage() {
                                                         video_id: activeLesson.id,
                                                         video_title: activeLesson.title,
                                                     }}
+                                                    startTime={savedTime > 0 ? savedTime : undefined}
                                                     playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]}
                                                     streamType="on-demand"
                                                     playsInline={true}
@@ -486,6 +492,11 @@ export default function CourseDetailPage() {
                                                     controlsList="nodownload"
                                                     onContextMenu={e => e.preventDefault()}
                                                     style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                                                    onLoadedMetadata={(e) => {
+                                                        if (savedTime > 0) {
+                                                            (e.target as any).currentTime = savedTime;
+                                                        }
+                                                    }}
                                                     onTimeUpdate={(e) => {
                                                         const currentTime = (e.target as any).currentTime;
                                                         if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
