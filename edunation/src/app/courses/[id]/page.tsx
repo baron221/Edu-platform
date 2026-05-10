@@ -43,6 +43,7 @@ export default function CourseDetailPage() {
     const [isVideoFinished, setIsVideoFinished] = useState(false);
     const maxReachedTimeRef = useRef(0);
     const lastTimeRef = useRef(0);
+    const lastSyncRef = useRef(0);
 
 
     const [processingPayment, setProcessingPayment] = useState(false);
@@ -443,6 +444,22 @@ export default function CourseDetailPage() {
                                                             } else {
                                                                 maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
                                                             }
+                                                        } else if (isLessonCompleted(activeLesson.id)) {
+                                                            maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
+                                                        }
+
+                                                        // Sync watchedSec every 10 seconds
+                                                        if (currentTime - lastSyncRef.current > 10) {
+                                                            lastSyncRef.current = currentTime;
+                                                            fetch('/api/progress', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({
+                                                                    courseId: course.id,
+                                                                    lessonId: activeLesson.id,
+                                                                    watchedSec: Math.floor(maxReachedTimeRef.current)
+                                                                })
+                                                            }).catch(console.error);
                                                         }
                                                     }}
                                                     onEnded={() => {
@@ -477,6 +494,21 @@ export default function CourseDetailPage() {
                                                             } else {
                                                                 maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
                                                             }
+                                                        } else if (isLessonCompleted(activeLesson.id)) {
+                                                            maxReachedTimeRef.current = Math.max(maxReachedTimeRef.current, currentTime);
+                                                        }
+
+                                                        if (currentTime - lastSyncRef.current > 10) {
+                                                            lastSyncRef.current = currentTime;
+                                                            fetch('/api/progress', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({
+                                                                    courseId: course.id,
+                                                                    lessonId: activeLesson.id,
+                                                                    watchedSec: Math.floor(maxReachedTimeRef.current)
+                                                                })
+                                                            }).catch(console.error);
                                                         }
                                                     }}
                                                     onEnded={() => {

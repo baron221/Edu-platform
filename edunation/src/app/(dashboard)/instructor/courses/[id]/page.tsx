@@ -81,6 +81,7 @@ export default function CourseStudentsDashboard() {
 
     const formatTime = (seconds: number) => {
         if (!seconds) return '0 min';
+        if (seconds > 0 && seconds < 60) return '< 1 min';
         const mins = Math.floor(seconds / 60);
         const hrs = Math.floor(mins / 60);
         if (hrs > 0) {

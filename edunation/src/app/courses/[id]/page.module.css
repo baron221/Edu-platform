@@ -54,23 +54,28 @@
 .back {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 24px;
-    padding: 6px 14px;
-    border-radius: 6px;
-    background: transparent;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    color: #4f46e5;
+    font-size: 0.875rem;
+    font-weight: 600;
     text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    width: fit-content;
+    margin-bottom: 24px;
 }
 
 .back:hover {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border-color: #cbd5e1;
+    background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+    border-color: #c7d2fe;
+    color: #4338ca;
+    transform: translateX(-4px) translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .heroTitle {
