@@ -157,6 +157,14 @@ export const authOptions: NextAuthOptions = {
                             role: 'student',
                         }
                     });
+                } else {
+                    // Update to uppercase if previously lowercase
+                    if (user.name !== fullName || user.university !== university) {
+                        user = await prisma.user.update({
+                            where: { id: user.id },
+                            data: { name: fullName, university: university }
+                        });
+                    }
                 }
 
                 return {
