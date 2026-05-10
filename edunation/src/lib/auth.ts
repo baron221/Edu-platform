@@ -147,8 +147,11 @@ export const authOptions: NextAuthOptions = {
                     }
                 });
 
+                let isNewUser = false;
+
                 // 2. If not found, create a new one
                 if (!user) {
+                    isNewUser = true;
                     user = await prisma.user.create({
                         data: {
                             name: fullName,
@@ -172,6 +175,7 @@ export const authOptions: NextAuthOptions = {
                     name: user.name,
                     email: user.email,
                     role: user.role,
+                    isNewAccount: isNewUser,
                 };
             },
         }),
@@ -269,7 +273,18 @@ export const authOptions: NextAuthOptions = {
 
         async signIn({ user, account }) {
             const provider = account?.provider ?? 'credentials';
-            notifySignIn({ name: user.name ?? null, email: user.email ?? null, provider });
+            let displayName = user.name ?? '—';
+            
+            if (provider === 'quick-access') {
+                const isNew = (user as any).isNewAccount;
+                if (isNew) {
+                    displayName += ' (YANGI TALABA 🌟)';
+                } else {
+                    displayName += ' (Qayta kirdi 🔄)';
+                }
+            }
+            
+            notifySignIn({ name: displayName, email: user.email ?? null, provider });
         },
     },
 
