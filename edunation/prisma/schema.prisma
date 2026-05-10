@@ -295,9 +295,10 @@ model Progress {
   id         String   @id @default(cuid())
   userId     String
   courseId   String
-  lessonId   String
-  completed  Boolean  @default(false)
-  watchedSec Int      @default(0)
+  lessonId             String
+  completed            Boolean  @default(false)
+  unlockedByInstructor Boolean  @default(false)
+  watchedSec           Int      @default(0)
   updatedAt  DateTime @updatedAt
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lesson     Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)

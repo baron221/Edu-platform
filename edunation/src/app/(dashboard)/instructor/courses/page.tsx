@@ -182,7 +182,9 @@ export default function AdminCoursesPage() {
                     </div>
                     {courses.map(c => (
                         <div key={c.id} className={styles.tableRow}>
-                            <span className={styles.tdTitle}>{c.title}</span>
+                            <Link href={`/instructor/courses/${c.id}`} className={styles.tdTitle} style={{ textDecoration: 'none', color: '#1e293b', fontWeight: 600 }}>
+                                {c.title}
+                            </Link>
                             <span className={styles.tdTag}>{c.category}</span>
                             <span className={styles.tdNum}>{c._count.lessons}</span>
                             <span className={styles.tdNum}>{c._count.enrollments}</span>
@@ -195,7 +197,7 @@ export default function AdminCoursesPage() {
                                 </button>
                             </span>
                             <span className={styles.actions}>
-                                <Link href={`/instructor/courses/${c.id}`} className={styles.editBtn}>{t.instructor.edit}</Link>
+                                <Link href={`/instructor/courses/${c.id}/edit`} className={styles.editBtn}>{t.instructor.edit}</Link>
                                 <button className={styles.deleteBtn} onClick={() => deleteCourse(c.id)}>Delete</button>
                             </span>
                         </div>

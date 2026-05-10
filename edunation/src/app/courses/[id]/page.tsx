@@ -331,7 +331,8 @@ export default function CourseDetailPage() {
                 {course.lessons?.map((lesson: any, idx: number) => {
                     const isCompleted = isLessonCompleted(lesson.id);
                     const isPrevCompleted = idx === 0 || isLessonCompleted(course.lessons[idx - 1].id);
-                    const isLockedSequentially = !isPrevCompleted && !isAdmin && !isInstructor;
+                    const isInstructorUnlocked = progress.some((p: any) => p.lessonId === lesson.id && p.unlockedByInstructor);
+                    const isLockedSequentially = !isPrevCompleted && !isAdmin && !isInstructor && !isInstructorUnlocked;
                     const canAccess = canWatch(lesson) && !isLockedSequentially;
 
                     return (
@@ -406,7 +407,8 @@ export default function CourseDetailPage() {
                                         if (currentIndex > 0 && !isAdmin && !isInstructor) {
                                             const previousLesson = course.lessons[currentIndex - 1];
                                             const prevCompleted = isLessonCompleted(previousLesson.id);
-                                            if (!prevCompleted) isStrictlyLocked = true;
+                                            const isInstructorUnlocked = progress.some((p: any) => p.lessonId === activeLesson.id && p.unlockedByInstructor);
+                                            if (!prevCompleted && !isInstructorUnlocked) isStrictlyLocked = true;
                                         }
 
                                         if (isStrictlyLocked) {

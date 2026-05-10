@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
@@ -11,15 +11,37 @@ export default function QuickJoinPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    useEffect(() => {
+        const saved = localStorage.getItem('quickAccessData');
+        if (saved) {
+            try {
+                const { firstName, lastName, university } = JSON.parse(saved);
+                if (firstName) setFirstName(firstName);
+                if (lastName) setLastName(lastName);
+                if (university) setUniversity(university);
+            } catch (e) {}
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
+        const uFirstName = firstName.toUpperCase();
+        const uLastName = lastName.toUpperCase();
+        const uUniversity = university.toUpperCase();
+
         try {
+            localStorage.setItem('quickAccessData', JSON.stringify({
+                firstName: uFirstName,
+                lastName: uLastName,
+                university: uUniversity
+            }));
+
             const result = await signIn('quick-access', {
-                firstName,
-                lastName,
-                university,
+                firstName: uFirstName,
+                lastName: uLastName,
+                university: uUniversity,
                 redirect: false,
             });
 
@@ -51,7 +73,7 @@ export default function QuickJoinPage() {
                             <input
                                 type="text"
                                 value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
+                                onChange={(e) => setFirstName(e.target.value.toUpperCase())}
                                 placeholder="Masalan: Nusratjon"
                                 required
                             />
@@ -62,7 +84,7 @@ export default function QuickJoinPage() {
                             <input
                                 type="text"
                                 value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
+                                onChange={(e) => setLastName(e.target.value.toUpperCase())}
                                 placeholder="Masalan: Soliyev"
                                 required
                             />
@@ -73,7 +95,7 @@ export default function QuickJoinPage() {
                             <input
                                 type="text"
                                 value={university}
-                                onChange={(e) => setUniversity(e.target.value)}
+                                onChange={(e) => setUniversity(e.target.value.toUpperCase())}
                                 placeholder="Masalan: TATU"
                                 required
                             />
