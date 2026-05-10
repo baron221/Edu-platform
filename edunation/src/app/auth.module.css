@@ -79,6 +79,33 @@
     letter-spacing: -0.02em;
 }
 
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.quickAccessLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #FF3366 0%, #FF9933 100%);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
+    transition: all 0.3s ease;
+}
+
+.quickAccessLink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
+}
+
 .subtitle {
     font-size: 14px;
     color: #64748b;

@@ -196,7 +196,12 @@ export default function LoginPage() {
                     <span>EduNation<span className="gradient-text">Uz</span></span>
                 </Link>
 
-                <h1 className={styles.title}>{t.auth.loginTitle}</h1>
+                <div className={styles.headerRow}>
+                    <h1 className={styles.title} style={{ marginBottom: 0 }}>{t.auth.loginTitle}</h1>
+                    <Link href="/join" className={styles.quickAccessLink}>
+                        ⚡ Tezkor kirish
+                    </Link>
+                </div>
                 <p className={styles.subtitle}>{t.auth.loginSubtitle}</p>
 
                 {/* Role Selector */}
