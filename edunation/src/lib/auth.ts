@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import { cookies } from 'next/headers';
 import GoogleProvider from 'next-auth/providers/google';
-import GitHubProvider from 'next-auth/providers/github';
+
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
@@ -18,11 +18,7 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
             allowDangerousEmailAccountLinking: true,
         }),
-        GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID ?? '',
-            clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
-            allowDangerousEmailAccountLinking: true,
-        }),
+
         CredentialsProvider({
             name: 'Email',
             credentials: {
@@ -82,37 +78,7 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
-        CredentialsProvider({
-            id: 'phone',
-            name: 'Phone',
-            credentials: {
-                phoneToken: { label: 'Phone Token', type: 'text' },
-            },
-            async authorize(credentials) {
-                if (!credentials?.phoneToken) return null;
 
-                try {
-                    const [b64, sig] = credentials.phoneToken.split('.');
-                    if (!b64 || !sig) return null;
-
-                    const payload = Buffer.from(b64, 'base64url').toString();
-                    const [userId, expiryStr, phone] = payload.split(':');
-
-                    const secret = process.env.NEXTAUTH_SECRET ?? 'fallback';
-                    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-                    if (expected !== sig) return null;
-
-                    if (Date.now() > parseInt(expiryStr, 10)) return null;
-
-                    const user = await prisma.user.findUnique({ where: { id: userId } });
-                    if (!user || user.phone !== phone) return null;
-
-                    return { id: user.id, name: user.name, email: user.email, image: user.image, role: user.role };
-                } catch {
-                    return null;
-                }
-            },
-        }),
         CredentialsProvider({
             id: 'quick-access',
             name: 'Quick Access',

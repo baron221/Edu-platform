@@ -13,10 +13,7 @@ export default function LoginPage() {
 
     const [role, setRole] = useState<'student' | 'instructor'>('student');
 
-    // Phone state
-    const [phone, setPhone] = useState('+998');
-    const [otp, setOtp] = useState('');
-    const [otpSent, setOtpSent] = useState(false);
+
 
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState('');
@@ -42,65 +39,9 @@ export default function LoginPage() {
     if (status === 'authenticated') return null;
 
 
-    const handleSendOtp = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading('send-otp');
-        try {
-            const res = await fetch('/api/auth/phone/send-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error ?? 'Failed to send OTP.');
-            } else {
-                setOtpSent(true);
-                if (data.mocked) {
-                    alert('As Eskiz is not configured, check the terminal console for the mock OTP code.');
-                }
-            }
-        } catch {
-            setError('Something went wrong. Please try again.');
-        } finally {
-            setLoading(null);
-        }
-    };
 
-    const handleVerifyOtp = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading('verify-otp');
-        try {
-            const res = await fetch('/api/auth/phone/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, code: otp }), // For login, we don't pass name/role
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error ?? 'Verification failed.');
-                setLoading(null);
-                return;
-            }
 
-            const result = await signIn('phone', {
-                redirect: false,
-                phoneToken: data.token,
-            });
-
-            if (!result?.ok) {
-                setError(result?.error ?? 'Login failed after verification.');
-            }
-            setLoading(null);
-        } catch {
-            setError('Something went wrong. Please try again.');
-            setLoading(null);
-        }
-    };
-
-    const handleOAuth = async (provider: 'google' | 'github') => {
+    const handleOAuth = async (provider: 'google') => {
         setLoading(provider);
         setError('');
         document.cookie = `edu_role=${role}; path=/; max-age=3600;`;
@@ -248,19 +189,6 @@ export default function LoginPage() {
                         )}
                     </button>
 
-                    <button
-                        type="button"
-                        className={`${styles.oauthBtn} ${styles.oauthGithub}`}
-                        onClick={() => handleOAuth('github')}
-                        disabled={loading !== null}
-                        id="btn-github-login"
-                    >
-                        {loading === 'github' ? <span className={styles.spinner} /> : (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                            </svg>
-                        )}
-                    </button>
 
                     <button
                         type="button"
@@ -283,35 +211,7 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                <div className={styles.divider}>
-                    <span>or sign in with Phone</span>
-                </div>
 
-                <form className={styles.form} onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} autoComplete="off">
-                    <div className={styles.field}>
-                        <label className={styles.label}>Phone Number</label>
-                        <input type="tel" className="input" placeholder="+998901234567"
-                            value={phone} onChange={e => setPhone(e.target.value)} disabled={otpSent || loading === 'send-otp'} required />
-                    </div>
-
-                    {otpSent && (
-                        <div className={styles.field}>
-                            <label className={styles.label}>OTP Code (6 digits)</label>
-                            <input type="text" className="input" placeholder="123456" maxLength={6}
-                                value={otp} onChange={e => setOtp(e.target.value)} required />
-                        </div>
-                    )}
-
-                    {!otpSent ? (
-                        <button type="submit" className={styles.submitBtn} disabled={loading === 'send-otp'}>
-                            {loading === 'send-otp' ? 'Sending...' : 'Send OTP'}
-                        </button>
-                    ) : (
-                        <button type="submit" className={styles.submitBtn} disabled={loading === 'verify-otp'}>
-                            {loading === 'verify-otp' ? 'Verifying...' : 'Verify & Sign in'}
-                        </button>
-                    )}
-                </form>
 
             </div>
         </div>
