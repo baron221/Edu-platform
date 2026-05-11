@@ -376,10 +376,22 @@
 
 /* Print Overrides */
 @media print {
+    @page {
+        size: landscape;
+        margin: 0;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     .page {
         background: white !important;
         padding: 0 !important;
         margin: 0 !important;
+        min-height: 0 !important;
+        display: block !important;
     }
 
     .actions {
@@ -389,16 +401,49 @@
     .certFrame {
         box-shadow: none !important;
         padding: 0 !important;
-        background: transparent !important;
-        max-width: 100% !important;
+        background: white !important;
+        max-width: none !important;
+        width: 100% !important;
+        height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     .cert {
-        border-width: 2px !important;
+        border-width: 4px !important;
         width: 100% !important;
         height: auto !important;
+        min-height: 100vh !important;
+        max-width: none !important;
+        max-height: none !important;
         aspect-ratio: 1.414 / 1 !important;
         box-sizing: border-box !important;
+        position: relative !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-color: #fdfcf7 !important;
+    }
+
+    .logoImg {
+        height: 80px !important;
+        width: auto !important;
+        filter: none !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .innerBorder {
+        inset: 15px !important;
+        border: 2px solid #1e293b !important;
+    }
+
+    .guilloche {
+        display: block !important;
+        opacity: 0.1 !important;
     }
 }
 
