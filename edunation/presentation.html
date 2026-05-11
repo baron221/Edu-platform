@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduNationUz - Premium Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --secondary: #06b6d4;
+            --bg: #fdfdff;
+            --text: #0f172a;
+            --subtext: #475569;
+            --border: rgba(124, 58, 237, 0.15);
+            --shadow: 0 25px 50px rgba(124, 58, 237, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .slide-container {
+            height: 100vh;
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+            flex-direction: column;
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 40px;
+            position: relative;
+            text-align: center;
+            overflow: hidden; /* Prevent content spill */
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(120px);
+        }
+
+        .orb-1 { top: -300px; left: -300px; background: radial-gradient(circle, rgba(6, 182, 212, 0.04) 0%, transparent 70%); }
+        .orb-2 { bottom: -300px; right: -300px; }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--text);
+            font-weight: 800;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--subtext);
+            max-width: 700px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .mockup-container {
+            width: 100%;
+            max-width: 900px;
+            perspective: 2000px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .real-img {
+            max-width: 100%;
+            max-height: 60vh; /* Ensure image doesn't take too much height */
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            transition: all 0.8s ease;
+        }
+
+        .slide.active .real-img {
+            transform: scale(1.02);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            text-align: left;
+        }
+
+        .feature-card .icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+        .feature-card h3 { font-size: 1.3rem; margin-bottom: 8px; font-weight: 700; }
+        .feature-card p { font-size: 0.95rem; line-height: 1.4; }
+
+        .btn {
+            padding: 14px 35px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 100px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .nav-dots {
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .dot.active {
+            background: var(--primary);
+            height: 25px;
+            border-radius: 10px;
+        }
+
+        .logo-header {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            z-index: 100;
+        }
+
+        .slide-count {
+            position: fixed;
+            bottom: 25px;
+            right: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--subtext);
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1024px) {
+            h1 { font-size: 2.8rem; }
+            .mockup-container { max-width: 80%; }
+        }
+
+        @media (max-width: 768px) {
+            .slide { padding: 40px 20px; }
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.8rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .real-img { max-height: 40vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#7c3aed"/>
+            <path d="M10 16L14 20L22 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        EduNationUz
+    </div>
+
+    <div class="nav-dots" id="dots"></div>
+    <div class="slide-count" id="count">1 / 7</div>
+
+    <div class="slide-container" id="container">
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="bg-glow orb-1"></div>
+            <h1>Kelajak Ta'limi</h1>
+            <p>EduNation - bu nafaqat ta'lim platformasi, balki kelajak mutaxassislarini tayyorlash ekotizimidir.</p>
+            <div class="mockup-container">
+                <img src="./hero_real.png" class="real-img" alt="Hero Section">
+            </div>
+            <button class="btn" onclick="nextSlide()">Taqdimotni boshlash</button>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <h2>Tezkor va Xavfsiz Kirish</h2>
+            <p>Login jarayoni maksimal darajada soddalashtirilgan. Telegram va Google orqali tezkor kirish.</p>
+            <div class="mockup-container">
+                <img src="./login_real.png" class="real-img" alt="Login Modal" style="max-height: 65vh;">
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <h2>Boy Kurslar Katalogi</h2>
+            <p>Pedagogika, IT, Multilevel va boshqa sohalar bo'yicha jahon darajasidagi darslar.</p>
+            <div class="mockup-container">
+                <img src="./courses_grid_real.png" class="real-img" alt="Courses Grid">
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <h2>O'qituvchilar Paneli</h2>
+            <p>O'qituvchilar uchun qulay boshqaruv tizimi va kurslarni tahrirlash imkoniyati.</p>
+            <div class="mockup-container">
+                <img src="./instructor_real.png" class="real-img" alt="Instructor Panel">
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <h2>Sun'iy Intellekt Yordamchi</h2>
+            <p>Har bir darsda shaxsiy AI-tyutor talabalarga real-vaqt rejimida yordam beradi.</p>
+            <div class="mockup-container">
+                <img src="./instructor_ai_real.png" class="real-img" alt="AI Chatbot">
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <h2>Noyob Imkoniyatlar</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="icon">🔄</span>
+                    <h3>Video Resumption</h3>
+                    <p>Darsni to'xtatgan joyingizdan davom ettiring.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🔓</span>
+                    <h3>Auto-Enroll</h3>
+                    <p>Bepul darslarni ko'rishni boshlashingiz bilan avtomatik a'zo bo'ling.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🤖</span>
+                    <h3>AI Quiz</h3>
+                    <p>Darslar bo'yicha sun'iy intellekt tomonidan yaratilgan testlar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <h1>EduNation bilan O'sing</h1>
+            <p>Biz bilan birga yangi cho'qqilarni zabt eting.</p>
+            <button class="btn" onclick="location.href='/'">Platformaga o'tish</button>
+            <p style="margin-top: 50px; font-size: 0.8rem; opacity: 0.4;">EduNationUz &copy; 2026</p>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 7;
+        const container = document.getElementById('container');
+        const dotsContainer = document.getElementById('dots');
+        const countDisplay = document.getElementById('count');
+
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            container.style.transform = `translateY(-${currentSlide * 100}vh)`;
+            
+            document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+            document.querySelectorAll('.slide').forEach((slide, i) => slide.classList.toggle('active', i === currentSlide));
+            countDisplay.innerText = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1); }
+        function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') prevSlide();
+        });
+
+        let lastTime = 0;
+        window.addEventListener('wheel', (e) => {
+            const currentTime = Date.now();
+            if (currentTime - lastTime < 1200) return;
+            lastTime = currentTime;
+            if (e.deltaY > 0) nextSlide();
+            else prevSlide();
+        }, { passive: true });
+    </script>
+</body>
+</html>
