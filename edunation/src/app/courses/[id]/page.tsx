@@ -117,6 +117,7 @@ export default function CourseDetailPage() {
 
 
     const handleEnroll = async () => {
+        if (enrolling) return;
         setEnrolling(true);
         try {
             const res = await fetch('/api/enroll', {
@@ -136,6 +137,13 @@ export default function CourseDetailPage() {
             console.error(err);
         } finally {
             setEnrolling(false);
+        }
+    };
+
+    // Auto-enroll if the student starts watching a free lesson and isn't enrolled yet
+    const handleAutoEnroll = () => {
+        if (!isEnrolled && session?.user && !enrolling) {
+            handleEnroll();
         }
     };
 
@@ -442,6 +450,7 @@ export default function CourseDetailPage() {
                                                     primaryColor="#7c3aed"
                                                     accentColor="#06b6d4"
                                                     style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000' }}
+                                                    onPlay={handleAutoEnroll}
                                                     onTimeUpdate={(e) => {
                                                         const currentTime = (e.target as any).currentTime;
                                                         if (!isAdmin && !isInstructor && !isLessonCompleted(activeLesson.id)) {
@@ -492,6 +501,7 @@ export default function CourseDetailPage() {
                                                     controlsList="nodownload"
                                                     onContextMenu={e => e.preventDefault()}
                                                     style={{ width: '100%', aspectRatio: '16/9', borderRadius: '12px', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                                                    onPlay={handleAutoEnroll}
                                                     onLoadedMetadata={(e) => {
                                                         if (savedTime > 0) {
                                                             (e.target as any).currentTime = savedTime;
