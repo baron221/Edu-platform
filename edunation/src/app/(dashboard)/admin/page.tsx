@@ -91,7 +91,7 @@ export default function AdminDashboard() {
                     <h1 className={styles.title}>{t.admin.dashboardTitle}</h1>
                     <p className={styles.subtitle}>{t.admin.dashboardSubtitle}</p>
                 </div>
-                <Link href="/admin/courses/new" className={styles.newBtn}>
+                <Link href="/instructor/courses" className={styles.newBtn}>
                     {t.admin.newCourse}
                 </Link>
             </div>
