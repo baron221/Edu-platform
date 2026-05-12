@@ -300,6 +300,18 @@ export const translations = {
             reviewCount: (n: number) => `${n} review${n !== 1 ? 's' : ''}`,
             selectRating: 'Please select a rating.',
         },
+        // Community
+        community: {
+            loading: 'Gathering wisdom...',
+            emptyTitle: 'Silence is Golden, but Chatting is Better! ✨',
+            emptyDesc: 'Be the spark that starts the fire. Share a thought, ask a question, or just say hello to your classmates!',
+            placeholder: 'Write something brilliant...',
+            replyingTo: 'Replying to',
+            signIn: 'Sign in to join the conversation 🚀',
+            instructor: '✦ Instructor',
+            liveSync: 'Live Sync Active',
+            messages: 'messages',
+        },
         // Settings
         settings: {
             title: 'Account Settings',
@@ -986,6 +998,18 @@ export const translations = {
             beFirst: 'Birinchi bo\'lib sharh qoldiring!',
             reviewCount: (n: number) => `${n} ta sharh`,
             selectRating: 'Iltimos, baho tanlang.',
+        },
+        // Community
+        community: {
+            loading: 'Bilimlar yuklanmoqda... 🚀',
+            emptyTitle: 'Hozircha bu yerda jimjitlik... ✨',
+            emptyDesc: 'Birinchi bo‘lib olovni yoqing! Savol bering, fikr ulashing yoki shunchaki kursdoshlaringizga salom yo‘llang.',
+            placeholder: 'Ajoyib xabar yozing...',
+            replyingTo: 'Javob berish',
+            signIn: 'Suhbatga qo‘shilish uchun tizimga kiring 🚀',
+            instructor: '✦ Muallim',
+            liveSync: 'Jonli muloqot faol',
+            messages: 'xabarlar',
         },
         // Settings
         settings: {
@@ -2071,6 +2095,18 @@ export const translations = {
             success: 'Квитанция отправлена! Наша команда проверит ее и активирует доступ в ближайшее время.',
             error: 'Не удалось отправить квитанцию. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой.',
             cancel: 'Отмена',
+        },
+        // Community
+        community: {
+            loading: 'Загружаем знания... 🚀',
+            emptyTitle: 'Здесь пока тишина... ✨',
+            emptyDesc: 'Станьте первым! Задайте вопрос, поделитесь мыслью или просто поприветствуйте своих сокурсников.',
+            placeholder: 'Напишите что-нибудь блестящее...',
+            replyingTo: 'Ответ для',
+            signIn: 'Войдите, чтобы присоединиться к беседе 🚀',
+            instructor: '✦ Преподаватель',
+            liveSync: 'Живое общение активно',
+            messages: 'сообщений',
         },
     },
 } as const;

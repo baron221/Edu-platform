@@ -4,6 +4,8 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { ArrowLeft, Send, X } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 import styles from './page.module.css';
 
 interface Author {
@@ -58,6 +60,7 @@ function dateSep(d: string) {
 export default function CommunityPage() {
     const { courseId } = useParams() as { courseId: string };
     const { data: session } = useSession();
+    const { language, t } = useLanguage();
     const userId = (session?.user as any)?.id;
     const role = (session?.user as any)?.role || 'student';
 
@@ -204,13 +207,13 @@ export default function CommunityPage() {
                     {loading ? (
                         <div className={styles.loadingWrap}>
                             <div className={styles.spinner} />
-                            <span>Loading messages...</span>
+                            <span className={styles.loadingText}>{t.community.loading}</span>
                         </div>
                     ) : messages.length === 0 ? (
                         <div className={styles.empty}>
-                            <div style={{ fontSize: 56, marginBottom: 12 }}>💬</div>
-                            <h3>No messages yet</h3>
-                            <p>Be the first to say something!</p>
+                            <div className={styles.emptyIcon}>✨</div>
+                            <h3 className={styles.emptyTitle}>{t.community.emptyTitle}</h3>
+                            <p className={styles.emptyDesc}>{t.community.emptyDesc}</p>
                         </div>
                     ) : (
                         grouped.map(group => (
@@ -301,7 +304,7 @@ export default function CommunityPage() {
                                 <textarea
                                     ref={inputRef}
                                     className={styles.input}
-                                    placeholder="Write a message..."
+                                    placeholder={t.community.placeholder}
                                     value={text}
                                     onChange={e => setText(e.target.value)}
                                     onKeyDown={handleKeyDown}
