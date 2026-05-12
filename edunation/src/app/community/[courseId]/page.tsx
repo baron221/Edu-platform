@@ -22,18 +22,19 @@ interface Message {
     text: string;
     createdAt: string;
     author: Author;
+    community: { course: { slug: string } };
     replyTo: ReplyTo | null;
 }
 
 function Avatar({ user, size = 36 }: { user: Author; size?: number }) {
     const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     if (user.image) {
-        return <img src={user.image} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt={user.name || ''} />;
+        return <img src={user.image} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1.5px solid rgba(124, 58, 237, 0.2)', padding: '1px' }} alt={user.name || ''} />;
     }
     const colors = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
     const color = colors[user.name ? user.name.charCodeAt(0) % colors.length : 0];
     return (
-        <div style={{ width: size, height: size, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.38, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+        <div style={{ width: size, height: size, borderRadius: '50%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.38, fontWeight: 700, color: 'white', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             {initials}
         </div>
     );
@@ -67,6 +68,7 @@ export default function CommunityPage() {
     const [replyTo, setReplyTo] = useState<Message | null>(null);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [courseName, setCourseName] = useState('');
+    const [courseSlug, setCourseSlug] = useState('');
 
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -79,7 +81,10 @@ export default function CommunityPage() {
         if (!res.ok) return;
         const data: Message[] = await res.json();
         setMessages(data);
-        if (data.length > 0) lastTimestampRef.current = data[data.length - 1].createdAt;
+        if (data.length > 0) {
+            lastTimestampRef.current = data[data.length - 1].createdAt;
+            setCourseSlug(data[0].community.course.slug);
+        }
         setLoading(false);
     }, [courseId]);
 
@@ -96,8 +101,17 @@ export default function CommunityPage() {
     }, [courseId]);
 
     useEffect(() => {
-        // Fetch course name
-        fetch(`/api/courses/${courseId}`).then(r => r.json()).then(d => setCourseName(d?.title || 'Course'));
+        // Fetch course info
+        fetch(`/api/courses?id=${courseId}`).then(r => r.json()).then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                // Since our /api/courses returns a list, find the one
+                const c = data.find((x: any) => x.id === courseId);
+                if (c) {
+                    setCourseName(c.title);
+                    setCourseSlug(c.slug);
+                }
+            }
+        });
         loadMessages();
     }, [courseId, loadMessages]);
 
@@ -175,7 +189,7 @@ export default function CommunityPage() {
 
             {/* Header */}
             <div className={styles.header}>
-                <Link href={`/courses/${courseId}`} className={styles.backBtn}>←</Link>
+                <Link href={`/courses/${courseSlug || '#'}`} className={styles.backBtn}>←</Link>
                 <div className={styles.headerInfo}>
                     <div className={styles.headerTitle}>
                         <span style={{ fontSize: '22px' }}>💬</span> {courseName || 'Course Community'}
@@ -185,86 +199,88 @@ export default function CommunityPage() {
             </div>
 
             {/* Messages area */}
-            <div className={styles.messages}>
-                {loading ? (
-                    <div className={styles.loadingWrap}>
-                        <div className={styles.spinner} />
-                        <span>Loading messages...</span>
-                    </div>
-                ) : messages.length === 0 ? (
-                    <div className={styles.empty}>
-                        <div style={{ fontSize: 56, marginBottom: 12 }}>💬</div>
-                        <h3>No messages yet</h3>
-                        <p>Be the first to say something!</p>
-                    </div>
-                ) : (
-                    grouped.map(group => (
-                        <div key={group.date}>
-                            <div className={styles.dateSep}>
-                                <span>{dateSep(group.msgs[0].createdAt)}</span>
-                            </div>
-                            {group.msgs.map((msg, idx) => {
-                                const isOwn = msg.author.id === userId;
-                                const isInstructor = msg.author.role === 'instructor' || msg.author.role === 'admin';
-                                const showAvatar = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
-                                const showName = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
+            <div className={styles.chatWrapper}>
+                <div className={styles.messages}>
+                    {loading ? (
+                        <div className={styles.loadingWrap}>
+                            <div className={styles.spinner} />
+                            <span>Loading messages...</span>
+                        </div>
+                    ) : messages.length === 0 ? (
+                        <div className={styles.empty}>
+                            <div style={{ fontSize: 56, marginBottom: 12 }}>💬</div>
+                            <h3>No messages yet</h3>
+                            <p>Be the first to say something!</p>
+                        </div>
+                    ) : (
+                        grouped.map(group => (
+                            <div key={group.date}>
+                                <div className={styles.dateSep}>
+                                    <span>{dateSep(group.msgs[0].createdAt)}</span>
+                                </div>
+                                {group.msgs.map((msg, idx) => {
+                                    const isOwn = msg.author.id === userId;
+                                    const isInstructor = msg.author.role === 'instructor' || msg.author.role === 'admin';
+                                    const showAvatar = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
+                                    const showName = !isOwn && (idx === 0 || group.msgs[idx - 1]?.author.id !== msg.author.id);
 
-                                return (
-                                    <div
-                                        key={msg.id}
-                                        className={`${styles.row} ${isOwn ? styles.rowOwn : styles.rowOther}`}
-                                        onMouseEnter={() => setHoveredId(msg.id)}
-                                        onMouseLeave={() => setHoveredId(null)}
-                                    >
-                                        {/* Avatar placeholder for alignment */}
-                                        {!isOwn && (
-                                            <div style={{ width: 36, flexShrink: 0, alignSelf: 'flex-end' }}>
-                                                {showAvatar && <Avatar user={msg.author} size={36} />}
-                                            </div>
-                                        )}
-
-                                        <div className={styles.bubbleWrap}>
-                                            {/* Action buttons (hover) */}
-                                            {hoveredId === msg.id && (
-                                                <div className={`${styles.actions} ${isOwn ? styles.actionsOwn : styles.actionsOther}`}>
-                                                    <button className={styles.actionBtn} onClick={() => { setReplyTo(msg); inputRef.current?.focus(); }} title="Reply">↩</button>
-                                                    {(isOwn || role === 'admin' || role === 'instructor') && (
-                                                        <button className={`${styles.actionBtn} ${styles.actionDel}`} onClick={() => deleteMsg(msg.id)} title="Delete">🗑</button>
-                                                    )}
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            className={`${styles.row} ${isOwn ? styles.rowOwn : styles.rowOther}`}
+                                            onMouseEnter={() => setHoveredId(msg.id)}
+                                            onMouseLeave={() => setHoveredId(null)}
+                                        >
+                                            {/* Avatar placeholder for alignment */}
+                                            {!isOwn && (
+                                                <div style={{ width: 36, flexShrink: 0, alignSelf: 'flex-end' }}>
+                                                    {showAvatar && <Avatar user={msg.author} size={36} />}
                                                 </div>
                                             )}
 
-                                            <div className={`${styles.bubble} ${isOwn ? styles.bubbleOwn : styles.bubbleOther} ${isInstructor && !isOwn ? styles.bubbleInstructor : ''}`}>
-                                                {/* Sender name */}
-                                                {showName && (
-                                                    <div className={styles.senderName}>
-                                                        {msg.author.name}
-                                                        {isInstructor && <span className={styles.instructorTag}>✦ Instructor</span>}
+                                            <div className={styles.bubbleWrap}>
+                                                {/* Action buttons (hover) */}
+                                                {hoveredId === msg.id && (
+                                                    <div className={`${styles.actions} ${isOwn ? styles.actionsOwn : styles.actionsOther}`}>
+                                                        <button className={styles.actionBtn} onClick={() => { setReplyTo(msg); inputRef.current?.focus(); }} title="Reply">↩</button>
+                                                        {(isOwn || role === 'admin' || role === 'instructor') && (
+                                                            <button className={`${styles.actionBtn} ${styles.actionDel}`} onClick={() => deleteMsg(msg.id)} title="Delete">🗑</button>
+                                                        )}
                                                     </div>
                                                 )}
 
-                                                {/* Reply-to preview */}
-                                                {msg.replyTo && (
-                                                    <div className={styles.replyPreview}>
-                                                        <div className={styles.replyAuthor}>{msg.replyTo.author.name}</div>
-                                                        <div className={styles.replyText}>{msg.replyTo.text.slice(0, 80)}{msg.replyTo.text.length > 80 ? '…' : ''}</div>
-                                                    </div>
-                                                )}
+                                                <div className={`${styles.bubble} ${isOwn ? styles.bubbleOwn : styles.bubbleOther} ${isInstructor && !isOwn ? styles.bubbleInstructor : ''}`}>
+                                                    {/* Sender name */}
+                                                    {showName && (
+                                                        <div className={styles.senderName}>
+                                                            {msg.author.name}
+                                                            {isInstructor && <span className={styles.instructorTag}>✦ Instructor</span>}
+                                                        </div>
+                                                    )}
 
-                                                {/* Message text */}
-                                                <div className={styles.msgText}>{msg.text}</div>
+                                                    {/* Reply-to preview */}
+                                                    {msg.replyTo && (
+                                                        <div className={styles.replyPreview}>
+                                                            <div className={styles.replyAuthor}>{msg.replyTo.author.name}</div>
+                                                            <div className={styles.replyText}>{msg.replyTo.text.slice(0, 80)}{msg.replyTo.text.length > 80 ? '…' : ''}</div>
+                                                        </div>
+                                                    )}
 
-                                                {/* Timestamp */}
-                                                <div className={styles.msgTime}>{timeStr(msg.createdAt)}</div>
+                                                    {/* Message text */}
+                                                    <div className={styles.msgText}>{msg.text}</div>
+
+                                                    {/* Timestamp */}
+                                                    <div className={styles.msgTime}>{timeStr(msg.createdAt)}</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))
-                )}
-                <div ref={bottomRef} />
+                                    );
+                                })}
+                            </div>
+                        ))
+                    )}
+                    <div ref={bottomRef} />
+                </div>
             </div>
 
             {/* Input bar */}

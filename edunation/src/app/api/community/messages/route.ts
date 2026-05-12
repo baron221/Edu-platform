@@ -23,6 +23,13 @@ export async function GET(req: Request) {
         take: 200,
         include: {
             author: { select: { id: true, name: true, image: true, role: true } },
+            community: {
+                select: {
+                    course: {
+                        select: { slug: true }
+                    }
+                }
+            },
             replyTo: {
                 select: {
                     id: true,
