@@ -169,12 +169,19 @@ export default function CommunityPage() {
 
     return (
         <div className={styles.shell}>
+            {/* Background Glow Orbs */}
+            <div className={styles.glowOrb1} />
+            <div className={styles.glowOrb2} />
+            <div className={styles.glowOrb3} />
+
             {/* Header */}
             <div className={styles.header}>
                 <Link href={`/courses/${courseId}`} className={styles.backBtn}>←</Link>
                 <div className={styles.headerInfo}>
-                    <div className={styles.headerTitle}>💬 {courseName || 'Course Community'}</div>
-                    <div className={styles.headerSub}>{messages.length} messages · polling every 3s</div>
+                    <div className={styles.headerTitle}>
+                        <span style={{ fontSize: '22px' }}>💬</span> {courseName || 'Course Community'}
+                    </div>
+                    <div className={styles.headerSub}>{messages.length} messages · Live Sync Active</div>
                 </div>
             </div>
 
