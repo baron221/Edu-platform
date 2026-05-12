@@ -476,13 +476,30 @@ export default function LessonEditorPage() {
                             </div>
                         </div>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>Estimated Duration</label>
-                            <input className={styles.input} value={lesson.duration ?? ''} onChange={e => handleChange('duration', e.target.value)} placeholder="e.g. 12:30" />
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input className={styles.input} value={lesson.duration ?? ''} onChange={e => handleChange('duration', e.target.value)} placeholder="e.g. 12:30" />
+                                {(lesson.duration === '00:00' || !lesson.duration) && lesson.videoUrl?.startsWith('mux:') && (
+                                    <button 
+                                        className={styles.syncBtn} 
+                                        onClick={async () => {
+                                            const res = await fetch(`/api/instructor/courses/${courseId}/lessons/${lessonId}/mux-status`);
+                                            const data = await res.json();
+                                            if (data.duration && data.duration !== '00:00') {
+                                                setLesson(prev => prev ? ({ ...prev, duration: data.duration }) : null);
+                                                toast.success(`Duration synced: ${data.duration}`);
+                                            } else {
+                                                toast.error('Video still processing or duration not available yet.');
+                                            }
+                                        }}
+                                        title="Sync duration from Mux"
+                                    >
+                                        🔄
+                                    </button>
+                                )}
+                            </div>
                             <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
                                 {lesson.videoUrl?.startsWith('mux:') ? '✅ Synced from Mux' : 'Will auto-calculate after upload'}
                             </p>
-                        </div>
 
                         <div className={styles.field}>
                             <label className={styles.label}>Default Video Quality</label>

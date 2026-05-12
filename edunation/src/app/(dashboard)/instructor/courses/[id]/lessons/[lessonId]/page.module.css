@@ -546,3 +546,21 @@
     background: #f5f3ff;
     transform: translateY(-1px);
 }
+
+.syncBtn {
+    padding: 0 12px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.syncBtn:hover {
+    background: #e2e8f0;
+    transform: rotate(30deg);
+}

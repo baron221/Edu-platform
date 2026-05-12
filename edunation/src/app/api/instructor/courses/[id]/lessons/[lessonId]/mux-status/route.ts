@@ -53,14 +53,18 @@ export async function GET(
                 const playbackId = asset.playback_ids?.[0]?.id;
 
                 if (playbackId) {
+                    // Always try to get duration from asset if it exists
                     const durationStr = asset.duration ? formatDuration(asset.duration) : '00:00';
+                    
+                    // Update database with the latest asset info
                     await prisma.lesson.update({
                         where: { id: lessonId },
                         data: {
                             muxAssetId: asset.id,
                             muxPlaybackId: playbackId,
                             videoUrl: `mux:${playbackId}`,
-                            duration: durationStr
+                            // Only update duration if we got a real one or if it was empty
+                            ...(durationStr !== '00:00' || !lesson.duration || lesson.duration === '00:00' ? { duration: durationStr } : {})
                         }
                     });
                     return NextResponse.json({ status: 'ready', playbackId, duration: durationStr });
