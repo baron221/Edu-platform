@@ -36,42 +36,50 @@ export async function GET(
         if (!lesson) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
 
         let uploadId = '';
+        let assetId = lesson.muxAssetId;
+
         if (lesson.videoUrl?.startsWith('mux-upload:')) {
             uploadId = lesson.videoUrl.split(':')[1];
         } else if (lesson.muxAssetId) {
-            // Already have asset, check if playbackId is missing
-            if (lesson.muxPlaybackId) return NextResponse.json({ status: 'ready', playbackId: lesson.muxPlaybackId });
+            assetId = lesson.muxAssetId;
+            // If we already have duration and playbackId, we're done
+            if (lesson.muxPlaybackId && lesson.duration && lesson.duration !== '00:00') {
+                return NextResponse.json({ status: 'ready', playbackId: lesson.muxPlaybackId, duration: lesson.duration });
+            }
         } else {
             return NextResponse.json({ status: 'no_mux_upload' });
         }
 
-        if (uploadId) {
+        // If we have an uploadId, check if asset was created
+        if (uploadId && !assetId) {
             const upload = await mux.video.uploads.retrieve(uploadId);
-
             if (upload.status === 'asset_created' && upload.asset_id) {
-                const asset = await mux.video.assets.retrieve(upload.asset_id);
-                const playbackId = asset.playback_ids?.[0]?.id;
-
-                if (playbackId) {
-                    // Always try to get duration from asset if it exists
-                    const durationStr = asset.duration ? formatDuration(asset.duration) : '00:00';
-                    
-                    // Update database with the latest asset info
-                    await prisma.lesson.update({
-                        where: { id: lessonId },
-                        data: {
-                            muxAssetId: asset.id,
-                            muxPlaybackId: playbackId,
-                            videoUrl: `mux:${playbackId}`,
-                            // Only update duration if we got a real one or if it was empty
-                            ...(durationStr !== '00:00' || !lesson.duration || lesson.duration === '00:00' ? { duration: durationStr } : {})
-                        }
-                    });
-                    return NextResponse.json({ status: 'ready', playbackId, duration: durationStr });
-                }
-                return NextResponse.json({ status: 'processing', assetId: asset.id });
+                assetId = upload.asset_id;
+            } else {
+                return NextResponse.json({ status: upload.status });
             }
-            return NextResponse.json({ status: upload.status });
+        }
+
+        // Now fetch asset info to get duration and playbackId
+        if (assetId) {
+            const asset = await mux.video.assets.retrieve(assetId);
+            const playbackId = asset.playback_ids?.[0]?.id;
+
+            if (asset.status === 'ready' && playbackId) {
+                const durationStr = asset.duration ? formatDuration(asset.duration) : '00:00';
+                
+                await prisma.lesson.update({
+                    where: { id: lessonId },
+                    data: {
+                        muxAssetId: asset.id,
+                        muxPlaybackId: playbackId,
+                        videoUrl: `mux:${playbackId}`,
+                        ...(durationStr !== '00:00' || !lesson.duration || lesson.duration === '00:00' ? { duration: durationStr } : {})
+                    }
+                });
+                return NextResponse.json({ status: 'ready', playbackId, duration: durationStr });
+            }
+            return NextResponse.json({ status: 'processing', assetId: asset.id });
         }
 
         return NextResponse.json({ status: 'unknown' });
