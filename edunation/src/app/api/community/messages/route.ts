@@ -46,7 +46,10 @@ export async function POST(req: Request) {
     if (!courseId || !text?.trim()) return new NextResponse('Missing fields', { status: 400 });
 
     // Auto-create community if not yet exists
-    const course = await prisma.course.findUnique({ where: { id: courseId }, select: { title: true } });
+    const course = await prisma.course.findUnique({ 
+        where: { id: courseId }, 
+        select: { title: true, instructorId: true } 
+    });
     if (!course) return new NextResponse('Course not found', { status: 404 });
 
     let community = await prisma.community.findUnique({ where: { courseId } });
@@ -74,6 +77,19 @@ export async function POST(req: Request) {
             },
         },
     });
+
+    // Notify instructor if message is from a student
+    if (course.instructorId && course.instructorId !== userId) {
+        await prisma.notification.create({
+            data: {
+                userId: course.instructorId,
+                type: 'community_message',
+                title: `New Community Message: ${course.title}`,
+                message: `${message.author.name || 'A student'} posted a new message in the community.`,
+                link: `/community/${courseId}`,
+            }
+        });
+    }
 
     return NextResponse.json(message, { status: 201 });
 }

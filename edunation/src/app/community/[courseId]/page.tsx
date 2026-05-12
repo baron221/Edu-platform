@@ -137,7 +137,6 @@ export default function CommunityPage() {
             const msg: Message = await res.json();
             setMessages(prev => [...prev, msg]);
             lastTimestampRef.current = msg.createdAt;
-            toast.success('+5 Points Earned!', { icon: '⭐' });
         }
         setSending(false);
         inputRef.current?.focus();
@@ -270,40 +269,43 @@ export default function CommunityPage() {
 
             {/* Input bar */}
             <div className={styles.inputBar}>
-                {replyTo && (
-                    <div className={styles.replyBanner}>
-                        <div>
-                            <div className={styles.replyBannerAuthor}>Replying to {replyTo.author.name}</div>
-                            <div className={styles.replyBannerText}>{replyTo.text.slice(0, 60)}{replyTo.text.length > 60 ? '…' : ''}</div>
+                <div className={styles.inputContainer}>
+                    {session ? (
+                        <>
+                            {replyTo && (
+                                <div className={styles.replyBanner}>
+                                    <div>
+                                        <div className={styles.replyBannerAuthor}>Replying to {replyTo.author.name}</div>
+                                        <div className={styles.replyBannerText}>{replyTo.text.slice(0, 60)}{replyTo.text.length > 60 ? '…' : ''}</div>
+                                    </div>
+                                    <button className={styles.replyClose} onClick={() => setReplyTo(null)}>✕</button>
+                                </div>
+                            )}
+                            <div className={styles.inputRow}>
+                                <textarea
+                                    ref={inputRef}
+                                    className={styles.input}
+                                    placeholder="Write a message..."
+                                    value={text}
+                                    onChange={e => setText(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    rows={1}
+                                />
+                                <button
+                                    className={styles.sendBtn}
+                                    onClick={send}
+                                    disabled={sending || !text.trim()}
+                                >
+                                    ➤
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className={styles.loginPrompt}>
+                            <Link href="/login" className={styles.loginLink}>Sign in to send messages</Link>
                         </div>
-                        <button className={styles.replyClose} onClick={() => setReplyTo(null)}>✕</button>
-                    </div>
-                )}
-
-                {session ? (
-                    <div className={styles.inputRow}>
-                        <textarea
-                            ref={inputRef}
-                            className={styles.input}
-                            placeholder="Write a message..."
-                            value={text}
-                            onChange={e => setText(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            rows={1}
-                        />
-                        <button
-                            className={styles.sendBtn}
-                            onClick={send}
-                            disabled={sending || !text.trim()}
-                        >
-                            ➤
-                        </button>
-                    </div>
-                ) : (
-                    <div className={styles.loginPrompt}>
-                        <Link href="/login" className={styles.loginLink}>Sign in to send messages</Link>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
