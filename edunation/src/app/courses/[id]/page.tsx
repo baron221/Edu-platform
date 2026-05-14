@@ -69,6 +69,13 @@ export default function CourseDetailPage() {
         }
     };
 
+    // Returns total duration of the active video
+    const getDuration = (): number => {
+        if (muxPlayerRef.current?.duration) return muxPlayerRef.current.duration;
+        if (nativeVideoRef.current?.duration) return nativeVideoRef.current.duration;
+        return 0;
+    };
+
     const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
     const [showManualForm, setShowManualForm] = useState(false);
@@ -684,6 +691,7 @@ export default function CourseDetailPage() {
                                             lessonId={activeLesson.id}
                                             courseId={course.id}
                                             getCurrentTime={getCurrentTime}
+                                            getDuration={getDuration}
                                             seekTo={seekTo}
                                         />
                                     )}
