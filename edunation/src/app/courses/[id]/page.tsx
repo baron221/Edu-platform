@@ -655,6 +655,17 @@ export default function CourseDetailPage() {
                                         </div>
                                     )}
 
+                                    {/* 📝 In-Video Notes Panel */}
+                                    {isEnrolled && canWatch(activeLesson) && (
+                                        <VideoNotesPanel
+                                            lessonId={activeLesson.id}
+                                            courseId={course.id}
+                                            getCurrentTime={getCurrentTime}
+                                            getDuration={getDuration}
+                                            seekTo={seekTo}
+                                        />
+                                    )}
+
                                     {/* AI-Generated Extra Resources */}
                                     {canWatch(activeLesson) && activeLesson.resources && activeLesson.resources.length > 0 && (
                                         <div style={{ marginTop: '24px' }}>
@@ -683,17 +694,6 @@ export default function CourseDetailPage() {
                                             <h3 className={styles.quizSectionTitle}>🤖 {t.ai.quiz.dynamicPractice}</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
                                         </div>
-                                    )}
-
-                                    {/* 📝 In-Video Notes Panel */}
-                                    {isEnrolled && canWatch(activeLesson) && (
-                                        <VideoNotesPanel
-                                            lessonId={activeLesson.id}
-                                            courseId={course.id}
-                                            getCurrentTime={getCurrentTime}
-                                            getDuration={getDuration}
-                                            seekTo={seekTo}
-                                        />
                                     )}
 
                                 </div>
