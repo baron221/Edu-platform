@@ -83,6 +83,7 @@ model User {
   submissions            Submission[]
   subscription           Subscription?
   subscriptionPayments   SubscriptionPayment[]
+  lessonNotes            LessonNote[]
 }
 
 model PhoneOtp {
@@ -176,6 +177,7 @@ model Course {
   progress       Progress[]
   purchases      Purchase[]
   reviews        Review[]
+  lessonNotes    LessonNote[]
 }
 
 model Lesson {
@@ -202,6 +204,7 @@ model Lesson {
   quizzes       Quiz[]
   resources     Resource[]
   submissions   Submission[]
+  lessonNotes   LessonNote[]
 }
 
 model Quiz {
@@ -600,4 +603,22 @@ model Submission {
 
   @@index([lessonId])
   @@index([userId])
+}
+
+model LessonNote {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  courseId  String
+  content   String
+  timestamp Float    // Video timestamp in seconds (e.g. 125.4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId])
+  @@index([courseId])
 }

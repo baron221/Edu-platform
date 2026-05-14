@@ -15,6 +15,7 @@ import ReviewsSection from '@/components/ReviewsSection';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import AssignmentSection from '@/components/AssignmentSection';
+import VideoNotesPanel from '@/components/VideoNotesPanel';
 
 function formatUZS(price: number, currLabel: string) {
     if (price === 0) return '';
@@ -44,7 +45,29 @@ export default function CourseDetailPage() {
     const maxReachedTimeRef = useRef(0);
     const lastTimeRef = useRef(0);
     const lastSyncRef = useRef(0);
+    // Refs for video players — used by VideoNotesPanel
+    const muxPlayerRef = useRef<any>(null);
+    const nativeVideoRef = useRef<HTMLVideoElement>(null);
 
+    // Returns current video time (works with both Mux and native video)
+    const getCurrentTime = (): number => {
+        if (muxPlayerRef.current?.currentTime !== undefined) {
+            return muxPlayerRef.current.currentTime ?? 0;
+        }
+        if (nativeVideoRef.current) {
+            return nativeVideoRef.current.currentTime ?? 0;
+        }
+        return 0;
+    };
+
+    // Seeks the active video player to a given time
+    const seekTo = (time: number) => {
+        if (muxPlayerRef.current) {
+            muxPlayerRef.current.currentTime = time;
+        } else if (nativeVideoRef.current) {
+            nativeVideoRef.current.currentTime = time;
+        }
+    };
 
     const [processingPayment, setProcessingPayment] = useState(false);
     const { data: session } = useSession();
@@ -438,6 +461,7 @@ export default function CourseDetailPage() {
                                         return canWatch(activeLesson) ? (
                                             (activeLesson.muxPlaybackId || (activeLesson.videoUrl && activeLesson.videoUrl.startsWith('mux:'))) ? (
                                                 <MuxPlayer
+                                                    ref={muxPlayerRef}
                                                     playbackId={activeLesson.muxPlaybackId || activeLesson.videoUrl.split(':')[1]}
                                                     metadata={{
                                                         video_id: activeLesson.id,
@@ -496,6 +520,7 @@ export default function CourseDetailPage() {
                                                 </MuxPlayer>
                                             ) : activeLesson.videoUrl && activeLesson.videoUrl.startsWith('/uploads/') ? (
                                                 <video
+                                                    ref={nativeVideoRef}
                                                     key={activeLesson.id}
                                                     controls
                                                     controlsList="nodownload"
@@ -651,6 +676,16 @@ export default function CourseDetailPage() {
                                             <h3 className={styles.quizSectionTitle}>🤖 {t.ai.quiz.dynamicPractice}</h3>
                                             <AIQuizPlayer slug={course.slug} lessonId={activeLesson.id} />
                                         </div>
+                                    )}
+
+                                    {/* 📝 In-Video Notes Panel */}
+                                    {isEnrolled && canWatch(activeLesson) && (
+                                        <VideoNotesPanel
+                                            lessonId={activeLesson.id}
+                                            courseId={course.id}
+                                            getCurrentTime={getCurrentTime}
+                                            seekTo={seekTo}
+                                        />
                                     )}
 
                                 </div>
