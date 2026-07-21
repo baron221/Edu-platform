@@ -339,7 +339,26 @@ export default function CourseDetailPage() {
     const reviewsCount = course._count?.reviews || 0;
     const rating = 4.8; // Placeholder
     const tags = ['Education', course.category];
-    const durationStr = '12 hours'; // Placeholder for total duration
+    const calculateTotalDuration = () => {
+        if (!course?.lessons || course.lessons.length === 0) return '0 h 0 m';
+        let totalMinutes = 0;
+        course.lessons.forEach((lesson: any) => {
+            if (!lesson.duration) return;
+            const parts = lesson.duration.split(':').map(Number);
+            if (parts.length === 3) {
+                totalMinutes += parts[0] * 60 + parts[1];
+            } else if (parts.length === 2) {
+                totalMinutes += parts[0];
+            } else if (parts.length === 1 && !isNaN(parts[0])) {
+                totalMinutes += parts[0];
+            }
+        });
+        
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return hours > 0 ? `${hours} h ${minutes} m` : `${minutes} m`;
+    };
+    const durationStr = calculateTotalDuration();
     const instructorAvatar = '👨‍🏫'; // Placeholder
 
     // Parse multi-lingual description (Format assumption: "English text | Uzbek text" or separated by newlines)

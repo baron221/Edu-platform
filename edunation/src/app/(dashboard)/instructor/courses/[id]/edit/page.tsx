@@ -45,6 +45,7 @@ export default function CourseEditorPage() {
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
 
     const [showLessonModal, setShowLessonModal] = useState(false);
     const [newLessonData, setNewLessonData] = useState({ title: '', description: '', isFree: false });
@@ -63,6 +64,9 @@ export default function CourseEditorPage() {
                     setError(data.error);
                 } else {
                     setCourse(data);
+                    if (data.category && !CATEGORIES.includes(data.category)) {
+                        setIsCustomCategory(true);
+                    }
                 }
                 setLoading(false);
             })
@@ -385,9 +389,44 @@ export default function CourseEditorPage() {
 
                         <div className={styles.field}>
                             <label className={styles.label}>Category</label>
-                            <select className={styles.select} value={course.category} onChange={e => handleChange('category', e.target.value)}>
-                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            {!isCustomCategory ? (
+                                <select 
+                                    className={styles.select} 
+                                    value={course.category} 
+                                    onChange={e => {
+                                        if (e.target.value === 'Other') {
+                                            setIsCustomCategory(true);
+                                            handleChange('category', '');
+                                        } else {
+                                            handleChange('category', e.target.value);
+                                        }
+                                    }}
+                                >
+                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                    <option value="Other">Other (Manual)</option>
+                                </select>
+                            ) : (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input 
+                                        className={styles.input} 
+                                        value={course.category} 
+                                        onChange={e => handleChange('category', e.target.value)} 
+                                        placeholder="Enter category name"
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        onClick={() => {
+                                            setIsCustomCategory(false);
+                                            handleChange('category', 'Web Development');
+                                        }}
+                                        style={{ padding: '0 1rem' }}
+                                        title="Cancel manual entry"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.field}>

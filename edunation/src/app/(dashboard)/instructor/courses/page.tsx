@@ -26,6 +26,7 @@ export default function AdminCoursesPage() {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [formData, setFormData] = useState({
         title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: ''
     });
@@ -92,6 +93,7 @@ export default function AdminCoursesPage() {
             return;
         }
         setShowModal(false);
+        setIsCustomCategory(false);
         setFormData({ title: '', description: '', category: 'Web Development', level: 'Beginner', isFree: true, price: '' });
         setThumbFile(null);
         router.push(`/instructor/courses/${course.id}`);
@@ -224,7 +226,51 @@ export default function AdminCoursesPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div className={styles.field}>
                                     <label>{t.instructor.categoryLabel}</label>
-                                    <input required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input" />
+                                    {!isCustomCategory ? (
+                                        <select 
+                                            value={formData.category} 
+                                            onChange={e => {
+                                                if (e.target.value === 'Other') {
+                                                    setIsCustomCategory(true);
+                                                    setFormData({ ...formData, category: '' });
+                                                } else {
+                                                    setFormData({ ...formData, category: e.target.value });
+                                                }
+                                            }} 
+                                            className="input"
+                                        >
+                                            <option value="Web Development">Web Development</option>
+                                            <option value="Mobile Development">Mobile Development</option>
+                                            <option value="Data Science">Data Science</option>
+                                            <option value="Design">Design</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Business">Business</option>
+                                            <option value="Language">Language</option>
+                                            <option value="Other">Other (Manual)</option>
+                                        </select>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <input 
+                                                required 
+                                                value={formData.category} 
+                                                onChange={e => setFormData({ ...formData, category: e.target.value })} 
+                                                className="input" 
+                                                placeholder="Enter category name"
+                                            />
+                                            <button 
+                                                type="button" 
+                                                className="btn btn-secondary" 
+                                                onClick={() => {
+                                                    setIsCustomCategory(false);
+                                                    setFormData({ ...formData, category: 'Web Development' });
+                                                }}
+                                                style={{ padding: '0 1rem' }}
+                                                title="Cancel manual entry"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className={styles.field}>
                                     <label>{t.instructor.levelLabel}</label>
