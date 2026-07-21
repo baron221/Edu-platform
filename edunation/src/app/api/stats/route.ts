@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// Cache for 30 seconds to keep it "realtime" without hammering the DB
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const [
